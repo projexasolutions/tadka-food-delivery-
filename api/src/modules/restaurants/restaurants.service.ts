@@ -1,4 +1,4 @@
-import { and, asc, eq, ilike, or } from 'drizzle-orm';
+import { and, asc, eq, gte, ilike, or } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { restaurants } from '../../db/schema';
 import type { z } from 'zod';
@@ -9,7 +9,6 @@ type RestaurantQuery = z.infer<typeof restaurantQuerySchema>;
 export async function listRestaurants(query: RestaurantQuery) {
   const search = query.q ? `%${query.q}%` : null;
   const cuisine = query.cuisine ? `%${query.cuisine}%` : null;
-
   const conditions = [eq(restaurants.isOpen, true)];
 
   if (search) {
@@ -22,22 +21,12 @@ export async function listRestaurants(query: RestaurantQuery) {
     );
   }
 
-  if (cuisine) {
-    conditions.push(ilike(restaurants.cuisine, cuisine));
-  }
+  if (cuisine) conditions.push(ilike(restaurants.cuisine, cuisine));
+  if (query.filter === 'rating') conditions.push(gte(restaurants.rating, '4.0'));
+  if (query.filter === 'offers') conditions.push(eq(restaurants.deliveryFee, 0));
 
-  if (query.filter === 'rating') {
-    conditions.push(ilike(restaurants.rating, '4.%'));
-  }
-
-  if (query.filter === 'offers') {
-    conditions.push(eq(restaurants.deliveryFee, 0));
-  }
-
-  if (query.filter === 'fast') {
-    conditions.push(eq(restaurants.deliveryFee, 0));
-  }
-
+  // A delivery-time field is not present in the current model, so the API does not
+  // incorrectly derive speed from delivery price.
   return db
     .select({
       id: restaurants.id,
