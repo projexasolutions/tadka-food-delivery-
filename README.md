@@ -46,7 +46,7 @@ The current repository contains legacy Supabase code from the MVP. Supabase is *
 ### Phase 1 completed
 
 - Added TypeScript project configuration.
-- Added Drizzle configuration and initial PostgreSQL schema foundation.
+- Added Drizzle configuration and PostgreSQL schema foundation.
 - Added PostgreSQL connection pooling.
 - Added Zod request validation.
 - Added the first Node REST module for restaurant discovery.
@@ -54,13 +54,22 @@ The current repository contains legacy Supabase code from the MVP. Supabase is *
 - Added environment documentation.
 - Added GitHub Actions verification for dependency installation, typechecking and frontend builds.
 
+### Phase 2 completed
+
+- Added PostgreSQL/Drizzle category and menu-item models.
+- Added a validated `GET /v1/restaurants/:restaurantId/menu` API.
+- Kept unavailable restaurants and menu items out of customer-facing results.
+- Replaced the restaurant listing page's direct Supabase query with the REST API.
+- Replaced the menu page's direct Supabase reads with the REST API.
+- Added abort handling so navigation does not leave stale restaurant/menu requests updating UI state.
+- Kept cart mutation on the legacy path temporarily because secure session authentication is not migrated yet.
+
 ### Next phases
 
-1. Replace Supabase restaurant/menu/cart access with REST modules.
-2. Implement server-side sessions and Argon2id authentication.
-3. Migrate order, delivery, review and notification workflows.
-4. Integrate Razorpay through trusted server-side payment flows/webhooks.
-5. Complete Tailwind/design-system migration without changing the approved TADKA visual language.
-6. Add Vitest unit coverage and Playwright end-to-end coverage.
-7. Remove all Supabase packages, routes and environment variables.
-8. Deploy the web app and API to dedicated cloud infrastructure.
+1. Implement server-side sessions and Argon2id authentication; then move cart reads/writes behind authenticated API endpoints.
+2. Migrate order, delivery, review and notification workflows.
+3. Integrate Razorpay through trusted server-side payment flows/webhooks.
+4. Complete Tailwind/design-system migration without changing the approved TADKA visual language.
+5. Add Vitest unit coverage and Playwright end-to-end coverage.
+6. Remove all Supabase packages, routes and environment variables after every dependency is migrated.
+7. Deploy the web app and API to dedicated cloud infrastructure.
