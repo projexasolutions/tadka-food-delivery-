@@ -64,12 +64,25 @@ The current repository contains legacy Supabase code from the MVP. Supabase is *
 - Added abort handling so navigation does not leave stale restaurant/menu requests updating UI state.
 - Kept cart mutation on the legacy path temporarily because secure session authentication is not migrated yet.
 
+### Phase 3 completed
+
+- Added Zod validation for signup and login payloads.
+- Added Argon2id password hashing and verification.
+- Added opaque server-side sessions with configurable 30-day expiry.
+- Added HttpOnly, SameSite=Lax session cookies with Secure enabled in production.
+- Added `POST /v1/auth/signup`, `POST /v1/auth/login`, `GET /v1/auth/me` and `POST /v1/auth/logout`.
+- Added authenticated request middleware for future protected modules.
+- Added an Origin guard for state-changing API requests when `WEB_ORIGIN` is configured.
+- Migrated the customer auth page off Supabase and onto the API session flow.
+- Added unit coverage for session cookie helpers.
+- Google OAuth remains intentionally deferred until the password/session foundation is stable.
+
 ### Next phases
 
-1. Implement server-side sessions and Argon2id authentication; then move cart reads/writes behind authenticated API endpoints.
+1. Migrate cart reads/writes behind authenticated API endpoints and remove its Supabase dependency.
 2. Migrate order, delivery, review and notification workflows.
 3. Integrate Razorpay through trusted server-side payment flows/webhooks.
 4. Complete Tailwind/design-system migration without changing the approved TADKA visual language.
-5. Add Vitest unit coverage and Playwright end-to-end coverage.
+5. Add broader Vitest unit coverage and Playwright end-to-end coverage.
 6. Remove all Supabase packages, routes and environment variables after every dependency is migrated.
 7. Deploy the web app and API to dedicated cloud infrastructure.
