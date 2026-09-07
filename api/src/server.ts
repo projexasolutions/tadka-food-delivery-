@@ -8,6 +8,7 @@ import { registerMenuRoutes } from './modules/menu/menu.routes';
 import { registerCartRoutes } from './modules/cart/cart.routes';
 import { registerOrderRoutes } from './modules/orders/orders.routes';
 import { registerRazorpayRoutes } from './modules/payments/razorpay.routes';
+import { registerAdminRoutes } from './modules/admin/admin.routes';
 import { handleRazorpayWebhook, PaymentError } from './modules/payments/razorpay.service';
 import { pool } from './db/client';
 
@@ -51,6 +52,7 @@ registerMenuRoutes(app);
 registerCartRoutes(app);
 registerOrderRoutes(app);
 registerRazorpayRoutes(app);
+registerAdminRoutes(app);
 
 app.use((_req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found.' } }));
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
