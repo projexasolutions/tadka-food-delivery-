@@ -57,8 +57,12 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
       lineTotal: item.price * item.quantity,
     })));
 
-    await tx.delete(cartItems).where(eq(cartItems.cartId, cart[0].id));
-    await tx.update(carts).set({ updatedAt: new Date() }).where(eq(carts.id, cart[0].id));
+    // COD is final at checkout, so its cart can be cleared immediately.
+    // Online payment keeps the cart until server-side payment verification succeeds.
+    if (input.paymentMethod === 'cod') {
+      await tx.delete(cartItems).where(eq(cartItems.cartId, cart[0].id));
+      await tx.update(carts).set({ updatedAt: new Date() }).where(eq(carts.id, cart[0].id));
+    }
     return getOrderForUser(userId, order.id, tx);
   });
 }
