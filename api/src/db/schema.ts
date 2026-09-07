@@ -81,6 +81,8 @@ export const orders = pgTable('orders', {
   status: text('status').notNull().default('pending'),
   paymentMethod: text('payment_method').notNull().default('cod'),
   paymentStatus: text('payment_status').notNull().default('pending'),
+  razorpayOrderId: text('razorpay_order_id').unique(),
+  razorpayPaymentId: text('razorpay_payment_id').unique(),
   deliveryAddress: text('delivery_address').notNull(),
   phone: text('phone').notNull(),
   subtotal: integer('subtotal').notNull(),
