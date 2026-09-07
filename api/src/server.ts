@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { registerRestaurantRoutes } from './modules/restaurants/restaurants.routes';
+import { registerMenuRoutes } from './modules/menu/menu.routes';
 import { pool } from './db/client';
 
 const app = express();
@@ -26,6 +27,7 @@ app.get('/health', async (_req, res, next) => {
 });
 
 registerRestaurantRoutes(app);
+registerMenuRoutes(app);
 
 app.use((_req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found.' } });
