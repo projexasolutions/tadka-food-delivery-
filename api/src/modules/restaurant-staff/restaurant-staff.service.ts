@@ -4,83 +4,23 @@ import { categories, menuItems, orders, restaurants, users } from '../../db/sche
 import type { CreateMenuItemInput, CreateStaffCategoryInput, UpdateMenuItemInput, UpdateStaffCategoryInput, UpdateStaffOrderStatusInput } from './restaurant-staff.schema';
 
 export class RestaurantStaffError extends Error {}
-
 const staffTransitions: Record<string, string[]> = { pending: ['confirmed', 'cancelled'], confirmed: ['preparing', 'cancelled'], preparing: ['ready', 'cancelled'], ready: [], picked_up: [], delivered: [], cancelled: [] };
 
 async function getRestaurantId(userId: string) {
   const [user] = await db.select({ restaurantId: users.restaurantId }).from(users).where(and(eq(users.id, userId), eq(users.role, 'restaurant_staff'))).limit(1);
-  if (!user?.restaurantId) throw new RestaurantStaffError('Restaurant staff is not assigned to a restaurant.');
-  return user.restaurantId;
+  if (!user?.restaurantId) throw new RestaurantStaffError('Restaurant staff is not assigned to a restaurant.'); return user.restaurantId;
 }
-
 async function assertCategoryBelongsToRestaurant(categoryId: string | null | undefined, restaurantId: string) {
-  if (!categoryId) return;
-  const [category] = await db.select({ id: categories.id }).from(categories).where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId))).limit(1);
-  if (!category) throw new RestaurantStaffError('Category does not belong to your restaurant.');
+  if (!categoryId) return; const [category] = await db.select({ id: categories.id }).from(categories).where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId))).limit(1); if (!category) throw new RestaurantStaffError('Category does not belong to your restaurant.');
 }
-
-export async function getStaffRestaurant(userId: string) {
-  const restaurantId = await getRestaurantId(userId);
-  const [restaurant] = await db.select({ id: restaurants.id, name: restaurants.name, description: restaurants.description, cuisine: restaurants.cuisine, imageUrl: restaurants.imageUrl, isOpen: restaurants.isOpen, deliveryFee: restaurants.deliveryFee }).from(restaurants).where(eq(restaurants.id, restaurantId)).limit(1);
-  if (!restaurant) throw new RestaurantStaffError('Restaurant not found.');
-  return restaurant;
-}
-
-export async function updateStaffRestaurant(userId: string, isOpen: boolean) {
-  const restaurantId = await getRestaurantId(userId);
-  const [updated] = await db.update(restaurants).set({ isOpen }).where(eq(restaurants.id, restaurantId)).returning({ id: restaurants.id, name: restaurants.name, description: restaurants.description, cuisine: restaurants.cuisine, imageUrl: restaurants.imageUrl, isOpen: restaurants.isOpen, deliveryFee: restaurants.deliveryFee });
-  if (!updated) throw new RestaurantStaffError('Restaurant not found.');
-  return updated;
-}
-
-export async function listStaffMenu(userId: string) {
-  const restaurantId = await getRestaurantId(userId);
-  const [items, restaurantCategories] = await Promise.all([
-    db.select({ id: menuItems.id, name: menuItems.name, description: menuItems.description, price: menuItems.price, imageUrl: menuItems.imageUrl, categoryId: menuItems.categoryId, isAvailable: menuItems.isAvailable, createdAt: menuItems.createdAt }).from(menuItems).where(eq(menuItems.restaurantId, restaurantId)).orderBy(asc(menuItems.createdAt)),
-    db.select({ id: categories.id, name: categories.name, createdAt: categories.createdAt }).from(categories).where(eq(categories.restaurantId, restaurantId)).orderBy(asc(categories.name)),
-  ]);
-  return { restaurantId, categories: restaurantCategories, items };
-}
-
-export async function createMenuItem(userId: string, input: CreateMenuItemInput) {
-  const restaurantId = await getRestaurantId(userId); await assertCategoryBelongsToRestaurant(input.categoryId, restaurantId);
-  const [item] = await db.insert(menuItems).values({ ...input, restaurantId }).returning({ id: menuItems.id, name: menuItems.name, description: menuItems.description, price: menuItems.price, imageUrl: menuItems.imageUrl, categoryId: menuItems.categoryId, isAvailable: menuItems.isAvailable });
-  return item;
-}
-
-export async function updateMenuItem(userId: string, itemId: string, input: UpdateMenuItemInput) {
-  const restaurantId = await getRestaurantId(userId); const [existing] = await db.select({ id: menuItems.id }).from(menuItems).where(and(eq(menuItems.id, itemId), eq(menuItems.restaurantId, restaurantId))).limit(1);
-  if (!existing) throw new RestaurantStaffError('Menu item not found.'); await assertCategoryBelongsToRestaurant(input.categoryId, restaurantId);
-  const [updated] = await db.update(menuItems).set(input).where(eq(menuItems.id, itemId)).returning({ id: menuItems.id, name: menuItems.name, description: menuItems.description, price: menuItems.price, imageUrl: menuItems.imageUrl, categoryId: menuItems.categoryId, isAvailable: menuItems.isAvailable });
-  return updated;
-}
-
-export async function removeMenuItem(userId: string, itemId: string) {
-  const restaurantId = await getRestaurantId(userId); const [updated] = await db.update(menuItems).set({ isAvailable: false }).where(and(eq(menuItems.id, itemId), eq(menuItems.restaurantId, restaurantId))).returning({ id: menuItems.id, isAvailable: menuItems.isAvailable });
-  if (!updated) throw new RestaurantStaffError('Menu item not found.'); return updated;
-}
-
-export async function createCategory(userId: string, input: CreateStaffCategoryInput) {
-  const restaurantId = await getRestaurantId(userId); const [category] = await db.insert(categories).values({ restaurantId, name: input.name }).returning({ id: categories.id, restaurantId: categories.restaurantId, name: categories.name }); return category;
-}
-
-export async function updateCategory(userId: string, categoryId: string, input: UpdateStaffCategoryInput) {
-  const restaurantId = await getRestaurantId(userId); const [updated] = await db.update(categories).set(input).where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId))).returning({ id: categories.id, restaurantId: categories.restaurantId, name: categories.name });
-  if (!updated) throw new RestaurantStaffError('Category not found.'); return updated;
-}
-
-export async function deleteCategory(userId: string, categoryId: string) {
-  const restaurantId = await getRestaurantId(userId); const [deleted] = await db.delete(categories).where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId))).returning({ id: categories.id });
-  if (!deleted) throw new RestaurantStaffError('Category not found.');
-}
-
-export async function listStaffOrders(userId: string) {
-  const restaurantId = await getRestaurantId(userId);
-  return db.select({ id: orders.id, userId: orders.userId, status: orders.status, paymentMethod: orders.paymentMethod, paymentStatus: orders.paymentStatus, deliveryAddress: orders.deliveryAddress, phone: orders.phone, subtotal: orders.subtotal, deliveryFee: orders.deliveryFee, total: orders.total, createdAt: orders.createdAt, updatedAt: orders.updatedAt }).from(orders).where(eq(orders.restaurantId, restaurantId)).orderBy(desc(orders.createdAt)).limit(50);
-}
-
-export async function updateStaffOrderStatus(userId: string, orderId: string, input: UpdateStaffOrderStatusInput) {
-  const restaurantId = await getRestaurantId(userId); const [order] = await db.select({ id: orders.id, status: orders.status }).from(orders).where(and(eq(orders.id, orderId), eq(orders.restaurantId, restaurantId))).limit(1);
-  if (!order) throw new RestaurantStaffError('Order not found.'); if (!staffTransitions[order.status]?.includes(input.status)) throw new RestaurantStaffError(`Cannot move an order from ${order.status} to ${input.status}.`);
-  const [updated] = await db.update(orders).set({ status: input.status, updatedAt: new Date() }).where(and(eq(orders.id, orderId), eq(orders.restaurantId, restaurantId))).returning({ id: orders.id, status: orders.status, updatedAt: orders.updatedAt }); return updated;
-}
+export async function getStaffRestaurant(userId: string) { const restaurantId = await getRestaurantId(userId); const [restaurant] = await db.select({ id: restaurants.id, name: restaurants.name, description: restaurants.description, cuisine: restaurants.cuisine, imageUrl: restaurants.imageUrl, isOpen: restaurants.isOpen, deliveryFee: restaurants.deliveryFee }).from(restaurants).where(eq(restaurants.id, restaurantId)).limit(1); if (!restaurant) throw new RestaurantStaffError('Restaurant not found.'); return restaurant; }
+export async function updateStaffRestaurant(userId: string, isOpen: boolean) { const restaurantId = await getRestaurantId(userId); const [updated] = await db.update(restaurants).set({ isOpen }).where(eq(restaurants.id, restaurantId)).returning({ id: restaurants.id, name: restaurants.name, description: restaurants.description, cuisine: restaurants.cuisine, imageUrl: restaurants.imageUrl, isOpen: restaurants.isOpen, deliveryFee: restaurants.deliveryFee }); if (!updated) throw new RestaurantStaffError('Restaurant not found.'); return updated; }
+export async function listStaffMenu(userId: string) { const restaurantId = await getRestaurantId(userId); const [items, restaurantCategories] = await Promise.all([db.select({ id: menuItems.id, name: menuItems.name, description: menuItems.description, price: menuItems.price, imageUrl: menuItems.imageUrl, categoryId: menuItems.categoryId, isAvailable: menuItems.isAvailable, createdAt: menuItems.createdAt }).from(menuItems).where(eq(menuItems.restaurantId, restaurantId)).orderBy(asc(menuItems.createdAt)), db.select({ id: categories.id, name: categories.name, createdAt: categories.createdAt }).from(categories).where(eq(categories.restaurantId, restaurantId)).orderBy(asc(categories.name))]); return { restaurantId, categories: restaurantCategories, items }; }
+export async function createMenuItem(userId: string, input: CreateMenuItemInput) { const restaurantId = await getRestaurantId(userId); await assertCategoryBelongsToRestaurant(input.categoryId, restaurantId); const [item] = await db.insert(menuItems).values({ ...input, restaurantId }).returning({ id: menuItems.id, name: menuItems.name, description: menuItems.description, price: menuItems.price, imageUrl: menuItems.imageUrl, categoryId: menuItems.categoryId, isAvailable: menuItems.isAvailable }); return item; }
+export async function updateMenuItem(userId: string, itemId: string, input: UpdateMenuItemInput) { const restaurantId = await getRestaurantId(userId); const [existing] = await db.select({ id: menuItems.id }).from(menuItems).where(and(eq(menuItems.id, itemId), eq(menuItems.restaurantId, restaurantId))).limit(1); if (!existing) throw new RestaurantStaffError('Menu item not found.'); await assertCategoryBelongsToRestaurant(input.categoryId, restaurantId); const [updated] = await db.update(menuItems).set(input).where(eq(menuItems.id, itemId)).returning({ id: menuItems.id, name: menuItems.name, description: menuItems.description, price: menuItems.price, imageUrl: menuItems.imageUrl, categoryId: menuItems.categoryId, isAvailable: menuItems.isAvailable }); return updated; }
+export async function removeMenuItem(userId: string, itemId: string) { const restaurantId = await getRestaurantId(userId); const [updated] = await db.update(menuItems).set({ isAvailable: false }).where(and(eq(menuItems.id, itemId), eq(menuItems.restaurantId, restaurantId))).returning({ id: menuItems.id, isAvailable: menuItems.isAvailable }); if (!updated) throw new RestaurantStaffError('Menu item not found.'); return updated; }
+export async function createCategory(userId: string, input: CreateStaffCategoryInput) { const restaurantId = await getRestaurantId(userId); const [category] = await db.insert(categories).values({ restaurantId, name: input.name }).returning({ id: categories.id, restaurantId: categories.restaurantId, name: categories.name }); return category; }
+export async function updateCategory(userId: string, categoryId: string, input: UpdateStaffCategoryInput) { const restaurantId = await getRestaurantId(userId); const [updated] = await db.update(categories).set(input).where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId))).returning({ id: categories.id, restaurantId: categories.restaurantId, name: categories.name }); if (!updated) throw new RestaurantStaffError('Category not found.'); return updated; }
+export async function deleteCategory(userId: string, categoryId: string) { const restaurantId = await getRestaurantId(userId); const [deleted] = await db.delete(categories).where(and(eq(categories.id, categoryId), eq(categories.restaurantId, restaurantId))).returning({ id: categories.id }); if (!deleted) throw new RestaurantStaffError('Category not found.'); }
+export async function listStaffOrders(userId: string) { const restaurantId = await getRestaurantId(userId); return db.select({ id: orders.id, userId: orders.userId, status: orders.status, paymentMethod: orders.paymentMethod, paymentStatus: orders.paymentStatus, deliveryAddress: orders.deliveryAddress, phone: orders.phone, subtotal: orders.subtotal, deliveryFee: orders.deliveryFee, total: orders.total, createdAt: orders.createdAt, updatedAt: orders.updatedAt }).from(orders).where(eq(orders.restaurantId, restaurantId)).orderBy(desc(orders.createdAt)).limit(50); }
+export async function updateStaffOrderStatus(userId: string, orderId: string, input: UpdateStaffOrderStatusInput) { const restaurantId = await getRestaurantId(userId); const [order] = await db.select({ id: orders.id, status: orders.status }).from(orders).where(and(eq(orders.id, orderId), eq(orders.restaurantId, restaurantId))).limit(1); if (!order) throw new RestaurantStaffError('Order not found.'); if (!staffTransitions[order.status]?.includes(input.status)) throw new RestaurantStaffError(`Cannot move an order from ${order.status} to ${input.status}.`); const [updated] = await db.update(orders).set({ status: input.status, updatedAt: new Date() }).where(and(eq(orders.id, orderId), eq(orders.restaurantId, restaurantId), eq(orders.status, order.status))).returning({ id: orders.id, status: orders.status, updatedAt: orders.updatedAt }); if (!updated) throw new RestaurantStaffError('Order changed before this update was applied. Refresh and try again.'); return updated; }
