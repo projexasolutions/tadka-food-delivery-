@@ -41,8 +41,6 @@ TADKA
 
 ## Migration status
 
-The repository still contains legacy Supabase code in modules that have not yet been migrated. Supabase is **not part of the target architecture** and will be removed module-by-module after equivalent API/database behavior is in place.
-
 ### Phase 1 completed
 
 - Added TypeScript project configuration.
@@ -86,7 +84,7 @@ The repository still contains legacy Supabase code in modules that have not yet 
 - Preserved the cart for online orders until payment succeeds.
 - Migrated checkout and order-history customer reads/writes to the API.
 
-### Phase 6 in progress — Razorpay
+### Phase 6 completed — Razorpay
 
 - Added server-created Razorpay Orders using the trusted server amount.
 - Added authenticated payment-order creation and payment-signature verification.
@@ -95,10 +93,19 @@ The repository still contains legacy Supabase code in modules that have not yet 
 - Added cart clearing only after verified online payment.
 - Connected the checkout UI to Razorpay Checkout.
 
-### Remaining phases
+### Phase 7 in progress — Admin & restaurant operations
 
-7. Complete admin/restaurant operational management and remaining legacy workflows.
-8. Production hardening, broader automated testing, final Supabase removal, migrations and dedicated-cloud deployment.
+- Added server-side role authorization for admin endpoints.
+- Migrated admin dashboard, users, restaurants, operations and categories to REST APIs.
+- Added protected role management with a database-backed restaurant assignment for restaurant staff.
+- Added explicit order-status transition rules instead of unrestricted status writes.
+- Added restaurant availability controls and restaurant-scoped category administration.
+- Removed the legacy browser Supabase client and Supabase dependencies from the application package.
+- Added the database migration for restaurant staff assignment and Razorpay order/payment identifiers.
+
+### Remaining
+
+8. Restaurant-staff menu/order workflows, production hardening, broader automated testing, final migration verification and dedicated-cloud deployment.
 
 ## Payment configuration
 
