@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { carts, cartItems, menuItems, restaurants } from '../../db/schema';
 import type { AddCartItemInput, UpdateCartItemInput } from './cart.schema';
@@ -29,19 +29,37 @@ export async function getCart(userId: string) {
 }
 
 export async function addCartItem(userId: string, input: AddCartItemInput) {
-  const [menuItem] = await db.select({ id: menuItems.id, isAvailable: menuItems.isAvailable, restaurantId: menuItems.restaurantId, restaurantOpen: restaurants.isOpen })
-    .from(menuItems).innerJoin(restaurants, eq(menuItems.restaurantId, restaurants.id)).where(eq(menuItems.id, input.menuItemId)).limit(1);
-  if (!menuItem || !menuItem.isAvailable) throw new CartItemError('This dish is currently unavailable.');
-  if (!menuItem.restaurantOpen) throw new CartItemError('This restaurant is currently closed.');
+  await db.transaction(async (tx) => {
+    // Serialize cart mutations per user so concurrent adds cannot create a mixed-restaurant cart.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`tadka:cart:${userId}`}))`);
 
-  const cartId = await getOrCreateCart(userId);
-  const existingRestaurant = await db.select({ restaurantId: menuItems.restaurantId }).from(cartItems).innerJoin(menuItems, eq(cartItems.menuItemId, menuItems.id)).where(eq(cartItems.cartId, cartId)).limit(1);
-  if (existingRestaurant[0] && existingRestaurant[0].restaurantId !== menuItem.restaurantId) throw new CartItemError('Your cart already contains items from another restaurant. Clear your cart before starting a new order.');
-  const existing = await db.select({ id: cartItems.id, quantity: cartItems.quantity }).from(cartItems).where(and(eq(cartItems.cartId, cartId), eq(cartItems.menuItemId, input.menuItemId))).limit(1);
-  const quantity = Math.min((existing[0]?.quantity ?? 0) + input.quantity, 50);
-  if (existing[0]) await db.update(cartItems).set({ quantity, updatedAt: new Date() }).where(eq(cartItems.id, existing[0].id));
-  else await db.insert(cartItems).values({ cartId, menuItemId: input.menuItemId, quantity });
-  await db.update(carts).set({ updatedAt: new Date() }).where(eq(carts.id, cartId));
+    const [menuItem] = await tx.select({ id: menuItems.id, isAvailable: menuItems.isAvailable, restaurantId: menuItems.restaurantId, restaurantOpen: restaurants.isOpen })
+      .from(menuItems).innerJoin(restaurants, eq(menuItems.restaurantId, restaurants.id)).where(eq(menuItems.id, input.menuItemId)).limit(1);
+    if (!menuItem || !menuItem.isAvailable) throw new CartItemError('This dish is currently unavailable.');
+    if (!menuItem.restaurantOpen) throw new CartItemError('This restaurant is currently closed.');
+
+    let cartId: string;
+    const [existingCart] = await tx.select({ id: carts.id }).from(carts).where(eq(carts.userId, userId)).limit(1);
+    if (existingCart) {
+      cartId = existingCart.id;
+    } else {
+      const [createdCart] = await tx.insert(carts).values({ userId }).returning({ id: carts.id });
+      if (!createdCart) throw new CartItemError('Unable to create cart.');
+      cartId = createdCart.id;
+    }
+
+    const [existingRestaurant] = await tx.select({ restaurantId: menuItems.restaurantId }).from(cartItems).innerJoin(menuItems, eq(cartItems.menuItemId, menuItems.id)).where(eq(cartItems.cartId, cartId)).limit(1);
+    if (existingRestaurant && existingRestaurant.restaurantId !== menuItem.restaurantId) {
+      throw new CartItemError('Your cart already contains items from another restaurant. Clear your cart before starting a new order.');
+    }
+
+    const [existing] = await tx.select({ id: cartItems.id, quantity: cartItems.quantity }).from(cartItems).where(and(eq(cartItems.cartId, cartId), eq(cartItems.menuItemId, input.menuItemId))).limit(1);
+    const quantity = Math.min((existing?.quantity ?? 0) + input.quantity, 50);
+    if (existing) await tx.update(cartItems).set({ quantity, updatedAt: new Date() }).where(eq(cartItems.id, existing.id));
+    else await tx.insert(cartItems).values({ cartId, menuItemId: input.menuItemId, quantity });
+    await tx.update(carts).set({ updatedAt: new Date() }).where(eq(carts.id, cartId));
+  });
+
   return getCart(userId);
 }
 
