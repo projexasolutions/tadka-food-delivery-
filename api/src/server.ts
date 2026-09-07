@@ -7,6 +7,7 @@ import { registerRestaurantRoutes } from './modules/restaurants/restaurants.rout
 import { registerMenuRoutes } from './modules/menu/menu.routes';
 import { registerCartRoutes } from './modules/cart/cart.routes';
 import { registerOrderRoutes } from './modules/orders/orders.routes';
+import { registerRazorpayRoutes } from './modules/payments/razorpay.routes';
 import { pool } from './db/client';
 
 const app = express();
@@ -16,6 +17,9 @@ const allowedOrigins = process.env.WEB_ORIGIN?.split(',').map((origin) => origin
 app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors({ origin: allowedOrigins.length > 0 ? allowedOrigins : true, credentials: true }));
+
+// Razorpay signs the exact raw request body. This route must be registered before express.json().
+app.post('/v1/payments/razorpay/webhook', express.raw({ type: 'application/json', limit: '1mb' }));
 app.use(express.json({ limit: '1mb' }));
 
 app.use((req, res, next) => {
@@ -35,6 +39,7 @@ registerRestaurantRoutes(app);
 registerMenuRoutes(app);
 registerCartRoutes(app);
 registerOrderRoutes(app);
+registerRazorpayRoutes(app);
 
 app.use((_req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found.' } }));
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
