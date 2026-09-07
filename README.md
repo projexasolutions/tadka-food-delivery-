@@ -62,7 +62,6 @@ The current repository contains legacy Supabase code from the MVP. Supabase is *
 - Replaced the restaurant listing page's direct Supabase query with the REST API.
 - Replaced the menu page's direct Supabase reads with the REST API.
 - Added abort handling so navigation does not leave stale restaurant/menu requests updating UI state.
-- Kept cart mutation on the legacy path temporarily because secure session authentication is not migrated yet.
 
 ### Phase 3 completed
 
@@ -71,18 +70,36 @@ The current repository contains legacy Supabase code from the MVP. Supabase is *
 - Added opaque server-side sessions with configurable 30-day expiry.
 - Added HttpOnly, SameSite=Lax session cookies with Secure enabled in production.
 - Added `POST /v1/auth/signup`, `POST /v1/auth/login`, `GET /v1/auth/me` and `POST /v1/auth/logout`.
-- Added authenticated request middleware for future protected modules.
+- Added authenticated request middleware for protected modules.
 - Added an Origin guard for state-changing API requests when `WEB_ORIGIN` is configured.
 - Migrated the customer auth page off Supabase and onto the API session flow.
 - Added unit coverage for session cookie helpers.
 - Google OAuth remains intentionally deferred until the password/session foundation is stable.
 
+### Phase 4 completed
+
+- Added authenticated PostgreSQL/Drizzle cart models.
+- Added protected cart endpoints for read, add, quantity update and removal.
+- Cart ownership is derived from the authenticated session, never from client-supplied user IDs.
+- Prevented a cart from mixing dishes from different restaurants.
+- Added server-side cart subtotal, delivery fee and total calculation.
+- Migrated the menu add-to-cart action and customer cart page off Supabase.
+
+### Phase 5 in progress
+
+- Added order and order-item persistence with price/name snapshots.
+- Added an atomic checkout transaction: validate cart, calculate totals, create order/items and clear cart together.
+- Added protected order creation, order history and single-order APIs.
+- Migrated checkout and order history pages to the REST API.
+- Online payment records are supported as `pending`; Razorpay capture/webhook handling remains Phase 6.
+- SQL migrations for cart and order tables are included; the Drizzle migration journal should be regenerated in a networked development environment before production deployment.
+
 ### Next phases
 
-1. Migrate cart reads/writes behind authenticated API endpoints and remove its Supabase dependency.
-2. Migrate order, delivery, review and notification workflows.
-3. Integrate Razorpay through trusted server-side payment flows/webhooks.
+1. Complete checkout/order UX and order tracking details.
+2. Integrate Razorpay through trusted server-side payment flows/webhooks.
+3. Complete admin + restaurant management workflows.
 4. Complete Tailwind/design-system migration without changing the approved TADKA visual language.
 5. Add broader Vitest unit coverage and Playwright end-to-end coverage.
-6. Remove all Supabase packages, routes and environment variables after every dependency is migrated.
+6. Remove all remaining Supabase packages, routes and environment variables after dependency search confirms migration completion.
 7. Deploy the web app and API to dedicated cloud infrastructure.
