@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { db } from '../../db/client';
-import { orders } from '../../db/schema';
+import { carts, cartItems, orders } from '../../db/schema';
 import type { CreateRazorpayOrderInput, VerifyRazorpayPaymentInput } from './razorpay.schema';
 
 const RAZORPAY_API = 'https://api.razorpay.com/v1/orders';
@@ -18,13 +18,17 @@ function sign(value: string, secret: string) {
   return createHmac('sha256', secret).update(value).digest('hex');
 }
 
+async function clearUserCart(userId: string) {
+  const [cart] = await db.select({ id: carts.id }).from(carts).where(eq(carts.userId, userId)).limit(1);
+  if (!cart) return;
+  await db.delete(cartItems).where(eq(cartItems.cartId, cart.id));
+  await db.update(carts).set({ updatedAt: new Date() }).where(eq(carts.id, cart.id));
+}
+
 export async function createRazorpayOrder(userId: string, input: CreateRazorpayOrderInput) {
   const [order] = await db.select({
-    id: orders.id,
-    total: orders.total,
-    paymentMethod: orders.paymentMethod,
-    paymentStatus: orders.paymentStatus,
-    razorpayOrderId: orders.razorpayOrderId,
+    id: orders.id, total: orders.total, paymentMethod: orders.paymentMethod,
+    paymentStatus: orders.paymentStatus, razorpayOrderId: orders.razorpayOrderId,
   }).from(orders).where(and(eq(orders.id, input.orderId), eq(orders.userId, userId))).limit(1);
 
   if (!order) throw new PaymentError('Order not found.');
@@ -36,8 +40,7 @@ export async function createRazorpayOrder(userId: string, input: CreateRazorpayO
   const keySecret = requiredEnv('RAZORPAY_KEY_SECRET');
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
   const response = await fetch(RAZORPAY_API, {
-    method: 'POST',
-    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+    method: 'POST', headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount: order.total * 100, currency: 'INR', receipt: order.id }),
   });
   const body = await response.json().catch(() => null);
@@ -60,6 +63,7 @@ export async function verifyRazorpayPayment(userId: string, input: VerifyRazorpa
   if (!valid) throw new PaymentError('Invalid payment signature.');
 
   await db.update(orders).set({ paymentStatus: 'paid', razorpayPaymentId: input.razorpayPaymentId, updatedAt: new Date() }).where(eq(orders.id, order.id));
+  await clearUserCart(userId);
   return { paid: true };
 }
 
@@ -69,16 +73,17 @@ export async function handleRazorpayWebhook(rawBody: Buffer, signature: string) 
   const valid = supplied.length === expected.length && timingSafeEqual(Buffer.from(expected, 'utf8'), supplied);
   if (!valid) throw new PaymentError('Invalid webhook signature.');
 
-  const payload = JSON.parse(rawBody.toString('utf8')) as {
-    event?: string;
-    payload?: { payment?: { entity?: { id?: string; order_id?: string } } };
-  };
+  let payload: { event?: string; payload?: { payment?: { entity?: { id?: string; order_id?: string } } } };
+  try { payload = JSON.parse(rawBody.toString('utf8')); } catch { throw new PaymentError('Invalid webhook payload.'); }
+
   const payment = payload.payload?.payment?.entity;
   const razorpayOrderId = payment?.order_id;
   if (!razorpayOrderId) return;
 
   if (payload.event === 'payment.captured' || payload.event === 'order.paid') {
-    await db.update(orders).set({ paymentStatus: 'paid', razorpayPaymentId: payment?.id, updatedAt: new Date() }).where(eq(orders.razorpayOrderId, razorpayOrderId));
+    const [order] = await db.update(orders).set({ paymentStatus: 'paid', razorpayPaymentId: payment?.id, updatedAt: new Date() })
+      .where(eq(orders.razorpayOrderId, razorpayOrderId)).returning({ userId: orders.userId });
+    if (order) await clearUserCart(order.userId);
   } else if (payload.event === 'payment.failed') {
     await db.update(orders).set({ paymentStatus: 'failed', updatedAt: new Date() }).where(eq(orders.razorpayOrderId, razorpayOrderId));
   }
