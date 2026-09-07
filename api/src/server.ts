@@ -2,20 +2,33 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { registerAuthRoutes } from './modules/auth/auth.routes';
 import { registerRestaurantRoutes } from './modules/restaurants/restaurants.routes';
 import { registerMenuRoutes } from './modules/menu/menu.routes';
 import { pool } from './db/client';
 
 const app = express();
 const port = Number(process.env.API_PORT ?? 4000);
+const allowedOrigins = process.env.WEB_ORIGIN?.split(',').map((origin) => origin.trim()).filter(Boolean) ?? [];
 
 app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors({
-  origin: process.env.WEB_ORIGIN?.split(',').map((origin) => origin.trim()) ?? true,
+  origin: allowedOrigins.length > 0 ? allowedOrigins : true,
   credentials: true,
 }));
 app.use(express.json({ limit: '1mb' }));
+
+app.use((req, res, next) => {
+  if (allowedOrigins.length === 0 || !['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    return next();
+  }
+
+  const origin = req.get('Origin');
+  if (!origin || allowedOrigins.includes(origin)) return next();
+
+  return res.status(403).json({ error: { code: 'FORBIDDEN_ORIGIN', message: 'Request origin is not allowed.' } });
+});
 
 app.get('/health', async (_req, res, next) => {
   try {
@@ -26,6 +39,7 @@ app.get('/health', async (_req, res, next) => {
   }
 });
 
+registerAuthRoutes(app);
 registerRestaurantRoutes(app);
 registerMenuRoutes(app);
 
