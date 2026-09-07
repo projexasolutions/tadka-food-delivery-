@@ -20,6 +20,25 @@ export const restaurants = pgTable('restaurants', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const categories = pgTable('categories', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  restaurantId: uuid('restaurant_id').references(() => restaurants.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const menuItems = pgTable('menu_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  restaurantId: uuid('restaurant_id').notNull().references(() => restaurants.id, { onDelete: 'cascade' }),
+  categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  price: integer('price').notNull(),
+  imageUrl: text('image_url'),
+  isAvailable: boolean('is_available').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),
