@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { carts, cartItems, menuItems, orderItems, orders, restaurants } from '../../db/schema';
 import type { CreateOrderInput } from './orders.schema';
@@ -10,29 +10,24 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     const cart = await tx.select({ id: carts.id }).from(carts).where(eq(carts.userId, userId)).limit(1);
     if (!cart[0]) throw new OrderError('Your cart is empty.');
 
-    const items = await tx
-      .select({
-        id: cartItems.id,
-        menuItemId: menuItems.id,
-        quantity: cartItems.quantity,
-        name: menuItems.name,
-        price: menuItems.price,
-        restaurantId: menuItems.restaurantId,
-        isAvailable: menuItems.isAvailable,
-        restaurantName: restaurants.name,
-        deliveryFee: restaurants.deliveryFee,
-        restaurantOpen: restaurants.isOpen,
-      })
-      .from(cartItems)
+    const items = await tx.select({
+      id: cartItems.id,
+      menuItemId: menuItems.id,
+      quantity: cartItems.quantity,
+      name: menuItems.name,
+      price: menuItems.price,
+      restaurantId: menuItems.restaurantId,
+      isAvailable: menuItems.isAvailable,
+      deliveryFee: restaurants.deliveryFee,
+      restaurantOpen: restaurants.isOpen,
+    }).from(cartItems)
       .innerJoin(menuItems, eq(cartItems.menuItemId, menuItems.id))
       .innerJoin(restaurants, eq(menuItems.restaurantId, restaurants.id))
       .where(eq(cartItems.cartId, cart[0].id));
 
     if (!items.length) throw new OrderError('Your cart is empty.');
     const restaurantId = items[0].restaurantId;
-    if (items.some((item) => item.restaurantId !== restaurantId)) {
-      throw new OrderError('Your cart contains items from multiple restaurants.');
-    }
+    if (items.some((item) => item.restaurantId !== restaurantId)) throw new OrderError('Your cart contains items from multiple restaurants.');
     if (!items.every((item) => item.isAvailable)) throw new OrderError('One or more dishes are no longer available.');
     if (!items.every((item) => item.restaurantOpen)) throw new OrderError('This restaurant is currently closed.');
 
@@ -46,7 +41,7 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
       deliveryAddress: input.deliveryAddress,
       phone: input.phone,
       paymentMethod: input.paymentMethod,
-      paymentStatus: input.paymentMethod === 'cod' ? 'pending' : 'pending',
+      paymentStatus: 'pending',
       status: 'pending',
       subtotal,
       deliveryFee,
@@ -64,70 +59,43 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
 
     await tx.delete(cartItems).where(eq(cartItems.cartId, cart[0].id));
     await tx.update(carts).set({ updatedAt: new Date() }).where(eq(carts.id, cart[0].id));
-
     return getOrderForUser(userId, order.id, tx);
   });
 }
 
 async function getOrderForUser(userId: string, orderId: string, executor = db) {
-  const rows = await executor
-    .select({
-      id: orders.id,
-      status: orders.status,
-      paymentMethod: orders.paymentMethod,
-      paymentStatus: orders.paymentStatus,
-      deliveryAddress: orders.deliveryAddress,
-      phone: orders.phone,
-      subtotal: orders.subtotal,
-      deliveryFee: orders.deliveryFee,
-      total: orders.total,
-      createdAt: orders.createdAt,
-      restaurantId: restaurants.id,
-      restaurantName: restaurants.name,
-    })
-    .from(orders)
-    .innerJoin(restaurants, eq(orders.restaurantId, restaurants.id))
-    .where(and(eq(orders.id, orderId), eq(orders.userId, userId)))
-    .limit(1);
+  const rows = await executor.select({
+    id: orders.id, status: orders.status, paymentMethod: orders.paymentMethod, paymentStatus: orders.paymentStatus,
+    deliveryAddress: orders.deliveryAddress, phone: orders.phone, subtotal: orders.subtotal, deliveryFee: orders.deliveryFee,
+    total: orders.total, createdAt: orders.createdAt, restaurantId: restaurants.id, restaurantName: restaurants.name,
+  }).from(orders).innerJoin(restaurants, eq(orders.restaurantId, restaurants.id))
+    .where(and(eq(orders.id, orderId), eq(orders.userId, userId))).limit(1);
 
   if (!rows[0]) return null;
   const items = await executor.select({
-    id: orderItems.id,
-    menuItemId: orderItems.menuItemId,
-    name: orderItems.name,
-    price: orderItems.price,
-    quantity: orderItems.quantity,
-    lineTotal: orderItems.lineTotal,
+    id: orderItems.id, menuItemId: orderItems.menuItemId, name: orderItems.name,
+    price: orderItems.price, quantity: orderItems.quantity, lineTotal: orderItems.lineTotal,
   }).from(orderItems).where(eq(orderItems.orderId, orderId));
-
   return { ...rows[0], items };
 }
 
 export async function listOrders(userId: string) {
   const rows = await db.select({
-    id: orders.id,
-    status: orders.status,
-    paymentMethod: orders.paymentMethod,
-    paymentStatus: orders.paymentStatus,
-    deliveryAddress: orders.deliveryAddress,
-    phone: orders.phone,
-    subtotal: orders.subtotal,
-    deliveryFee: orders.deliveryFee,
-    total: orders.total,
-    createdAt: orders.createdAt,
-    restaurantName: restaurants.name,
-  }).from(orders)
-    .innerJoin(restaurants, eq(orders.restaurantId, restaurants.id))
-    .where(eq(orders.userId, userId))
-    .orderBy(desc(orders.createdAt));
+    id: orders.id, status: orders.status, paymentMethod: orders.paymentMethod, paymentStatus: orders.paymentStatus,
+    deliveryAddress: orders.deliveryAddress, phone: orders.phone, subtotal: orders.subtotal, deliveryFee: orders.deliveryFee,
+    total: orders.total, createdAt: orders.createdAt, restaurantName: restaurants.name,
+  }).from(orders).innerJoin(restaurants, eq(orders.restaurantId, restaurants.id))
+    .where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
 
   if (!rows.length) return [];
   const ids = rows.map((row) => row.id);
-  const items = await db.select({ id: orderItems.id, orderId: orderItems.orderId, name: orderItems.name, price: orderItems.price, quantity: orderItems.quantity, lineTotal: orderItems.lineTotal })
-    .from(orderItems)
-    .where(eq(orderItems.orderId, ids[0]));
-
-  return rows.map((row) => ({ ...row, items: row.id === ids[0] ? items : [] }));
+  const items = await db.select({
+    id: orderItems.id, orderId: orderItems.orderId, name: orderItems.name,
+    price: orderItems.price, quantity: orderItems.quantity, lineTotal: orderItems.lineTotal,
+  }).from(orderItems).where(inArray(orderItems.orderId, ids));
+  const byOrder = new Map<string, typeof items>();
+  for (const item of items) byOrder.set(item.orderId, [...(byOrder.get(item.orderId) ?? []), item]);
+  return rows.map((row) => ({ ...row, items: byOrder.get(row.id) ?? [] }));
 }
 
 export async function getOrder(userId: string, orderId: string) {
