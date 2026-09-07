@@ -1,13 +1,20 @@
-import SupabaseStatus from '@/components/SupabaseStatus';
-import { supabase } from '@/lib/supabase';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default async function HealthPage() {
-  const { error } = await supabase.from('restaurants').select('id').limit(1);
+  let status = 'Unavailable';
+
+  try {
+    const response = await fetch(`${apiUrl}/health`, { cache: 'no-store' });
+    status = response.ok ? 'OK' : 'Needs attention';
+  } catch {
+    status = 'Unavailable';
+  }
+
   return (
     <main className="page">
       <h1>System Health</h1>
-      <p>Database connectivity: <strong>{error ? 'Needs configuration' : 'OK'}</strong></p>
-      <p>Next step: sign in and test each role flow.</p><SupabaseStatus />
+      <p>Node API connectivity: <strong>{status}</strong></p>
+      <p>Database checks are performed by the API health endpoint.</p>
     </main>
   );
 }
