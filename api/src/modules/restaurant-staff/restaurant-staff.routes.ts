@@ -2,83 +2,22 @@ import type { Express } from 'express';
 import { requireAuth } from '../auth/auth.middleware';
 import { requireRole } from '../auth/auth.roles';
 import { createMenuItemSchema, createStaffCategorySchema, itemIdParamsSchema, categoryIdParamsSchema, orderIdParamsSchema, updateMenuItemSchema, updateStaffCategorySchema, updateStaffOrderStatusSchema } from './restaurant-staff.schema';
-import { RestaurantStaffError, createCategory, createMenuItem, deleteCategory, getStaffRestaurant, listStaffMenu, listStaffOrders, removeMenuItem, updateCategory, updateMenuItem, updateStaffOrderStatus } from './restaurant-staff.service';
+import { RestaurantStaffError, createCategory, createMenuItem, deleteCategory, getStaffRestaurant, listStaffMenu, listStaffOrders, removeMenuItem, updateCategory, updateMenuItem, updateStaffOrderStatus, updateStaffRestaurant } from './restaurant-staff.service';
 
 const staffOnly = [requireAuth, requireRole('restaurant_staff')];
 const validationError = (message: string) => ({ error: { code: 'VALIDATION_ERROR', message } });
-
-function handleError(error: unknown, res: any, next: any) {
-  if (error instanceof RestaurantStaffError) return res.status(409).json({ error: { code: 'STAFF_OPERATION_FAILED', message: error.message } });
-  return next(error);
-}
+function handleError(error: unknown, res: any, next: any) { if (error instanceof RestaurantStaffError) return res.status(409).json({ error: { code: 'STAFF_OPERATION_FAILED', message: error.message } }); return next(error); }
 
 export function registerRestaurantStaffRoutes(app: Express) {
-  app.get('/v1/restaurant', ...staffOnly, async (req, res, next) => {
-    try { return res.json({ data: await getStaffRestaurant(req.auth!.userId) }); } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.get('/v1/restaurant/menu', ...staffOnly, async (req, res, next) => {
-    try { return res.json({ data: await listStaffMenu(req.auth!.userId) }); } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.post('/v1/restaurant/menu/items', ...staffOnly, async (req, res, next) => {
-    try {
-      const body = createMenuItemSchema.safeParse(req.body);
-      if (!body.success) return res.status(400).json(validationError('Invalid menu item.'));
-      return res.status(201).json({ data: await createMenuItem(req.auth!.userId, body.data) });
-    } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.patch('/v1/restaurant/menu/items/:id', ...staffOnly, async (req, res, next) => {
-    try {
-      const params = itemIdParamsSchema.safeParse(req.params); const body = updateMenuItemSchema.safeParse(req.body);
-      if (!params.success || !body.success) return res.status(400).json(validationError('Invalid menu item update.'));
-      return res.json({ data: await updateMenuItem(req.auth!.userId, params.data.id, body.data) });
-    } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.delete('/v1/restaurant/menu/items/:id', ...staffOnly, async (req, res, next) => {
-    try {
-      const params = itemIdParamsSchema.safeParse(req.params);
-      if (!params.success) return res.status(400).json(validationError('Invalid menu item ID.'));
-      return res.json({ data: await removeMenuItem(req.auth!.userId, params.data.id) });
-    } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.post('/v1/restaurant/categories', ...staffOnly, async (req, res, next) => {
-    try {
-      const body = createStaffCategorySchema.safeParse(req.body);
-      if (!body.success) return res.status(400).json(validationError('Invalid category.'));
-      return res.status(201).json({ data: await createCategory(req.auth!.userId, body.data) });
-    } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.patch('/v1/restaurant/categories/:id', ...staffOnly, async (req, res, next) => {
-    try {
-      const params = categoryIdParamsSchema.safeParse(req.params); const body = updateStaffCategorySchema.safeParse(req.body);
-      if (!params.success || !body.success) return res.status(400).json(validationError('Invalid category update.'));
-      return res.json({ data: await updateCategory(req.auth!.userId, params.data.id, body.data) });
-    } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.delete('/v1/restaurant/categories/:id', ...staffOnly, async (req, res, next) => {
-    try {
-      const params = categoryIdParamsSchema.safeParse(req.params);
-      if (!params.success) return res.status(400).json(validationError('Invalid category ID.'));
-      await deleteCategory(req.auth!.userId, params.data.id);
-      return res.status(204).send();
-    } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.get('/v1/restaurant/orders', ...staffOnly, async (req, res, next) => {
-    try { return res.json({ data: await listStaffOrders(req.auth!.userId) }); } catch (error) { return handleError(error, res, next); }
-  });
-
-  app.patch('/v1/restaurant/orders/:id/status', ...staffOnly, async (req, res, next) => {
-    try {
-      const params = orderIdParamsSchema.safeParse(req.params); const body = updateStaffOrderStatusSchema.safeParse(req.body);
-      if (!params.success || !body.success) return res.status(400).json(validationError('Invalid order status update.'));
-      return res.json({ data: await updateStaffOrderStatus(req.auth!.userId, params.data.id, body.data) });
-    } catch (error) { return handleError(error, res, next); }
-  });
+  app.get('/v1/restaurant', ...staffOnly, async (req, res, next) => { try { return res.json({ data: await getStaffRestaurant(req.auth!.userId) }); } catch (error) { return handleError(error, res, next); } });
+  app.patch('/v1/restaurant', ...staffOnly, async (req, res, next) => { try { const body = require('./restaurant-staff.schema').updateStaffRestaurantSchema.safeParse(req.body); if (!body.success) return res.status(400).json(validationError('Invalid restaurant update.')); return res.json({ data: await updateStaffRestaurant(req.auth!.userId, body.data.isOpen) }); } catch (error) { return handleError(error, res, next); } });
+  app.get('/v1/restaurant/menu', ...staffOnly, async (req, res, next) => { try { return res.json({ data: await listStaffMenu(req.auth!.userId) }); } catch (error) { return handleError(error, res, next); } });
+  app.post('/v1/restaurant/menu/items', ...staffOnly, async (req, res, next) => { try { const body = createMenuItemSchema.safeParse(req.body); if (!body.success) return res.status(400).json(validationError('Invalid menu item.')); return res.status(201).json({ data: await createMenuItem(req.auth!.userId, body.data) }); } catch (error) { return handleError(error, res, next); } });
+  app.patch('/v1/restaurant/menu/items/:id', ...staffOnly, async (req, res, next) => { try { const params = itemIdParamsSchema.safeParse(req.params); const body = updateMenuItemSchema.safeParse(req.body); if (!params.success || !body.success) return res.status(400).json(validationError('Invalid menu item update.')); return res.json({ data: await updateMenuItem(req.auth!.userId, params.data.id, body.data) }); } catch (error) { return handleError(error, res, next); } });
+  app.delete('/v1/restaurant/menu/items/:id', ...staffOnly, async (req, res, next) => { try { const params = itemIdParamsSchema.safeParse(req.params); if (!params.success) return res.status(400).json(validationError('Invalid menu item ID.')); return res.json({ data: await removeMenuItem(req.auth!.userId, params.data.id) }); } catch (error) { return handleError(error, res, next); } });
+  app.post('/v1/restaurant/categories', ...staffOnly, async (req, res, next) => { try { const body = createStaffCategorySchema.safeParse(req.body); if (!body.success) return res.status(400).json(validationError('Invalid category.')); return res.status(201).json({ data: await createCategory(req.auth!.userId, body.data) }); } catch (error) { return handleError(error, res, next); } });
+  app.patch('/v1/restaurant/categories/:id', ...staffOnly, async (req, res, next) => { try { const params = categoryIdParamsSchema.safeParse(req.params); const body = updateStaffCategorySchema.safeParse(req.body); if (!params.success || !body.success) return res.status(400).json(validationError('Invalid category update.')); return res.json({ data: await updateCategory(req.auth!.userId, params.data.id, body.data) }); } catch (error) { return handleError(error, res, next); } });
+  app.delete('/v1/restaurant/categories/:id', ...staffOnly, async (req, res, next) => { try { const params = categoryIdParamsSchema.safeParse(req.params); if (!params.success) return res.status(400).json(validationError('Invalid category ID.')); await deleteCategory(req.auth!.userId, params.data.id); return res.status(204).send(); } catch (error) { return handleError(error, res, next); } });
+  app.get('/v1/restaurant/orders', ...staffOnly, async (req, res, next) => { try { return res.json({ data: await listStaffOrders(req.auth!.userId) }); } catch (error) { return handleError(error, res, next); } });
+  app.patch('/v1/restaurant/orders/:id/status', ...staffOnly, async (req, res, next) => { try { const params = orderIdParamsSchema.safeParse(req.params); const body = updateStaffOrderStatusSchema.safeParse(req.body); if (!params.success || !body.success) return res.status(400).json(validationError('Invalid order status update.')); return res.json({ data: await updateStaffOrderStatus(req.auth!.userId, params.data.id, body.data) }); } catch (error) { return handleError(error, res, next); } });
 }
