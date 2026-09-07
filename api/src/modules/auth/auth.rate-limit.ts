@@ -4,10 +4,12 @@ type Bucket = { count: number; resetAt: number };
 const buckets = new Map<string, Bucket>();
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 10;
+const MAX_BUCKETS = 5000;
 
 export function authRateLimit(req: Request, res: Response, next: NextFunction) {
   const now = Date.now();
   const key = req.ip || req.socket.remoteAddress || 'unknown';
+  if (buckets.size > MAX_BUCKETS) for (const [bucketKey, bucket] of buckets) if (bucket.resetAt <= now) buckets.delete(bucketKey);
   const current = buckets.get(key);
   if (!current || current.resetAt <= now) {
     buckets.set(key, { count: 1, resetAt: now + WINDOW_MS });
