@@ -27,7 +27,7 @@ TADKA
 ├── Node.js REST API
 ├── PostgreSQL + Drizzle
 ├── Session-based authentication
-├── Payment gateway integration
+├── Razorpay payment gateway
 └── S3-compatible media storage
 ```
 
@@ -41,7 +41,7 @@ TADKA
 
 ## Migration status
 
-The current repository contains legacy Supabase code from the MVP. Supabase is **not part of the target architecture** and will be removed module-by-module after equivalent API/database behavior is in place.
+The repository still contains legacy Supabase code in modules that have not yet been migrated. Supabase is **not part of the target architecture** and will be removed module-by-module after equivalent API/database behavior is in place.
 
 ### Phase 1 completed
 
@@ -57,49 +57,55 @@ The current repository contains legacy Supabase code from the MVP. Supabase is *
 ### Phase 2 completed
 
 - Added PostgreSQL/Drizzle category and menu-item models.
-- Added a validated `GET /v1/restaurants/:restaurantId/menu` API.
-- Kept unavailable restaurants and menu items out of customer-facing results.
-- Replaced the restaurant listing page's direct Supabase query with the REST API.
-- Replaced the menu page's direct Supabase reads with the REST API.
-- Added abort handling so navigation does not leave stale restaurant/menu requests updating UI state.
+- Added a validated restaurant-menu API.
+- Replaced restaurant and menu customer reads with REST API calls.
+- Kept unavailable restaurants and dishes out of customer-facing results.
 
 ### Phase 3 completed
 
-- Added Zod validation for signup and login payloads.
 - Added Argon2id password hashing and verification.
-- Added opaque server-side sessions with configurable 30-day expiry.
-- Added HttpOnly, SameSite=Lax session cookies with Secure enabled in production.
-- Added `POST /v1/auth/signup`, `POST /v1/auth/login`, `GET /v1/auth/me` and `POST /v1/auth/logout`.
-- Added authenticated request middleware for protected modules.
-- Added an Origin guard for state-changing API requests when `WEB_ORIGIN` is configured.
-- Migrated the customer auth page off Supabase and onto the API session flow.
-- Added unit coverage for session cookie helpers.
-- Google OAuth remains intentionally deferred until the password/session foundation is stable.
+- Added opaque server-side sessions with configurable expiry.
+- Added secure HttpOnly/SameSite session cookies.
+- Added signup, login, session lookup and logout endpoints.
+- Added authenticated request middleware and state-changing Origin protection.
+- Migrated the customer auth page off Supabase.
 
 ### Phase 4 completed
 
-- Added authenticated PostgreSQL/Drizzle cart models.
-- Added protected cart endpoints for read, add, quantity update and removal.
-- Cart ownership is derived from the authenticated session, never from client-supplied user IDs.
-- Prevented a cart from mixing dishes from different restaurants.
-- Added server-side cart subtotal, delivery fee and total calculation.
-- Migrated the menu add-to-cart action and customer cart page off Supabase.
+- Added authenticated cart APIs backed by PostgreSQL/Drizzle.
+- Added quantity validation and item ownership checks.
+- Added menu availability checks before cart mutation.
+- Migrated menu/cart customer flows off Supabase.
 
-### Phase 5 in progress
+### Phase 5 completed
 
-- Added order and order-item persistence with price/name snapshots.
-- Added an atomic checkout transaction: validate cart, calculate totals, create order/items and clear cart together.
-- Added protected order creation, order history and single-order APIs.
-- Migrated checkout and order history pages to the REST API.
-- Online payment records are supported as `pending`; Razorpay capture/webhook handling remains Phase 6.
-- SQL migrations for cart and order tables are included; the Drizzle migration journal should be regenerated in a networked development environment before production deployment.
+- Added transactional checkout and order creation.
+- Added order and order-item snapshots so historical prices/names are not dependent on mutable menu data.
+- Added authenticated order history and single-order APIs.
+- Added server-side subtotal, delivery-fee and total calculation.
+- Preserved the cart for online orders until payment succeeds.
+- Migrated checkout and order-history customer reads/writes to the API.
 
-### Next phases
+### Phase 6 in progress — Razorpay
 
-1. Complete checkout/order UX and order tracking details.
-2. Integrate Razorpay through trusted server-side payment flows/webhooks.
-3. Complete admin + restaurant management workflows.
-4. Complete Tailwind/design-system migration without changing the approved TADKA visual language.
-5. Add broader Vitest unit coverage and Playwright end-to-end coverage.
-6. Remove all remaining Supabase packages, routes and environment variables after dependency search confirms migration completion.
-7. Deploy the web app and API to dedicated cloud infrastructure.
+- Added server-created Razorpay Orders using the trusted server amount.
+- Added authenticated payment-order creation and payment-signature verification.
+- Added raw-body webhook signature verification.
+- Added captured/paid/failed payment status handling.
+- Added cart clearing only after verified online payment.
+- Connected the checkout UI to Razorpay Checkout.
+
+### Remaining phases
+
+7. Complete admin/restaurant operational management and remaining legacy workflows.
+8. Production hardening, broader automated testing, final Supabase removal, migrations and dedicated-cloud deployment.
+
+## Payment configuration
+
+The server requires `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and `RAZORPAY_WEBHOOK_SECRET`. The browser receives only the public `NEXT_PUBLIC_RAZORPAY_KEY_ID`.
+
+Configure the Razorpay webhook endpoint as:
+
+`POST /v1/payments/razorpay/webhook`
+
+Use the webhook secret configured in `RAZORPAY_WEBHOOK_SECRET`.
