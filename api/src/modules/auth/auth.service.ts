@@ -16,19 +16,22 @@ export async function signup(input: SignupInput) {
   const passwordHash = await argon2.hash(input.password, { type: argon2.argon2id });
 
   try {
-    const [user] = await db
-      .insert(users)
-      .values({ email, passwordHash, fullName: input.fullName.trim() })
-      .returning({ id: users.id, email: users.email, fullName: users.fullName, role: users.role });
+    return await db.transaction(async (tx) => {
+      const [user] = await tx
+        .insert(users)
+        .values({ email, passwordHash, fullName: input.fullName.trim() })
+        .returning({ id: users.id, email: users.email, fullName: users.fullName, role: users.role });
+      if (!user) throw new Error('User creation returned no row.');
 
-    if (!user) throw new Error('User creation returned no row.');
+      const sessionId = createSessionId();
+      const expiresAt = new Date(Date.now() + sessionTtlMs());
+      const [session] = await tx.insert(sessions).values({ id: sessionId, userId: user.id, expiresAt }).returning({ id: sessions.id });
+      if (!session) throw new Error('Session creation returned no row.');
 
-    const session = await createSession(user.id);
-    return { user, sessionId: session.id };
+      return { user, sessionId: session.id };
+    });
   } catch (error) {
-    if (isUniqueViolation(error)) {
-      throw new AuthConflictError();
-    }
+    if (isUniqueViolation(error)) throw new AuthConflictError();
     throw error;
   }
 }
@@ -38,7 +41,6 @@ export async function login(input: LoginInput) {
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
   if (!user?.passwordHash) throw new InvalidCredentialsError();
-
   const valid = await argon2.verify(user.passwordHash, input.password);
   if (!valid) throw new InvalidCredentialsError();
 
@@ -52,7 +54,6 @@ export async function login(input: LoginInput) {
 export async function createSession(userId: string) {
   const id = createSessionId();
   const expiresAt = new Date(Date.now() + sessionTtlMs());
-
   const [session] = await db.insert(sessions).values({ id, userId, expiresAt }).returning();
   if (!session) throw new Error('Session creation returned no row.');
   return session;
@@ -61,17 +62,11 @@ export async function createSession(userId: string) {
 export async function getSessionUser(sessionId: string) {
   const now = new Date();
   const [result] = await db
-    .select({
-      id: users.id,
-      email: users.email,
-      fullName: users.fullName,
-      role: users.role,
-    })
+    .select({ id: users.id, email: users.email, fullName: users.fullName, role: users.role })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))
     .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, now)))
     .limit(1);
-
   return result ?? null;
 }
 
