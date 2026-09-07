@@ -6,7 +6,7 @@ import type { CreateOrderInput } from './orders.schema';
 export class OrderError extends Error {}
 
 export async function createOrder(userId: string, input: CreateOrderInput) {
-  return db.transaction(async (tx) => {
+  const orderId = await db.transaction(async (tx) => {
     const cart = await tx.select({ id: carts.id }).from(carts).where(eq(carts.userId, userId)).limit(1);
     if (!cart[0]) throw new OrderError('Your cart is empty.');
 
@@ -36,25 +36,16 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     const total = subtotal + deliveryFee;
 
     const [order] = await tx.insert(orders).values({
-      userId,
-      restaurantId,
-      deliveryAddress: input.deliveryAddress,
-      phone: input.phone,
-      paymentMethod: input.paymentMethod,
-      paymentStatus: 'pending',
-      status: 'pending',
-      subtotal,
-      deliveryFee,
-      total,
+      userId, restaurantId, deliveryAddress: input.deliveryAddress, phone: input.phone,
+      paymentMethod: input.paymentMethod, paymentStatus: 'pending', status: 'pending',
+      subtotal, deliveryFee, total,
     }).returning({ id: orders.id });
 
+    if (!order) throw new OrderError('Unable to create order.');
+
     await tx.insert(orderItems).values(items.map((item) => ({
-      orderId: order.id,
-      menuItemId: item.menuItemId,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      lineTotal: item.price * item.quantity,
+      orderId: order.id, menuItemId: item.menuItemId, name: item.name, price: item.price,
+      quantity: item.quantity, lineTotal: item.price * item.quantity,
     })));
 
     // COD is final at checkout, so its cart can be cleared immediately.
@@ -63,12 +54,14 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
       await tx.delete(cartItems).where(eq(cartItems.cartId, cart[0].id));
       await tx.update(carts).set({ updatedAt: new Date() }).where(eq(carts.id, cart[0].id));
     }
-    return getOrderForUser(userId, order.id, tx);
+    return order.id;
   });
+
+  return getOrderForUser(userId, orderId);
 }
 
-async function getOrderForUser(userId: string, orderId: string, executor = db) {
-  const rows = await executor.select({
+async function getOrderForUser(userId: string, orderId: string) {
+  const rows = await db.select({
     id: orders.id, status: orders.status, paymentMethod: orders.paymentMethod, paymentStatus: orders.paymentStatus,
     deliveryAddress: orders.deliveryAddress, phone: orders.phone, subtotal: orders.subtotal, deliveryFee: orders.deliveryFee,
     total: orders.total, createdAt: orders.createdAt, restaurantId: restaurants.id, restaurantName: restaurants.name,
@@ -76,7 +69,7 @@ async function getOrderForUser(userId: string, orderId: string, executor = db) {
     .where(and(eq(orders.id, orderId), eq(orders.userId, userId))).limit(1);
 
   if (!rows[0]) return null;
-  const items = await executor.select({
+  const items = await db.select({
     id: orderItems.id, menuItemId: orderItems.menuItemId, name: orderItems.name,
     price: orderItems.price, quantity: orderItems.quantity, lineTotal: orderItems.lineTotal,
   }).from(orderItems).where(eq(orderItems.orderId, orderId));
