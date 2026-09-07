@@ -1,55 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function AdminApplicationsPage() {
-  const [apps, setApps] = useState([]);
-  const [message, setMessage] = useState('');
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  async function load() {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', (await supabase.auth.getUser()).data.user?.id).single();
-    if (profile?.role !== 'admin') {
-      setMessage('Admin access required.');
-      return;
-    }
-    const { data, error } = await supabase.from('restaurant_applications').select('*').order('created_at', { ascending: false });
-    if (error) setMessage(error.message);
-    else setApps(data || []);
-  }
+  useEffect(() => {
+    fetch(`${apiUrl}/v1/auth/me`, { credentials: 'include', cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const body = await response.json();
+        return body.data ?? null;
+      })
+      .then((user) => setAuthorized(user?.role === 'admin'))
+      .finally(() => setLoading(false));
+  }, []);
 
-  async function review(app, status) {
-    setMessage("");
-    const { error } = await supabase.rpc("review_restaurant_application", {
-      p_application_id: app.id,
-      p_status: status
-    });
-    if (error) return setMessage(error.message);
-    setMessage(`Application ${status}.`);
-    load();
-  }
+  if (loading) return <main className="container"><section className="panel"><p>Checking admin access…</p></section></main>;
+  if (!authorized) return <main className="container"><section className="panel"><h1>Admin access required</h1><Link className="btn primary" href="/auth">Sign in</Link></section></main>;
 
-  useEffect(() => { load(); }, []);
-
-  return (
-    <main className="page">
-      <h1>Restaurant Applications</h1>
-      {message && <p>{message}</p>}
-      <div className="grid">
-        {apps.map(app => (
-          <article className="card" key={app.id}>
-            <h3>{app.restaurant_name}</h3>
-            <p>{app.cuisine || 'Cuisine not specified'}</p>
-            <p>Status: <strong>{app.status}</strong></p>
-            {app.status === 'pending' && (
-              <div className="actions">
-                <button onClick={() => review(app, 'approved')}>Approve</button>
-                <button onClick={() => review(app, 'rejected')}>Reject</button>
-              </div>
-            )}
-          </article>
-        ))}
-      </div>
-    </main>
-  );
+  return <main className="container"><section className="panel"><span className="eyebrow">ADMIN</span><h1>Restaurant Applications</h1><p>Application management is not part of the current PostgreSQL schema. The old Supabase workflow has been intentionally removed rather than kept as a broken compatibility layer.</p><Link className="btn primary" href="/admin">Back to admin</Link></section></main>;
 }
