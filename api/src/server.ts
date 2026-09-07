@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { registerAuthRoutes } from './modules/auth/auth.routes';
 import { registerRestaurantRoutes } from './modules/restaurants/restaurants.routes';
 import { registerMenuRoutes } from './modules/menu/menu.routes';
+import { registerCartRoutes } from './modules/cart/cart.routes';
 import { pool } from './db/client';
 
 const app = express();
@@ -20,13 +21,9 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }));
 
 app.use((req, res, next) => {
-  if (allowedOrigins.length === 0 || !['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
-    return next();
-  }
-
+  if (allowedOrigins.length === 0 || !['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
   const origin = req.get('Origin');
   if (!origin || allowedOrigins.includes(origin)) return next();
-
   return res.status(403).json({ error: { code: 'FORBIDDEN_ORIGIN', message: 'Request origin is not allowed.' } });
 });
 
@@ -42,6 +39,7 @@ app.get('/health', async (_req, res, next) => {
 registerAuthRoutes(app);
 registerRestaurantRoutes(app);
 registerMenuRoutes(app);
+registerCartRoutes(app);
 
 app.use((_req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found.' } });
