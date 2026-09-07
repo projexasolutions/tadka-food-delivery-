@@ -16,10 +16,12 @@ import { pool } from './db/client';
 const app = express();
 const port = Number(process.env.API_PORT ?? 4000);
 const allowedOrigins = process.env.WEB_ORIGIN?.split(',').map((origin) => origin.trim()).filter(Boolean) ?? [];
+const corsOrigin = allowedOrigins.length > 0 ? allowedOrigins : process.env.NODE_ENV === 'production' ? false : true;
 
 app.disable('x-powered-by');
+app.set('trust proxy', process.env.TRUST_PROXY === 'true');
 app.use(helmet());
-app.use(cors({ origin: allowedOrigins.length > 0 ? allowedOrigins : true, credentials: true }));
+app.use(cors({ origin: corsOrigin, credentials: true }));
 
 app.post('/v1/payments/razorpay/webhook', express.raw({ type: 'application/json', limit: '1mb' }), async (req, res, next) => {
   try {
@@ -34,7 +36,6 @@ app.post('/v1/payments/razorpay/webhook', express.raw({ type: 'application/json'
 });
 
 app.use(express.json({ limit: '1mb' }));
-
 app.use((req, res, next) => {
   if (allowedOrigins.length === 0 || !['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
   const origin = req.get('Origin');
@@ -43,8 +44,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/health', async (_req, res, next) => {
-  try { await pool.query('select 1'); res.json({ status: 'ok', service: 'tadka-api', database: 'ok' }); }
-  catch (error) { next(error); }
+  try { await pool.query('select 1'); res.json({ status: 'ok', service: 'tadka-api', database: 'ok' }); } catch (error) { next(error); }
 });
 
 registerAuthRoutes(app);
@@ -63,7 +63,6 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
 });
 
 const server = app.listen(port, () => console.log(`Tadka API listening on :${port}`));
-
 async function shutdown(signal: string) {
   console.log(`${signal} received; shutting down.`);
   server.close(async () => { await pool.end(); process.exit(0); });
