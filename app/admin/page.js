@@ -2,69 +2,26 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
-const TABLES = [
-  ['profiles', 'USERS', 'Registered accounts'],
-  ['restaurants', 'RESTAURANTS', 'Partner locations'],
-  ['orders', 'ORDERS', 'Total orders'],
-  ['menu_items', 'MENU ITEMS', 'Published catalog'],
-];
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function AdminPage() {
   const [stats, setStats] = useState(null);
   const [message, setMessage] = useState('Loading…');
 
   useEffect(() => {
-    let mounted = true;
+    const controller = new AbortController();
+    fetch(`${apiUrl}/v1/admin/dashboard`, { credentials: 'include', cache: 'no-store', signal: controller.signal })
+      .then(async (response) => {
+        const body = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(body?.error?.message || 'Unable to load admin dashboard.');
+        return body.data;
+      })
+      .then((data) => { setStats(data); setMessage(''); })
+      .catch((error) => { if (error.name !== 'AbortError') setMessage(error.message); });
 
-    async function loadDashboard() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setMessage('Login required');
-        return;
-      }
-
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError || profile?.role !== 'admin') {
-        setMessage('Admin access required.');
-        return;
-      }
-
-      const results = await Promise.all(
-        TABLES.map(async ([table]) => {
-          const { count, error } = await supabase
-            .from(table)
-            .select('id', { count: 'exact', head: true });
-
-          return [table, error ? 0 : count || 0];
-        }),
-      );
-
-      if (!mounted) return;
-
-      setStats(Object.fromEntries(results));
-      setMessage('');
-    }
-
-    loadDashboard();
-
-    return () => {
-      mounted = false;
-    };
+    return () => controller.abort();
   }, []);
-
-  const restaurantCount = stats?.restaurants || 0;
-  const orderCount = stats?.orders || 0;
-  const menuCount = stats?.menu_items || 0;
 
   return (
     <main className="admin-shell">
@@ -76,9 +33,7 @@ export default function AdminPage() {
         </div>
         <div className="admin-top-actions">
           <span className="admin-date">Live platform data</span>
-          <Link href="/" className="btn secondary">
-            Customer view
-          </Link>
+          <Link href="/" className="btn secondary">Customer view</Link>
         </div>
       </div>
 
@@ -87,61 +42,29 @@ export default function AdminPage() {
       {stats && (
         <>
           <section className="admin-kpis">
-            {TABLES.map(([table, label, description]) => (
-              <div className="admin-kpi" key={table}>
-                <span>{label}</span>
-                <b>{stats[table]}</b>
-                <small>{description}</small>
-              </div>
-            ))}
+            <div className="admin-kpi"><span>USERS</span><b>{stats.users}</b><small>Registered accounts</small></div>
+            <div className="admin-kpi"><span>RESTAURANTS</span><b>{stats.restaurants}</b><small>Partner locations</small></div>
+            <div className="admin-kpi"><span>ORDERS</span><b>{stats.orders}</b><small>Total orders</small></div>
+            <div className="admin-kpi"><span>PAID REVENUE</span><b>₹{stats.paidRevenue.toLocaleString('en-IN')}</b><small>Captured payments</small></div>
           </section>
 
           <section className="admin-grid">
             <div className="admin-card admin-main-card">
               <div className="admin-card-head">
-                <div>
-                  <span className="eyebrow">CONTROL CENTER</span>
-                  <h2>Platform operations</h2>
-                </div>
+                <div><span className="eyebrow">CONTROL CENTER</span><h2>Platform operations</h2></div>
                 <span className="admin-status">Healthy</span>
               </div>
-
               <div className="admin-links">
-                <Link href="/admin/users">
-                  <b>Users</b>
-                  <small>Accounts and roles</small>
-                </Link>
-                <Link href="/admin/restaurants">
-                  <b>Restaurants</b>
-                  <small>Partners and approvals</small>
-                </Link>
-                <Link href="/admin/operations">
-                  <b>Operations</b>
-                  <small>Order and platform operations</small>
-                </Link>
-                <Link href="/admin/categories">
-                  <b>Categories</b>
-                  <small>Restaurant catalog structure</small>
-                </Link>
+                <Link href="/admin/users"><b>Users</b><small>Accounts and roles</small></Link>
+                <Link href="/admin/restaurants"><b>Restaurants</b><small>Partners and availability</small></Link>
+                <Link href="/admin/operations"><b>Operations</b><small>Orders and payments</small></Link>
+                <Link href="/admin/categories"><b>Categories</b><small>Restaurant catalog structure</small></Link>
               </div>
             </div>
-
             <div className="admin-card admin-side-card">
               <span className="eyebrow">QUICK VIEW</span>
-              <h2>Today at a glance</h2>
-              <div className="admin-summary">
-                <div>
-                  <span>Orders per restaurant</span>
-                  <b>{restaurantCount ? (orderCount / restaurantCount).toFixed(1) : '0.0'}</b>
-                </div>
-                <div>
-                  <span>Menu depth</span>
-                  <b>{restaurantCount ? (menuCount / restaurantCount).toFixed(1) : '0.0'}</b>
-                </div>
-              </div>
-              <p className="muted">
-                Use the operations areas to review platform activity without clutter.
-              </p>
+              <h2>Platform health</h2>
+              <p className="muted">Admin actions are authenticated by the server session and authorized by the database role.</p>
             </div>
           </section>
         </>
