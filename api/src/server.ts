@@ -8,6 +8,7 @@ import { registerMenuRoutes } from './modules/menu/menu.routes';
 import { registerCartRoutes } from './modules/cart/cart.routes';
 import { registerOrderRoutes } from './modules/orders/orders.routes';
 import { registerRazorpayRoutes } from './modules/payments/razorpay.routes';
+import { handleRazorpayWebhook, PaymentError } from './modules/payments/razorpay.service';
 import { pool } from './db/client';
 
 const app = express();
@@ -18,8 +19,18 @@ app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors({ origin: allowedOrigins.length > 0 ? allowedOrigins : true, credentials: true }));
 
-// Razorpay signs the exact raw request body. This route must be registered before express.json().
-app.post('/v1/payments/razorpay/webhook', express.raw({ type: 'application/json', limit: '1mb' }));
+app.post('/v1/payments/razorpay/webhook', express.raw({ type: 'application/json', limit: '1mb' }), async (req, res, next) => {
+  try {
+    const signature = req.get('x-razorpay-signature');
+    if (!signature || !Buffer.isBuffer(req.body)) return res.status(400).json({ error: { code: 'INVALID_WEBHOOK', message: 'Invalid webhook request.' } });
+    await handleRazorpayWebhook(req.body, signature);
+    return res.status(200).json({ received: true });
+  } catch (error) {
+    if (error instanceof PaymentError) return res.status(400).json({ error: { code: 'INVALID_WEBHOOK', message: error.message } });
+    return next(error);
+  }
+});
+
 app.use(express.json({ limit: '1mb' }));
 
 app.use((req, res, next) => {
