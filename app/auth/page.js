@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "../../lib/supabase";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export default function AuthPage() {
-  const supabase = createClient();
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,35 +18,51 @@ export default function AuthPage() {
     setLoading(true);
     setMessage("");
 
-    if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: name } }
+    try {
+      const endpoint = mode === "signup" ? "/v1/auth/signup" : "/v1/auth/login";
+      const body = mode === "signup" ? { fullName: name, email, password } : { email, password };
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
       });
-      setMessage(error ? error.message : "Account created. Check your email if confirmation is enabled.");
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      setMessage(error ? error.message : "Login successful. You can continue ordering.");
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        setMessage(payload?.error?.message || "Unable to complete the request.");
+        return;
+      }
+
+      setMessage(mode === "signup" ? "Account created. You are now signed in." : "Login successful. You can continue ordering.");
+    } catch {
+      setMessage("Unable to reach the server. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  }
+
+  function toggleMode() {
+    setMode(mode === "login" ? "signup" : "login");
+    setMessage("");
   }
 
   return (
     <main className="page narrow">
-      <header className="nav"><Link className="brand" href="/">🍛 Tadka</Link><Link href="/cart">Cart →</Link></header>
+      <header className="nav"><Link className="brand" href="/">🌶️ Tadka</Link><Link href="/cart">Cart →</Link></header>
       <div className="card authCard">
         <span className="eyebrow">{mode === "login" ? "Welcome back" : "Create account"}</span>
         <h1>{mode === "login" ? "Login" : "Sign up"}</h1>
         <form onSubmit={submit}>
-          {mode === "signup" && <label>Full name<input value={name} onChange={e=>setName(e.target.value)} required /></label>}
-          <label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
-          <label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength={6} required /></label>
+          {mode === "signup" && <label>Full name<input value={name} onChange={e => setName(e.target.value)} required /></label>}
+          <label>Email<input type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>
+          <label>Password<input type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={8} required /></label>
           <button className="primary full" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Login" : "Create account"}</button>
         </form>
         {message && <p className="notice">{message}</p>}
         <Link className="mutedLink" href="/auth/reset">Forgot password?</Link>
-        <button className="linkButton" onClick={() => {setMode(mode==="login"?"signup":"login");setMessage("");}}>
+        <button className="linkButton" type="button" onClick={toggleMode}>
           {mode === "login" ? "New here? Create an account" : "Already have an account? Login"}
         </button>
       </div>
