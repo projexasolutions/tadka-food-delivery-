@@ -1,4 +1,4 @@
-import type { Express } from 'express';
+import type { Express, Response } from 'express';
 import { loginSchema, signupSchema } from './auth.schema';
 import {
   AuthConflictError,
@@ -10,7 +10,7 @@ import {
 } from './auth.service';
 import { clearSessionCookie, readSessionId, setSessionCookie } from './auth.session';
 
-function setCookie(res: Parameters<Express['get']>[1] extends never ? never : any, value: string) {
+function setCookie(res: Response, value: string) {
   res.setHeader('Set-Cookie', value);
 }
 
