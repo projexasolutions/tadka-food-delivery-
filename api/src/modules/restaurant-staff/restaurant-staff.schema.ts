@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 const uuidParams = z.object({ id: z.string().uuid() });
-
 export const itemIdParamsSchema = uuidParams;
 export const orderIdParamsSchema = uuidParams;
 export const categoryIdParamsSchema = uuidParams;
@@ -15,16 +14,11 @@ export const createMenuItemSchema = z.object({
   isAvailable: z.boolean().optional().default(true),
 });
 
-export const updateMenuItemSchema = createMenuItemSchema.partial().refine((value) => Object.keys(value).length > 0, {
-  message: 'At least one menu item field is required.',
-});
-
+export const updateMenuItemSchema = createMenuItemSchema.partial().refine((value) => Object.keys(value).length > 0, { message: 'At least one menu item field is required.' });
 export const createStaffCategorySchema = z.object({ name: z.string().trim().min(2).max(80) });
 export const updateStaffCategorySchema = createStaffCategorySchema;
-
-export const updateStaffOrderStatusSchema = z.object({
-  status: z.enum(['confirmed', 'preparing', 'ready', 'cancelled']),
-});
+export const updateStaffRestaurantSchema = z.object({ isOpen: z.boolean() });
+export const updateStaffOrderStatusSchema = z.object({ status: z.enum(['confirmed', 'preparing', 'ready', 'cancelled']) });
 
 export type CreateMenuItemInput = z.infer<typeof createMenuItemSchema>;
 export type UpdateMenuItemInput = z.infer<typeof updateMenuItemSchema>;
