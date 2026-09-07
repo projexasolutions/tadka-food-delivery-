@@ -15,7 +15,9 @@ export const createMenuItemSchema = z.object({
   isAvailable: z.boolean().optional().default(true),
 });
 
-export const updateMenuItemSchema = createMenuItemSchema.partial();
+export const updateMenuItemSchema = createMenuItemSchema.partial().refine((value) => Object.keys(value).length > 0, {
+  message: 'At least one menu item field is required.',
+});
 
 export const createStaffCategorySchema = z.object({ name: z.string().trim().min(2).max(80) });
 export const updateStaffCategorySchema = createStaffCategorySchema;
