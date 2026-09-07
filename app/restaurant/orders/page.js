@@ -1,9 +1,63 @@
 'use client';
-import {useEffect,useState} from 'react';
-import RestaurantShell from '@/components/RestaurantShell'; import {supabase} from '@/lib/supabase';
-const next={pending:'confirmed',confirmed:'preparing',preparing:'ready',ready:'picked_up',picked_up:'on_the_way',on_the_way:'delivered'}; const pretty=s=>String(s||'').replaceAll('_',' ');
-export default function Orders(){const [orders,setOrders]=useState([]),[filter,setFilter]=useState('all'),[loading,setLoading]=useState(true),[msg,setMsg]=useState('');
- async function load(){setLoading(true);const {data:{user}}=await supabase.auth.getUser();if(!user){setMsg('Login required');setLoading(false);return}const r=await supabase.from('restaurants').select('id').eq('owner_id',user.id).maybeSingle();if(!r.data){setMsg('Restaurant owner access required.');setLoading(false);return}const q=await supabase.from('orders').select('id,status,subtotal,delivery_fee,created_at,order_items(id,name,quantity,price)').eq('restaurant_id',r.data.id).order('created_at',{ascending:false});if(q.error)setMsg(q.error.message);setOrders(q.data||[]);setLoading(false)} useEffect(()=>{load()},[]);
- async function advance(o){const n=next[o.status];if(!n)return;const {error}=await supabase.rpc('advance_order_status',{p_order_id:o.id,p_next_status:n});if(error)setMsg(error.message);else setOrders(xs=>xs.map(x=>x.id===o.id?{...x,status:n}:x))}
- const rows=filter==='all'?orders:orders.filter(o=>o.status===filter);
- return <RestaurantShell title="LIVE ORDER OPERATIONS" subtitle="Live Orders & Kitchen Queue"><div className="orders-page-toolbar"><div><b>{orders.filter(o=>!['delivered','cancelled'].includes(o.status)).length} active orders</b><span> • Live kitchen queue</span></div><button className="partner-btn secondary" onClick={load}><span className="material-symbols-outlined">refresh</span> Refresh</button></div><div className="order-tabs">{['all','pending','confirmed','preparing','ready','picked_up','on_the_way','delivered'].map(s=><button key={s} className={filter===s?'active':''} onClick={()=>setFilter(s)}>{s==='all'?'All':pretty(s)} <b>{s==='all'?orders.length:orders.filter(o=>o.status===s).length}</b></button>)}</div>{msg&&<div className="partner-alert">{msg}<button onClick={()=>setMsg('')}>×</button></div>}{loading?<div className="partner-panel">Loading orders…</div>:<div className="kitchen-grid">{rows.map(o=><article className="kitchen-card" key={o.id}><div className="kitchen-card-top"><span className="order-id">#{o.id.slice(0,8).toUpperCase()}</span><span className={'status '+o.status}>{pretty(o.status)}</span></div><small>{new Date(o.created_at).toLocaleString()}</small><div className="kitchen-items">{(o.order_items||[]).map(i=><div key={i.id}><span>{i.name} × {i.quantity}</span><b>₹{Number(i.price*i.quantity).toFixed(0)}</b></div>)}</div><div className="kitchen-total"><b>₹{(Number(o.subtotal||0)+Number(o.delivery_fee||0)).toFixed(0)}</b>{next[o.status]?<button className="status-action" onClick={()=>advance(o)}>Mark {pretty(next[o.status])}</button>:<span className="done-mark"><span className="material-symbols-outlined">check_circle</span> Complete</span>}</div></article>)}{!rows.length&&<div className="partner-panel partner-empty compact"><span className="material-symbols-outlined">inbox</span><b>No orders in this queue</b><p>Try another status filter.</p></div>}</div>}</RestaurantShell>}
+
+import { useEffect, useMemo, useState } from 'react';
+import RestaurantShell from '@/components/RestaurantShell';
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const statuses = ['all', 'pending', 'confirmed', 'preparing', 'ready', 'cancelled', 'delivered'];
+const nextStatus = { pending: 'confirmed', confirmed: 'preparing', preparing: 'ready' };
+const pretty = (status) => String(status || '').replaceAll('_', ' ');
+
+async function api(path, options = {}) {
+  const response = await fetch(`${apiUrl}${path}`, { ...options, credentials: 'include', cache: 'no-store', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
+  const body = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(body?.error?.message || 'Request failed.');
+  return body?.data;
+}
+
+export default function Orders() {
+  const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [msg, setMsg] = useState('');
+
+  async function load() {
+    setLoading(true);
+    try { setOrders((await api('/v1/restaurant/orders')) || []); setMsg(''); }
+    catch (error) { setMsg(error.message); }
+    finally { setLoading(false); }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function advance(order) {
+    const status = nextStatus[order.status];
+    if (!status) return;
+    try {
+      const updated = await api(`/v1/restaurant/orders/${order.id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+      setOrders((current) => current.map((item) => item.id === order.id ? { ...item, ...updated } : item));
+    } catch (error) { setMsg(error.message); }
+  }
+
+  async function cancel(order) {
+    if (!window.confirm(`Cancel order #${order.id.slice(0, 8).toUpperCase()}?`)) return;
+    try {
+      const updated = await api(`/v1/restaurant/orders/${order.id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'cancelled' }) });
+      setOrders((current) => current.map((item) => item.id === order.id ? { ...item, ...updated } : item));
+    } catch (error) { setMsg(error.message); }
+  }
+
+  const rows = useMemo(() => filter === 'all' ? orders : orders.filter((order) => order.status === filter), [orders, filter]);
+
+  return <RestaurantShell title="LIVE ORDER OPERATIONS" subtitle="Live Orders & Kitchen Queue">
+    <div className="orders-page-toolbar"><div><b>{orders.filter((o) => !['delivered', 'cancelled'].includes(o.status)).length} active orders</b><span> • Restaurant kitchen queue</span></div><button className="partner-btn secondary" onClick={load}><span className="material-symbols-outlined">refresh</span> Refresh</button></div>
+    <div className="order-tabs">{statuses.map((status) => <button key={status} className={filter === status ? 'active' : ''} onClick={() => setFilter(status)}>{status === 'all' ? 'All' : pretty(status)} <b>{status === 'all' ? orders.length : orders.filter((o) => o.status === status).length}</b></button>)}</div>
+    {msg && <div className="partner-alert">{msg}<button onClick={() => setMsg('')}>×</button></div>}
+    {loading ? <div className="partner-panel">Loading orders…</div> : <div className="kitchen-grid">{rows.map((order) => <article className="kitchen-card" key={order.id}>
+      <div className="kitchen-card-top"><span className="order-id">#{order.id.slice(0, 8).toUpperCase()}</span><span className={`status ${order.status}`}>{pretty(order.status)}</span></div>
+      <small>{new Date(order.createdAt).toLocaleString()}</small>
+      <div className="kitchen-items"><div><span>Order total</span><b>₹{Number(order.total).toFixed(0)}</b></div><div><span>Payment</span><b>{pretty(order.paymentMethod)} · {pretty(order.paymentStatus)}</b></div><div><span>Delivery</span><b>{order.deliveryAddress}</b></div></div>
+      <div className="kitchen-total">{nextStatus[order.status] ? <button className="status-action" onClick={() => advance(order)}>Mark {pretty(nextStatus[order.status])}</button> : <span className="done-mark"><span className="material-symbols-outlined">{order.status === 'cancelled' ? 'cancel' : 'check_circle'}</span>{order.status === 'ready' ? 'Awaiting pickup' : order.status === 'cancelled' ? 'Cancelled' : 'Complete'}</span>}{['pending', 'confirmed', 'preparing'].includes(order.status) && <button className="status-action" onClick={() => cancel(order)}>Cancel</button>}</div>
+    </article>)}{!rows.length && <div className="partner-panel partner-empty compact"><span className="material-symbols-outlined">inbox</span><b>No orders in this queue</b><p>Try another status filter.</p></div>}</div>}
+  </RestaurantShell>;
+}
