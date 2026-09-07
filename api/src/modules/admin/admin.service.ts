@@ -12,21 +12,21 @@ const allowedTransitions: Record<string, string[]> = {
 
 export async function getDashboard() {
   const [userCount, restaurantCount, orderCount, paidRevenue] = await Promise.all([
-    db.select({ count: sql<number>`count(*)` }).from(users),
-    db.select({ count: sql<number>`count(*)` }).from(restaurants),
-    db.select({ count: sql<number>`count(*)` }).from(orders),
-    db.select({ total: sql<number>`coalesce(sum(${orders.total}), 0)` }).from(orders).where(eq(orders.paymentStatus, 'paid')),
+    db.select({ count: sql<number>`count(*)` }).from(users), db.select({ count: sql<number>`count(*)` }).from(restaurants),
+    db.select({ count: sql<number>`count(*)` }).from(orders), db.select({ total: sql<number>`coalesce(sum(${orders.total}), 0)` }).from(orders).where(eq(orders.paymentStatus, 'paid')),
   ]);
   return { users: Number(userCount[0]?.count ?? 0), restaurants: Number(restaurantCount[0]?.count ?? 0), orders: Number(orderCount[0]?.count ?? 0), paidRevenue: Number(paidRevenue[0]?.total ?? 0) };
 }
 
 export async function listUsers() {
-  return db.select({ id: users.id, email: users.email, fullName: users.fullName, role: users.role, createdAt: users.createdAt }).from(users).orderBy(desc(users.createdAt));
+  return db.select({ id: users.id, email: users.email, fullName: users.fullName, role: users.role, restaurantId: users.restaurantId, createdAt: users.createdAt }).from(users).orderBy(desc(users.createdAt));
 }
 
 export async function updateUserRole(adminUserId: string, userId: string, input: UpdateUserRoleInput) {
   if (adminUserId === userId && input.role !== 'admin') throw new AdminError('You cannot remove your own admin access.');
-  const [updated] = await db.update(users).set({ role: input.role }).where(eq(users.id, userId)).returning({ id: users.id, email: users.email, fullName: users.fullName, role: users.role });
+  if (input.role === 'restaurant_staff' && !input.restaurantId) throw new AdminError('A restaurant is required for restaurant staff.');
+  const [updated] = await db.update(users).set({ role: input.role, restaurantId: input.role === 'restaurant_staff' ? input.restaurantId : null })
+    .where(eq(users.id, userId)).returning({ id: users.id, email: users.email, fullName: users.fullName, role: users.role, restaurantId: users.restaurantId });
   if (!updated) throw new AdminError('User not found.');
   return updated;
 }
