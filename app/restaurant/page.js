@@ -3,15 +3,17 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import RestaurantShell from '@/components/RestaurantShell';
-import { supabase } from '@/lib/supabase';
-import {
-  ORDER_STATUS_FLOW,
-  formatOrderStatus,
-  getOwnedRestaurant,
-} from '@/lib/restaurant';
 
-const HOURLY_LOAD = [18, 28, 42, 33, 16, 26, 48, 56, 45, 31, 21];
-const HOURLY_LABELS = ['11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '6 PM', '7 PM', '8 PM', '9 PM', '11 PM'];
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const pretty = (status) => String(status || '').replaceAll('_', ' ');
+const nextStatus = { pending: 'confirmed', confirmed: 'preparing', preparing: 'ready' };
+
+async function api(path, options = {}) {
+  const response = await fetch(`${apiUrl}${path}`, { ...options, credentials: 'include', cache: 'no-store', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
+  const body = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(body?.error?.message || 'Request failed.');
+  return body?.data;
+}
 
 export default function RestaurantDashboard() {
   const [restaurant, setRestaurant] = useState(null);
@@ -21,226 +23,64 @@ export default function RestaurantDashboard() {
   const [message, setMessage] = useState('');
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setMessage('');
-
+    setLoading(true); setMessage('');
     try {
-      const ownedRestaurant = await getOwnedRestaurant('*');
-      if (!ownedRestaurant) {
-        setRestaurant(null);
-        return;
-      }
-
-      const [ordersResult, itemsResult] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('id,status,subtotal,delivery_fee,created_at,order_items(id,name,quantity,price)')
-          .eq('restaurant_id', ownedRestaurant.id)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('menu_items')
-          .select('id,name,price,is_available,category_id')
-          .eq('restaurant_id', ownedRestaurant.id)
-          .order('created_at', { ascending: false }),
-      ]);
-
-      if (ordersResult.error) throw ordersResult.error;
-      if (itemsResult.error) throw itemsResult.error;
-
-      setRestaurant(ownedRestaurant);
-      setOrders(ordersResult.data || []);
-      setItems(itemsResult.data || []);
-    } catch (error) {
-      setMessage(error.message || 'Unable to load the restaurant dashboard.');
-    } finally {
-      setLoading(false);
-    }
+      const [restaurantData, orderData, menuData] = await Promise.all([api('/v1/restaurant'), api('/v1/restaurant/orders'), api('/v1/restaurant/menu')]);
+      setRestaurant(restaurantData || null); setOrders(orderData || []); setItems(menuData?.items || []);
+    } catch (error) { setMessage(error.message || 'Unable to load the restaurant dashboard.'); }
+    finally { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
-  async function advance(order) {
-    const nextStatus = ORDER_STATUS_FLOW[order.status];
-    if (!nextStatus) return;
-
-    setMessage('');
-    const { error } = await supabase.rpc('advance_order_status', {
-      p_order_id: order.id,
-      p_next_status: nextStatus,
-    });
-
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setOrders((current) =>\n      current.map((item) => item.id === order.id ? { ...item, status: nextStatus } : item),
-    );
+  async function updateStatus(order) {
+    const status = nextStatus[order.status];
+    if (!status) return;
+    try {
+      const updated = await api(`/v1/restaurant/orders/${order.id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+      setOrders((current) => current.map((item) => item.id === order.id ? { ...item, ...updated } : item));
+    } catch (error) { setMessage(error.message); }
   }
 
   async function toggleKitchen() {
     if (!restaurant) return;
-
-    const nextOpenState = !restaurant.is_open;
-    const { error } = await supabase
-      .from('restaurants')
-      .update({ is_open: nextOpenState })
-      .eq('id', restaurant.id);
-
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setRestaurant((current) => ({ ...current, is_open: nextOpenState }));
+    try {
+      setRestaurant(await api('/v1/restaurant', { method: 'PATCH', body: JSON.stringify({ isOpen: !restaurant.isOpen }) }));
+    } catch (error) { setMessage(error.message); }
   }
 
-  const activeOrders = useMemo(
-    () => orders.filter((order) => !['delivered', 'cancelled'].includes(order.status)),
-    [orders],
-  );
-  const pendingOrders = useMemo(() => orders.filter((order) => order.status === 'pending'), [orders]);
-  const preparingOrders = useMemo(() => orders.filter((order) => order.status === 'preparing'), [orders]);
-  const readyOrders = useMemo(() => orders.filter((order) => order.status === 'ready'), [orders]);
-  const deliveredOrders = useMemo(() => orders.filter((order) => order.status === 'delivered'), [orders]);
-  const gross = deliveredOrders.reduce(
-    (total, order) => total + Number(order.subtotal || 0) + Number(order.delivery_fee || 0),
-    0,
-  );
-  const averageOrder = orders.length ? gross / orders.length : 0;
-  const breakdown = useMemo(
-    () => ['pending', 'preparing', 'ready', 'picked_up', 'delivered'].map((status) => [
-      status,
-      orders.filter((order) => order.status === status).length,
-    ]),
-    [orders],
-  );
+  const activeOrders = useMemo(() => orders.filter((order) => !['delivered', 'cancelled'].includes(order.status)), [orders]);
+  const pendingOrders = orders.filter((order) => order.status === 'pending');
+  const preparingOrders = orders.filter((order) => order.status === 'preparing');
+  const readyOrders = orders.filter((order) => order.status === 'ready');
+  const deliveredOrders = orders.filter((order) => order.status === 'delivered');
+  const revenue = deliveredOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const averageOrder = deliveredOrders.length ? revenue / deliveredOrders.length : 0;
 
-  if (loading) {
-    return (
-      <RestaurantShell title="RESTAURANT PARTNER" subtitle="Loading your command center…">
-        <div className="partner-skeleton-grid"><div /><div /><div /><div /></div>
-      </RestaurantShell>
-    );
-  }
+  if (loading) return <RestaurantShell title="RESTAURANT PARTNER" subtitle="Loading your command center…"><div className="partner-skeleton-grid"><div /><div /><div /><div /></div></RestaurantShell>;
+  if (!restaurant) return <RestaurantShell title="RESTAURANT PARTNER" subtitle="Restaurant access required"><div className="partner-empty"><span className="metric-label">RESTAURANT</span><h2>{message || 'No restaurant access'}</h2><p>Your account must be assigned to an approved restaurant by an administrator.</p><Link className="partner-btn primary" href="/account">Back to account</Link></div></RestaurantShell>;
 
-  if (!restaurant) {
-    return (
-      <RestaurantShell title="RESTAURANT PARTNER" subtitle="Restaurant access required">
-        <div className="partner-empty">
-          <span className="metric-label">RESTAURANT</span>
-          <h2>{message || 'No restaurant found'}</h2>
-          <p>Register a restaurant and wait for admin approval before managing orders.</p>
-          <Link className="partner-btn primary" href="/restaurant/onboard">Register restaurant</Link>
-        </div>
-      </RestaurantShell>
-    );
-  }
-
-  return (
-    <RestaurantShell title="RESTAURANT PARTNER" subtitle={`Good morning, ${restaurant.name}`}>
-      {message && (
-        <div className="partner-alert">
-          <span className="metric-label">NOTICE</span>
-          {message}
-          <button type="button" onClick={() => setMessage('')} aria-label="Dismiss notice">×</button>
-        </div>
-      )}
-
-      <section className="partner-hero">
-        <div>
-          <span className="rush-badge"><i /> LUNCH RUSH ACTIVE</span>
-          <p>Here’s your kitchen overview, live order queue and delivery dispatch performance for today.</p>
-        </div>
-        <button type="button" className={`accept-toggle ${restaurant.is_open ? 'on' : 'off'}`} onClick={toggleKitchen}>
-          <i /> {restaurant.is_open ? 'OPEN • ACCEPTING ORDERS' : 'CLOSED • PAUSED'}
-          <span>{restaurant.is_open ? 'Pause Kitchen' : 'Open Kitchen'}</span>
-        </button>
-      </section>
-
-      <div className="partner-metrics">
-        <Metric title="Today’s Orders" value={orders.length} sub="Live order count" />
-        <Metric title="Pending Action" value={String(pendingOrders.length).padStart(2, '0')} sub="Needs attention now" urgent />
-        <Metric title="In Kitchen" value={String(preparingOrders.length).padStart(2, '0')} sub="Preparing" />
-        <Metric title="Ready for Dispatch" value={String(readyOrders.length).padStart(2, '0')} sub="Waiting for pickup" />
-        <Metric title="Delivered Gross" value={`₹${gross.toFixed(0)}`} sub="Completed orders" />
-        <Metric title="Avg Order" value={`₹${averageOrder.toFixed(0)}`} sub="Per ticket" />
+  return <RestaurantShell title="RESTAURANT PARTNER" subtitle={`Welcome back, ${restaurant.name}`}>
+    {message && <div className="partner-alert"><span className="metric-label">NOTICE</span>{message}<button type="button" onClick={() => setMessage('')} aria-label="Dismiss notice">×</button></div>}
+    <section className="partner-hero"><div><span className="rush-badge"><i /> KITCHEN STATUS</span><p>Monitor your live order queue and keep menu availability in sync with the kitchen.</p></div><button type="button" className={`accept-toggle ${restaurant.isOpen ? 'on' : 'off'}`} onClick={toggleKitchen}><i /> {restaurant.isOpen ? 'OPEN • ACCEPTING ORDERS' : 'CLOSED • PAUSED'}<span>{restaurant.isOpen ? 'Pause Kitchen' : 'Open Kitchen'}</span></button></section>
+    <div className="partner-metrics">
+      <Metric title="Orders" value={orders.length} sub="Latest 50 orders" />
+      <Metric title="Pending Action" value={String(pendingOrders.length).padStart(2, '0')} sub="Needs attention" urgent />
+      <Metric title="In Kitchen" value={String(preparingOrders.length).padStart(2, '0')} sub="Preparing" />
+      <Metric title="Ready" value={String(readyOrders.length).padStart(2, '0')} sub="Awaiting pickup" />
+      <Metric title="Delivered Revenue" value={`₹${revenue.toFixed(0)}`} sub="Delivered orders" />
+      <Metric title="Avg Delivered" value={`₹${averageOrder.toFixed(0)}`} sub="Per completed order" />
+    </div>
+    <section className="partner-panel orders-panel"><div className="panel-head"><div><h2>Live Incoming Orders</h2><p>{activeOrders.length} active orders in the kitchen pipeline.</p></div><button type="button" className="partner-btn secondary" onClick={() => void load()}>Refresh</button></div>
+      <div className="order-table"><div className="order-table-head"><span>ORDER</span><span>TIME</span><span>TOTAL</span><span>PAYMENT</span><span>STATUS</span><span>ACTION</span></div>
+        {orders.slice(0, 8).map((order) => <div className="order-line" key={order.id}><b>#{order.id.slice(0, 8).toUpperCase()}</b><span>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span><strong>₹{Number(order.total).toFixed(0)}</strong><span>{pretty(order.paymentMethod)} · {pretty(order.paymentStatus)}</span><span className={`status ${order.status}`}>{pretty(order.status)}</span>{nextStatus[order.status] ? <button type="button" className="status-action" onClick={() => void updateStatus(order)}>Mark {pretty(nextStatus[order.status])}</button> : <Link className="view-action" href="/restaurant/orders">View</Link>}</div>)}
+        {!orders.length && <div className="partner-empty compact"><span className="metric-label">ORDERS</span><b>No orders yet</b><p>New customer orders will appear here.</p></div>}
       </div>
-
-      <div className="partner-two-col">
-        <section className="partner-panel chart-panel">
-          <div className="panel-head">
-            <div><h2>Hourly Kitchen Load &amp; Volume</h2><p>Order volume across today’s service window.</p></div>
-            <span className="metric-label">TODAY</span>
-          </div>
-          <div className="fake-chart" aria-label="Hourly order volume chart">
-            {HOURLY_LOAD.map((height, index) => (
-              <div className="chart-bar-wrap" key={HOURLY_LABELS[index]}>
-                <div className="chart-bar" style={{ height: `${height}%` }} />
-                <small>{HOURLY_LABELS[index]}</small>
-              </div>
-            ))}
-          </div>
-          <div className="chart-foot">
-            <div><small>Current prep pace</small><b>{preparingOrders.length ? '12.4' : '—'} min</b></div>
-            <div><small>Demand capacity</small><b>{Math.min(100, activeOrders.length * 8)}% Utilized</b></div>
-            <div><small>Avg dispatch</small><b>3.8 min</b></div>
-          </div>
-        </section>
-
-        <section className="partner-panel breakdown">
-          <div className="panel-head">
-            <div><h2>Order Breakdown</h2><p>Live lifecycle pipeline</p></div>
-            <button type="button" className="icon-action" onClick={load} aria-label="Refresh orders">Refresh</button>
-          </div>
-          <div className="donut"><div><b>{orders.length}</b><span>TOTAL ORDERS</span></div></div>
-          <div className="legend">
-            {breakdown.map(([status, count]) => (
-              <div key={status}><i className={`dot ${status}`} /><span>{formatOrderStatus(status)}</span><b>{String(count).padStart(2, '0')}</b></div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <section className="partner-panel orders-panel">
-        <div className="panel-head">
-          <div><h2>Live Incoming &amp; High-Priority Orders</h2><p>{activeOrders.length} active orders • advance kitchen status as each order moves forward.</p></div>
-          <button type="button" className="partner-btn secondary" onClick={load}>Refresh</button>
-        </div>
-        <div className="order-table">
-          <div className="order-table-head"><span>ORDER</span><span>TIME</span><span>ITEMS</span><span>TOTAL</span><span>STATUS</span><span>ACTION</span></div>
-          {orders.slice(0, 8).map((order) => (
-            <div className="order-line" key={order.id}>
-              <b>#{order.id.slice(0, 8).toUpperCase()}</b>
-              <span>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-              <span>{(order.order_items || []).map((item) => `${item.name} × ${item.quantity}`).join(', ') || 'No items'}</span>
-              <strong>₹{(Number(order.subtotal || 0) + Number(order.delivery_fee || 0)).toFixed(0)}</strong>
-              <span className={`status ${order.status}`}>{formatOrderStatus(order.status)}</span>
-              {ORDER_STATUS_FLOW[order.status] ? (
-                <button type="button" className="status-action" onClick={() => advance(order)}>Mark {formatOrderStatus(ORDER_STATUS_FLOW[order.status])}</button>
-              ) : <Link className="view-action" href="/restaurant/orders">View</Link>}
-            </div>
-          ))}
-          {!orders.length && <div className="partner-empty compact"><span className="metric-label">ORDERS</span><b>No orders yet</b><p>New customer orders will appear here.</p></div>}
-        </div>
-        <div className="table-footer"><span>Showing {Math.min(orders.length, 8)} of {orders.length} orders</span><Link href="/restaurant/orders">View All Live Orders →</Link></div>
-      </section>
-
-      <section className="partner-insights">
-        <Insight title="Menu catalog" text={`${items.filter((item) => item.is_available).length} available dishes`} href="/restaurant/menu" />
-        <Insight title="Menu command" text={`${items.filter((item) => !item.is_available).length} hidden dishes`} href="/restaurant/menu" />
-        <Insight title="Revenue intelligence" text="Open analytics dashboard" href="/restaurant/analytics" />
-      </section>
-    </RestaurantShell>
-  );
+      <div className="table-footer"><span>Showing {Math.min(orders.length, 8)} of {orders.length}</span><Link href="/restaurant/orders">View All Live Orders →</Link></div>
+    </section>
+    <section className="partner-insights"><Insight title="Menu catalog" text={`${items.filter((item) => item.isAvailable).length} available dishes`} href="/restaurant/menu" /><Insight title="Hidden dishes" text={`${items.filter((item) => !item.isAvailable).length} unavailable`} href="/restaurant/menu" /><Insight title="Analytics" text="Open revenue dashboard" href="/restaurant/analytics" /></section>
+  </RestaurantShell>;
 }
 
-function Metric({ title, value, sub, urgent = false }) {
-  return <div className={`metric ${urgent ? 'urgent' : ''}`}><small>{title}</small><strong>{value}</strong><span>{sub}</span></div>;
-}
-
-function Insight({ title, text, href }) {
-  return <Link href={href} className="insight"><span><b>{title}</b><small>{text}</small></span><span className="metric-label">OPEN</span></Link>;
-}
+function Metric({ title, value, sub, urgent = false }) { return <div className={`metric ${urgent ? 'urgent' : ''}`}><small>{title}</small><strong>{value}</strong><span>{sub}</span></div>; }
+function Insight({ title, text, href }) { return <Link href={href} className="insight"><span><b>{title}</b><small>{text}</small></span><span className="metric-label">OPEN</span></Link>; }
