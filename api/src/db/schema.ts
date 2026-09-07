@@ -46,6 +46,7 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash'),
   fullName: text('full_name'),
   role: text('role').notNull().default('customer'),
+  restaurantId: uuid('restaurant_id').references(() => restaurants.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -70,9 +71,7 @@ export const cartItems = pgTable('cart_items', {
   quantity: integer('quantity').notNull().default(1),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  cartMenuItemUnique: uniqueIndex('cart_items_cart_menu_item_idx').on(table.cartId, table.menuItemId),
-}));
+}, (table) => ({ cartMenuItemUnique: uniqueIndex('cart_items_cart_menu_item_idx').on(table.cartId, table.menuItemId) }));
 
 export const orders = pgTable('orders', {
   id: uuid('id').defaultRandom().primaryKey(),
