@@ -18,7 +18,7 @@ export const createMenuItemSchema = z.object({
 export const updateMenuItemSchema = createMenuItemSchema.partial();
 
 export const createStaffCategorySchema = z.object({ name: z.string().trim().min(2).max(80) });
-export const updateStaffCategorySchema = createStaffCategorySchema.partial();
+export const updateStaffCategorySchema = createStaffCategorySchema;
 
 export const updateStaffOrderStatusSchema = z.object({
   status: z.enum(['confirmed', 'preparing', 'ready', 'cancelled']),
