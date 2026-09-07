@@ -73,3 +73,29 @@ export const cartItems = pgTable('cart_items', {
 }, (table) => ({
   cartMenuItemUnique: uniqueIndex('cart_items_cart_menu_item_idx').on(table.cartId, table.menuItemId),
 }));
+
+export const orders = pgTable('orders', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  restaurantId: uuid('restaurant_id').notNull().references(() => restaurants.id, { onDelete: 'restrict' }),
+  status: text('status').notNull().default('pending'),
+  paymentMethod: text('payment_method').notNull().default('cod'),
+  paymentStatus: text('payment_status').notNull().default('pending'),
+  deliveryAddress: text('delivery_address').notNull(),
+  phone: text('phone').notNull(),
+  subtotal: integer('subtotal').notNull(),
+  deliveryFee: integer('delivery_fee').notNull(),
+  total: integer('total').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const orderItems = pgTable('order_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
+  menuItemId: uuid('menu_item_id').notNull().references(() => menuItems.id, { onDelete: 'restrict' }),
+  name: text('name').notNull(),
+  price: integer('price').notNull(),
+  quantity: integer('quantity').notNull(),
+  lineTotal: integer('line_total').notNull(),
+});
