@@ -1,132 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useRoleGuard } from '@/lib/useRoleGuard';
+import Link from 'next/link';
 
-const ACTIVE_ORDER_STATUSES = ['ready', 'picked_up', 'on_the_way'];
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function AdminDelivery() {
-  const { checkingRole } = useRoleGuard(['admin']);
-  const [orders, setOrders] = useState([]);
-  const [riders, setRiders] = useState([]);
-  const [message, setMessage] = useState('');
+  const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState('');
 
   useEffect(() => {
-    if (checkingRole) return;
+    fetch(`${apiUrl}/v1/auth/me`, { credentials: 'include', cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const body = await response.json();
+        return body.data ?? null;
+      })
+      .then((user) => setAuthorized(user?.role === 'admin'))
+      .finally(() => setLoading(false));
+  }, []);
 
-    async function loadDeliveryControl() {
-      setLoading(true);
-      setMessage('');
+  if (loading) return <main className="container"><section className="panel"><p>Checking admin access…</p></section></main>;
+  if (!authorized) return <main className="container"><section className="panel"><h1>Admin access required</h1><Link className="btn primary" href="/auth">Sign in</Link></section></main>;
 
-      const [ordersResult, ridersResult] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('id, status, created_at, restaurants(name), delivery_assignments(id, rider_id, status)')
-          .in('status', ACTIVE_ORDER_STATUSES)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('profiles')
-          .select('id, full_name')
-          .eq('role', 'rider')
-          .order('full_name'),
-      ]);
-
-      const error = ordersResult.error || ridersResult.error;
-      if (error) setMessage(error.message);
-
-      setOrders(ordersResult.data || []);
-      setRiders(ridersResult.data || []);
-      setLoading(false);
-    }
-
-    loadDeliveryControl();
-  }, [checkingRole]);
-
-  async function assignRider(orderId, riderId) {
-    if (!riderId) return;
-
-    setBusy(orderId);
-    setMessage('');
-
-    const { error } = await supabase
-      .from('delivery_assignments')
-      .upsert(
-        { order_id: orderId, rider_id: riderId, status: 'assigned' },
-        { onConflict: 'order_id' },
-      );
-
-    if (error) {
-      setMessage(error.message);
-      setBusy('');
-      return;
-    }
-
-    setOrders((current) =>
-      current.map((order) => {
-        if (order.id !== orderId) return order;
-        return {
-          ...order,
-          delivery_assignments: [{ id: order.delivery_assignments?.[0]?.id, rider_id: riderId, status: 'assigned' }],
-        };
-      }),
-    );
-    setBusy('');
-  }
-
-  if (checkingRole) {
-    return <main className="container"><p>Checking admin access…</p></main>;
-  }
-
-  return (
-    <main className="container">
-      <div className="page-head">
-        <div>
-          <span className="eyebrow">ADMIN</span>
-          <h1>Delivery Control</h1>
-          <p>Assign ready orders and keep delivery handoffs moving.</p>
-        </div>
-      </div>
-
-      {loading ? (
-        <section className="panel"><p>Loading delivery operations…</p></section>
-      ) : (
-        <div className="cards">
-          {orders.map((order) => {
-            const assignment = order.delivery_assignments?.[0];
-            return (
-              <article className="card" key={order.id}>
-                <div className="delivery-admin-head">
-                  <div>
-                    <h3>#{order.id.slice(0, 8)}</h3>
-                    <p>{order.restaurants?.name || 'Restaurant'} · {order.status}</p>
-                  </div>
-                  <span className="badge">{assignment ? assignment.status : 'Unassigned'}</span>
-                </div>
-
-                <select
-                  value={assignment?.rider_id || ''}
-                  disabled={busy === order.id || Boolean(assignment?.rider_id)}
-                  onChange={(event) => assignRider(order.id, event.target.value)}
-                  aria-label={`Assign rider to order ${order.id.slice(0, 8)}`}
-                >
-                  <option value="" disabled>Assign rider…</option>
-                  {riders.map((rider) => (
-                    <option key={rider.id} value={rider.id}>{rider.full_name || 'Rider'}</option>
-                  ))}
-                </select>
-
-                {assignment?.rider_id && <p className="notice">Rider assigned · {assignment.status}</p>}
-              </article>
-            );
-          })}
-          {!orders.length && <section className="panel"><p>No orders are currently waiting for delivery assignment.</p></section>}
-        </div>
-      )}
-
-      {message && <p className="notice">{message}</p>}
-    </main>
-  );
+  return <main className="container"><section className="panel"><span className="eyebrow">ADMIN</span><h1>Delivery Control</h1><p>Rider assignment requires the delivery domain migration. The previous Supabase-backed screen has been removed so the admin area cannot issue writes against a retired data source.</p><Link className="btn primary" href="/admin">Back to admin</Link></section></main>;
 }
