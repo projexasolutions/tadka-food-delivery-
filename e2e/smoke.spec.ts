@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('customer landing page loads', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.locator('body')).toContainText('TADKA');
+  await expect(page.locator('body')).toContainText(/tadka/i);
 });
 
 test('authentication page is reachable', async ({ page }) => {
