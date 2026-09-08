@@ -2,6 +2,7 @@ import SiteNav from '@/components/SiteNav';
 import './globals.css';
 import './tadka-theme.css';
 import './tadka-modern.css';
+import './tadka-icons.css';
 
 export const metadata = {
   title: 'Tadka — Food Delivery',
