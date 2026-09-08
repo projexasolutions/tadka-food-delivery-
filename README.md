@@ -19,7 +19,7 @@ TADKA is a production-oriented food-delivery platform focused on a clean custome
 
 ## Architecture
 
-The application is being migrated from the original Supabase-backed MVP to a self-managed modular-monolith architecture. The migration is intentionally incremental so existing customer, restaurant, rider and admin flows are not replaced blindly.
+The application uses a modular-monolith architecture. The former Supabase client and Supabase dependency have been removed from the application.
 
 ```text
 TADKA
@@ -35,77 +35,40 @@ TADKA
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local` and configure the database/API values.
-3. Start the web app with `npm run dev`.
-4. Start the API with `npm run dev:api`.
-5. Run `npm run typecheck` before opening a pull request.
+3. Run `npm run db:migrate` against the configured PostgreSQL database.
+4. Start the web app with `npm run dev`.
+5. Start the API with `npm run dev:api`.
+6. Run `npm run typecheck` and `npm run test` before opening a pull request.
 
 ## Migration status
 
-### Phase 1 completed
+### Completed
 
-- Added TypeScript project configuration.
-- Added Drizzle configuration and PostgreSQL schema foundation.
-- Added PostgreSQL connection pooling.
-- Added Zod request validation.
-- Added the first Node REST module for restaurant discovery.
-- Added API health checking.
-- Added environment documentation.
-- Added GitHub Actions verification for dependency installation, typechecking and frontend builds.
+- TypeScript, Next.js and Express foundation with strict typechecking.
+- PostgreSQL/Drizzle schema, connection pooling and idempotent migrations.
+- Restaurant discovery and menu APIs with Zod validation.
+- Argon2id authentication, opaque server-side sessions and secure cookies.
+- Authenticated cart with single-restaurant enforcement and concurrency protection.
+- Transactional checkout/order creation with server-calculated totals and historical item snapshots.
+- Razorpay order creation, HMAC payment verification and raw-body webhook verification.
+- Admin role management, restaurant controls, category management and explicit order-state transitions.
+- Restaurant-staff scoped menu, category and order operations.
+- Rider delivery assignment and rider status workflow (`assigned → accepted → picked_up → delivered`).
+- Customer reviews restricted to delivered orders, with one review per order.
+- Restaurant review management and operational notification feeds.
+- Customer profile editing through the authenticated API.
+- Legacy Supabase browser/client dependencies and data access removed.
+- GitHub Actions typecheck, unit-test and frontend-build verification.
 
-### Phase 2 completed
+## Remaining production work
 
-- Added PostgreSQL/Drizzle category and menu-item models.
-- Added a validated restaurant-menu API.
-- Replaced restaurant and menu customer reads with REST API calls.
-- Kept unavailable restaurants and dishes out of customer-facing results.
+The application features are implemented. Remaining work is operational rather than another large feature migration:
 
-### Phase 3 completed
-
-- Added Argon2id password hashing and verification.
-- Added opaque server-side sessions with configurable expiry.
-- Added secure HttpOnly/SameSite session cookies.
-- Added signup, login, session lookup and logout endpoints.
-- Added authenticated request middleware and state-changing Origin protection.
-- Migrated the customer auth page off Supabase.
-
-### Phase 4 completed
-
-- Added authenticated cart APIs backed by PostgreSQL/Drizzle.
-- Added quantity validation and item ownership checks.
-- Added menu availability checks before cart mutation.
-- Migrated menu/cart customer flows off Supabase.
-
-### Phase 5 completed
-
-- Added transactional checkout and order creation.
-- Added order and order-item snapshots so historical prices/names are not dependent on mutable menu data.
-- Added authenticated order history and single-order APIs.
-- Added server-side subtotal, delivery-fee and total calculation.
-- Preserved the cart for online orders until payment succeeds.
-- Migrated checkout and order-history customer reads/writes to the API.
-
-### Phase 6 completed — Razorpay
-
-- Added server-created Razorpay Orders using the trusted server amount.
-- Added authenticated payment-order creation and payment-signature verification.
-- Added raw-body webhook signature verification.
-- Added captured/paid/failed payment status handling.
-- Added cart clearing only after verified online payment.
-- Connected the checkout UI to Razorpay Checkout.
-
-### Phase 7 in progress — Admin & restaurant operations
-
-- Added server-side role authorization for admin endpoints.
-- Migrated admin dashboard, users, restaurants, operations and categories to REST APIs.
-- Added protected role management with a database-backed restaurant assignment for restaurant staff.
-- Added explicit order-status transition rules instead of unrestricted status writes.
-- Added restaurant availability controls and restaurant-scoped category administration.
-- Removed the legacy browser Supabase client and Supabase dependencies from the application package.
-- Added the database migration for restaurant staff assignment and Razorpay order/payment identifiers.
-
-### Remaining
-
-8. Restaurant-staff menu/order workflows, production hardening, broader automated testing, final migration verification and dedicated-cloud deployment.
+1. Run and verify all database migrations against the real production PostgreSQL instance.
+2. Regenerate and commit `package-lock.json` from the current `package.json` in a networked Node environment.
+3. Expand Playwright coverage for authenticated checkout, payment and role-specific workflows.
+4. Configure production secrets, S3 storage, Razorpay production keys/webhook, TLS, backups and monitoring on dedicated cloud hosting.
+5. Perform a final production security/performance review and live smoke test.
 
 ## Payment configuration
 
