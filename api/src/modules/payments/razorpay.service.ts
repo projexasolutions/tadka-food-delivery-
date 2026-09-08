@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { db } from '../../db/client';
 import { carts, cartItems, orderItems, orders } from '../../db/schema';
@@ -19,17 +19,21 @@ async function clearPaidOrderCart(orderId: string, userId: string) {
 }
 
 export async function createRazorpayOrder(userId: string, input: CreateRazorpayOrderInput) {
-  const [order] = await db.select({ id: orders.id, total: orders.total, paymentMethod: orders.paymentMethod, paymentStatus: orders.paymentStatus, razorpayOrderId: orders.razorpayOrderId })
-    .from(orders).where(and(eq(orders.id, input.orderId), eq(orders.userId, userId))).limit(1);
-  if (!order) throw new PaymentError('Order not found.');
-  if (order.paymentMethod !== 'online') throw new PaymentError('This order does not require online payment.');
-  if (order.paymentStatus === 'paid') throw new PaymentError('This order has already been paid.');
-  if (order.razorpayOrderId) return { razorpayOrderId: order.razorpayOrderId, amount: order.total * 100, currency: 'INR' };
-  const keyId = requiredEnv('RAZORPAY_KEY_ID'); const keySecret = requiredEnv('RAZORPAY_KEY_SECRET'); const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
-  const response = await fetch(RAZORPAY_API, { method: 'POST', headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: order.total * 100, currency: 'INR', receipt: order.id }) });
-  const body = await response.json().catch(() => null); if (!response.ok || !body?.id) throw new PaymentError('Unable to create the payment order.');
-  await db.update(orders).set({ razorpayOrderId: body.id, updatedAt: new Date() }).where(eq(orders.id, order.id));
-  return { razorpayOrderId: body.id, amount: body.amount, currency: body.currency };
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`payment:${input.orderId}`}))`);
+    const [order] = await tx.select({ id: orders.id, total: orders.total, paymentMethod: orders.paymentMethod, paymentStatus: orders.paymentStatus, razorpayOrderId: orders.razorpayOrderId })
+      .from(orders).where(and(eq(orders.id, input.orderId), eq(orders.userId, userId))).limit(1);
+    if (!order) throw new PaymentError('Order not found.');
+    if (order.paymentMethod !== 'online') throw new PaymentError('This order does not require online payment.');
+    if (order.paymentStatus === 'paid') throw new PaymentError('This order has already been paid.');
+    if (order.razorpayOrderId) return { razorpayOrderId: order.razorpayOrderId, amount: order.total * 100, currency: 'INR' };
+
+    const keyId = requiredEnv('RAZORPAY_KEY_ID'); const keySecret = requiredEnv('RAZORPAY_KEY_SECRET'); const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const response = await fetch(RAZORPAY_API, { method: 'POST', headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: order.total * 100, currency: 'INR', receipt: order.id }) });
+    const body = await response.json().catch(() => null); if (!response.ok || !body?.id) throw new PaymentError('Unable to create the payment order.');
+    await tx.update(orders).set({ razorpayOrderId: body.id, updatedAt: new Date() }).where(eq(orders.id, order.id));
+    return { razorpayOrderId: body.id, amount: body.amount, currency: body.currency };
+  });
 }
 
 export async function verifyRazorpayPayment(userId: string, input: VerifyRazorpayPaymentInput) {
