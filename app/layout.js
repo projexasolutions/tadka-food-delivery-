@@ -1,5 +1,6 @@
 import SiteNav from '@/components/SiteNav';
 import './globals.css';
+import './tadka-theme.css';
 
 export const metadata = {
   title: 'Tadka — Food Delivery',
