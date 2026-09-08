@@ -38,11 +38,11 @@ TADKA
 3. Run `npm run db:migrate` against the configured PostgreSQL database.
 4. Start the web app with `npm run dev`.
 5. Start the API with `npm run dev:api`.
-6. Run `npm run typecheck` and `npm run test` before opening a pull request.
+6. Run `npm run typecheck`, `npm run test` and `npm run test:e2e` before opening a pull request.
 
 ## Migration status
 
-### Completed
+### Feature implementation complete
 
 - TypeScript, Next.js and Express foundation with strict typechecking.
 - PostgreSQL/Drizzle schema, connection pooling and idempotent migrations.
@@ -50,7 +50,7 @@ TADKA
 - Argon2id authentication, opaque server-side sessions and secure cookies.
 - Authenticated cart with single-restaurant enforcement and concurrency protection.
 - Transactional checkout/order creation with server-calculated totals and historical item snapshots.
-- Razorpay order creation, HMAC payment verification and raw-body webhook verification.
+- Razorpay order creation, HMAC payment verification and raw-body webhook verification with duplicate-request protection.
 - Admin role management, restaurant controls, category management and explicit order-state transitions.
 - Restaurant-staff scoped menu, category and order operations.
 - Rider delivery assignment and rider status workflow (`assigned → accepted → picked_up → delivered`).
@@ -58,17 +58,20 @@ TADKA
 - Restaurant review management and operational notification feeds.
 - Customer profile editing through the authenticated API.
 - Legacy Supabase browser/client dependencies and data access removed.
-- GitHub Actions typecheck, unit-test and frontend-build verification.
+- Playwright customer smoke tests wired into GitHub Actions.
+- Production web/API container definitions and dedicated-cloud deployment runbook.
 
-## Remaining production work
+## Release checklist
 
-The application features are implemented. Remaining work is operational rather than another large feature migration:
+The product feature set is complete. Before declaring the hosted environment production-ready:
 
-1. Run and verify all database migrations against the real production PostgreSQL instance.
+1. Run and verify all database migrations against the production PostgreSQL instance.
 2. Regenerate and commit `package-lock.json` from the current `package.json` in a networked Node environment.
 3. Expand Playwright coverage for authenticated checkout, payment and role-specific workflows.
 4. Configure production secrets, S3 storage, Razorpay production keys/webhook, TLS, backups and monitoring on dedicated cloud hosting.
 5. Perform a final production security/performance review and live smoke test.
+
+See `docs/PRODUCTION_DEPLOYMENT.md` for the deployment procedure.
 
 ## Payment configuration
 
