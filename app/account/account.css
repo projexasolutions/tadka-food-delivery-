@@ -1,0 +1,20 @@
+.accountPage{min-height:calc(100vh - 80px);padding:44px 0 80px;background:var(--bg)}
+.accountInner{width:min(900px,calc(100% - 32px));margin:0 auto}
+.accountHeader{margin-bottom:26px}
+.accountHeader .eyebrow{display:block;margin-bottom:8px}
+.accountHeader h1{margin:0 0 8px;font-size:clamp(32px,5vw,48px);line-height:1.05;letter-spacing:-.04em}
+.accountEmail{margin:0;color:var(--muted);font-size:14px}
+.accountCards{display:grid;gap:14px;margin-bottom:20px}
+.accountCard{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:84px;padding:20px 22px;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+a.accountCard:hover{transform:translateY(-1px);box-shadow:var(--shadow2);border-color:#d7dee8}
+.accountCardInfo{display:flex;flex-direction:column;gap:5px;min-width:0}
+.accountCardTitle{font-size:15px;font-weight:800;color:var(--ink)}
+.accountCardText{font-size:13px;color:var(--muted);line-height:1.45}
+.accountArrow{font-size:20px;color:var(--muted);flex:0 0 auto}
+.roleCard{cursor:default}
+.roleValue{font-size:13px;font-weight:800;color:var(--primary);background:rgba(226,55,68,.08);padding:7px 11px;border-radius:999px;white-space:nowrap}
+.accountActions{display:flex;align-items:center;gap:12px;margin-top:8px}
+.signOutButton{border:0;border-radius:12px;padding:11px 16px;background:var(--danger);color:#fff;font-weight:800;cursor:pointer}
+.signOutButton:hover{filter:brightness(.96)}
+.accountMessage{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:#fff4e6;color:#9a3412;border:1px solid #fed7aa;font-size:13px}
+@media (max-width:640px){.accountPage{padding-top:28px}.accountCard{min-height:76px;padding:17px}.accountCardText{font-size:12px}.roleValue{font-size:12px}.accountActions{width:100%}.signOutButton{width:100%}}
