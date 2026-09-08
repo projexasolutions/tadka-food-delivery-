@@ -12,6 +12,7 @@ import { registerAdminRoutes } from './modules/admin/admin.routes';
 import { registerRestaurantStaffRoutes } from './modules/restaurant-staff/restaurant-staff.routes';
 import { registerDeliveryRoutes } from './modules/delivery/delivery.routes';
 import { registerReviewRoutes } from './modules/reviews/reviews.routes';
+import { registerNotificationRoutes } from './modules/notifications/notifications.routes';
 import { handleRazorpayWebhook, PaymentError } from './modules/payments/razorpay.service';
 import { pool } from './db/client';
 
@@ -59,17 +60,12 @@ registerRestaurantStaffRoutes(app);
 registerAdminRoutes(app);
 registerDeliveryRoutes(app);
 registerReviewRoutes(app);
+registerNotificationRoutes(app);
 
 app.use((_req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found.' } }));
-app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(error);
-  res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' } });
-});
+app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => { console.error(error); res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' } }); });
 
 const server = app.listen(port, () => console.log(`Tadka API listening on :${port}`));
-async function shutdown(signal: string) {
-  console.log(`${signal} received; shutting down.`);
-  server.close(async () => { await pool.end(); process.exit(0); });
-}
+async function shutdown(signal: string) { console.log(`${signal} received; shutting down.`); server.close(async () => { await pool.end(); process.exit(0); }); }
 process.on('SIGTERM', () => void shutdown('SIGTERM'));
 process.on('SIGINT', () => void shutdown('SIGINT'));
