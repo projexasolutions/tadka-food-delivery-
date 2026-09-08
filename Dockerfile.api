@@ -1,0 +1,14 @@
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --no-audit --no-fund
+
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
+COPY package*.json ./
+COPY api ./api
+COPY tsconfig.json ./tsconfig.json
+EXPOSE 4000
+CMD ["node", "--import", "tsx", "api/src/server.ts"]
