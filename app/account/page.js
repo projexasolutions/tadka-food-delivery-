@@ -2,8 +2,16 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import './account.css';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+const roleLabels = {
+  customer: 'Customer',
+  restaurant_staff: 'Restaurant',
+  rider: 'Delivery Partner',
+  admin: 'Admin',
+};
 
 export default function AccountPage() {
   const [user, setUser] = useState(null);
@@ -31,21 +39,96 @@ export default function AccountPage() {
     window.location.href = '/';
   }
 
-  if (loading) return <main className="container"><section className="panel"><p>Loading your account…</p></section></main>;
-  if (!user) return <main className="container"><section className="panel"><h1>Your account</h1><p>Please sign in to continue.</p><Link className="btn primary" href="/auth">Sign in</Link></section></main>;
+  if (loading) {
+    return <main className="accountPage"><div className="accountInner"><section className="panel"><p>Loading your account…</p></section></div></main>;
+  }
+
+  if (!user) {
+    return (
+      <main className="accountPage">
+        <div className="accountInner">
+          <section className="panel">
+            <h1>Your account</h1>
+            <p>Please sign in to continue.</p>
+            <Link className="btn primary" href="/auth">Sign in</Link>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  const role = roleLabels[user.role] || user.role || 'Customer';
 
   return (
-    <main className="container">
-      <div className="page-head"><div><span className="eyebrow">ACCOUNT</span><h1>Welcome{user.fullName ? `, ${user.fullName}` : ''}.</h1><p>{user.email}</p></div></div>
-      <section className="cards">
-        <div className="card"><strong>Role</strong><span className="badge">{user.role}</span></div>
-        <Link className="card" href="/account/profile"><strong>Profile</strong><span>Manage your profile →</span></Link>
-        <Link className="card" href="/orders"><strong>Your orders</strong><span>Track recent orders →</span></Link>
-        {user.role === 'restaurant_staff' && <Link className="card" href="/restaurant"><strong>Restaurant dashboard</strong><span>Manage restaurant →</span></Link>}
-        {user.role === 'admin' && <Link className="card" href="/admin"><strong>Admin dashboard</strong><span>Manage platform →</span></Link>}
-      </section>
-      <button className="btn danger" onClick={logout}>Sign out</button>
-      {message && <p className="notice">{message}</p>}
+    <main className="accountPage">
+      <div className="accountInner">
+        <header className="accountHeader">
+          <span className="eyebrow">ACCOUNT</span>
+          <h1>Welcome{user.fullName ? `, ${user.fullName}` : ''}.</h1>
+          <p className="accountEmail">{user.email}</p>
+        </header>
+
+        <section className="accountCards" aria-label="Account options">
+          <div className="accountCard roleCard">
+            <div className="accountCardInfo">
+              <strong className="accountCardTitle">Account Role</strong>
+              <span className="accountCardText">Your access level on Tadka</span>
+            </div>
+            <span className="roleValue">{role}</span>
+          </div>
+
+          <Link className="accountCard" href="/account/profile">
+            <span className="accountCardInfo">
+              <strong className="accountCardTitle">Profile</strong>
+              <span className="accountCardText">Manage your name, contact details and profile</span>
+            </span>
+            <span className="accountArrow" aria-hidden="true">→</span>
+          </Link>
+
+          <Link className="accountCard" href="/orders">
+            <span className="accountCardInfo">
+              <strong className="accountCardTitle">Your Orders</strong>
+              <span className="accountCardText">Track your recent orders and order history</span>
+            </span>
+            <span className="accountArrow" aria-hidden="true">→</span>
+          </Link>
+
+          {user.role === 'restaurant_staff' && (
+            <Link className="accountCard" href="/restaurant">
+              <span className="accountCardInfo">
+                <strong className="accountCardTitle">Restaurant Dashboard</strong>
+                <span className="accountCardText">Manage your restaurant, menu and incoming orders</span>
+              </span>
+              <span className="accountArrow" aria-hidden="true">→</span>
+            </Link>
+          )}
+
+          {user.role === 'rider' && (
+            <Link className="accountCard" href="/delivery">
+              <span className="accountCardInfo">
+                <strong className="accountCardTitle">Delivery Dashboard</strong>
+                <span className="accountCardText">View assigned deliveries and update delivery status</span>
+              </span>
+              <span className="accountArrow" aria-hidden="true">→</span>
+            </Link>
+          )}
+
+          {user.role === 'admin' && (
+            <Link className="accountCard" href="/admin">
+              <span className="accountCardInfo">
+                <strong className="accountCardTitle">Admin Dashboard</strong>
+                <span className="accountCardText">Manage users, restaurants, orders and platform operations</span>
+              </span>
+              <span className="accountArrow" aria-hidden="true">→</span>
+            </Link>
+          )}
+        </section>
+
+        <div className="accountActions">
+          <button className="signOutButton" onClick={logout}>Sign out</button>
+        </div>
+        {message && <p className="accountMessage">{message}</p>}
+      </div>
     </main>
   );
 }
