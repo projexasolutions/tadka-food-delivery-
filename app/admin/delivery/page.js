@@ -4,24 +4,15 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+async function api(path, options = {}) { const response = await fetch(`${apiUrl}${path}`, { ...options, credentials: 'include', cache: 'no-store', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } }); const body = await response.json().catch(() => null); if (!response.ok) throw new Error(body?.error?.message || 'Request failed.'); return body?.data; }
 
 export default function AdminDelivery() {
-  const [authorized, setAuthorized] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${apiUrl}/v1/auth/me`, { credentials: 'include', cache: 'no-store' })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        const body = await response.json();
-        return body.data ?? null;
-      })
-      .then((user) => setAuthorized(user?.role === 'admin'))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <main className="container"><section className="panel"><p>Checking admin access…</p></section></main>;
-  if (!authorized) return <main className="container"><section className="panel"><h1>Admin access required</h1><Link className="btn primary" href="/auth">Sign in</Link></section></main>;
-
-  return <main className="container"><section className="panel"><span className="eyebrow">ADMIN</span><h1>Delivery Control</h1><p>Rider assignment requires the delivery domain migration. The previous Supabase-backed screen has been removed so the admin area cannot issue writes against a retired data source.</p><Link className="btn primary" href="/admin">Back to admin</Link></section></main>;
+  const [riders, setRiders] = useState([]); const [deliveries, setDeliveries] = useState([]); const [orders, setOrders] = useState([]); const [riderByOrder, setRiderByOrder] = useState({}); const [loading, setLoading] = useState(true); const [message, setMessage] = useState('');
+  async function load() { setLoading(true); try { const [r, d, o] = await Promise.all([api('/v1/admin/riders'), api('/v1/admin/deliveries'), api('/v1/admin/orders')]); setRiders(r || []); setDeliveries(d || []); setOrders((o || []).filter((x) => ['confirmed', 'preparing', 'ready'].includes(x.status))); setMessage(''); } catch (error) { setMessage(error.message); } finally { setLoading(false); } }
+  useEffect(() => { void load(); }, []);
+  async function assign(orderId) { const riderId = riderByOrder[orderId]; if (!riderId) return; try { await api('/v1/admin/deliveries', { method: 'POST', body: JSON.stringify({ orderId, riderId }) }); setRiderByOrder((current) => ({ ...current, [orderId]: '' })); await load(); } catch (error) { setMessage(error.message); } }
+  return <main className="container"><div className="page-head"><div><span className="eyebrow">ADMIN</span><h1>Delivery Control</h1><p>Assign active orders to riders and monitor delivery progress.</p></div><button className="secondary" onClick={load}>Refresh</button></div>{message && <div className="partner-alert">{message}<button onClick={() => setMessage('')}>×</button></div>}
+    {loading ? <section className="panel"><p>Loading delivery operations…</p></section> : <><section className="panel"><div className="panel-head"><div><h2>Assign orders</h2><p>Only confirmed, preparing, and ready orders can be assigned.</p></div></div>{!orders.length ? <p className="muted">No active orders need assignment.</p> : <div className="order-list">{orders.map((order) => <article className="order-card" key={order.id}><div><span className="eyebrow">{order.status.replace('_', ' ').toUpperCase()}</span><h3>Order #{order.id.slice(0, 8)}</h3><p>₹{order.total}</p></div><div className="order-card-side"><select value={riderByOrder[order.id] || ''} onChange={(e) => setRiderByOrder((current) => ({ ...current, [order.id]: e.target.value }))}><option value="">Select rider</option>{riders.map((rider) => <option key={rider.id} value={rider.id}>{rider.fullName || rider.email}</option>)}</select><button className="primary" disabled={!riderByOrder[order.id]} onClick={() => assign(order.id)}>Assign</button></div></article>)}</div>}</section>
+    <section className="panel"><div className="panel-head"><div><h2>Delivery activity</h2><p>{deliveries.length} delivery record{deliveries.length === 1 ? '' : 's'}</p></div></div>{!deliveries.length ? <p className="muted">No deliveries assigned yet.</p> : <div className="order-list">{deliveries.map((delivery) => <article className="order-card" key={delivery.id}><div><span className="eyebrow">{delivery.status.replace('_', ' ').toUpperCase()}</span><h3>Order #{delivery.orderId.slice(0, 8)}</h3><p>{delivery.restaurantName} · {delivery.riderName || 'Rider'}</p><p className="muted">{delivery.address}</p></div><strong>₹{delivery.total}</strong></article>)}</div>}</section></>}
+    <Link className="secondary" href="/admin">Back to admin</Link></main>;
 }
