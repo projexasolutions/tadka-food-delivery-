@@ -1,8 +1,9 @@
 import type { Express, Response } from 'express';
-import { loginSchema, signupSchema } from './auth.schema';
-import { AuthConflictError, InvalidCredentialsError, getSessionUser, login, revokeSession, signup } from './auth.service';
+import { loginSchema, signupSchema, updateProfileSchema } from './auth.schema';
+import { AuthConflictError, InvalidCredentialsError, getSessionUser, login, revokeSession, signup, updateProfile } from './auth.service';
 import { clearSessionCookie, readSessionId, setSessionCookie } from './auth.session';
 import { authRateLimit } from './auth.rate-limit';
+import { requireAuth } from './auth.middleware';
 
 function setCookie(res: Response, value: string) { res.setHeader('Set-Cookie', value); }
 
@@ -33,6 +34,15 @@ export function registerAuthRoutes(app: Express) {
     try {
       const sessionId = readSessionId(req.headers.cookie); if (!sessionId) return res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Authentication required.' } });
       const user = await getSessionUser(sessionId); if (!user) return res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Authentication required.' } });
+      return res.json({ data: { user } });
+    } catch (error) { return next(error); }
+  });
+
+  app.patch('/v1/auth/profile', requireAuth, async (req, res, next) => {
+    try {
+      const parsed = updateProfileSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid profile details.' } });
+      const user = await updateProfile(req.auth!.userId, parsed.data);
       return res.json({ data: { user } });
     } catch (error) { return next(error); }
   });
