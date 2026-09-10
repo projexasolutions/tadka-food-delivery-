@@ -11,7 +11,7 @@ export default function SiteNav() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [cartCount, setCartCount] = useState(0);
-  const [location, setLocation] = useState('Choose delivery area');
+  const [location, setLocation] = useState('Choose location');
   const [locationBusy, setLocationBusy] = useState(false);
   const isActive = (path) => pathname === path || (path !== '/' && pathname.startsWith(path));
 
@@ -43,37 +43,40 @@ export default function SiteNav() {
     if (!navigator.geolocation) { setLocation('Location unavailable'); return; }
     setLocationBusy(true);
     navigator.geolocation.getCurrentPosition(
-      () => { setLocation('Current area selected'); setLocationBusy(false); },
-      () => { setLocation('Choose delivery area'); setLocationBusy(false); },
+      () => { setLocation('Current area'); setLocationBusy(false); },
+      () => { setLocation('Choose location'); setLocationBusy(false); },
     );
   }
 
   return (
     <header className="site-nav">
       <div className="site-nav-inner">
-        <Link className="site-brand" href="/" aria-label="Tadka home"><img src="/tadka-logo.svg" alt="Tadka" className="site-logo" /></Link>
+        <Link className="site-brand" href="/" aria-label="Tadka home">
+          <img src="/tadka-logo.svg" alt="Tadka" className="site-logo" />
+        </Link>
         <button className="location-chip" type="button" onClick={requestLocation} title="Choose delivery location">
-          <span className="location-pin" aria-hidden="true">LOC</span>
-          <span><small>DELIVERY AREA</small><b>{locationBusy ? 'Finding area…' : location}</b></span>
-          <span className="location-arrow" aria-hidden="true">+</span>
+          <span className="location-pin" aria-hidden="true">●</span>
+          <span><small>DELIVER TO</small><b>{locationBusy ? 'Finding…' : location}</b></span>
+          <span className="location-arrow" aria-hidden="true">⌄</span>
         </button>
         <form className="nav-search" onSubmit={submitSearch} role="search">
           <span className="nav-search-icon" aria-hidden="true">SEARCH</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search food" placeholder="Find a dish, kitchen or cuisine" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search food" placeholder="Search for dishes, restaurants or cuisines" />
         </form>
         <nav className="site-links" aria-label="Primary navigation">
-          <Link className={isActive('/restaurants') ? 'active' : ''} href="/restaurants">Discover</Link>
-          <Link className={isActive('/orders') ? 'active' : ''} href="/orders">My orders</Link>
-          <Link className={isActive('/account') ? 'active' : ''} href="/account">Account</Link>
+          <Link className={isActive('/') ? 'active' : ''} href="/">Home</Link>
+          <Link className={isActive('/restaurants') ? 'active' : ''} href="/restaurants">Explore</Link>
+          <Link href="/restaurants?offers=true">Offers</Link>
+          <Link href="/restaurants">Categories</Link>
         </nav>
-        <Link className="nav-cart" href="/cart" aria-label={`Cart with ${cartCount} items`}><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</Link>
+        <Link className="nav-cart" href="/cart" aria-label={`Bag with ${cartCount} items`}><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</Link>
       </div>
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
         <Link className={isActive('/') ? 'active' : ''} href="/"><span>Home</span></Link>
-        <Link className={isActive('/restaurants') ? 'active' : ''} href="/restaurants"><span>Discover</span></Link>
+        <Link className={isActive('/restaurants') ? 'active' : ''} href="/restaurants"><span>Explore</span></Link>
+        <Link href="/restaurants?offers=true"><span>Offers</span></Link>
         <Link className={isActive('/orders') ? 'active' : ''} href="/orders"><span>Orders</span></Link>
         <Link className={isActive('/cart') ? 'active' : ''} href="/cart"><span>Bag</span></Link>
-        <Link className={isActive('/account') ? 'active' : ''} href="/account"><span>Account</span></Link>
       </nav>
     </header>
   );
