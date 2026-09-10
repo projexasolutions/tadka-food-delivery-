@@ -68,6 +68,7 @@ export default function SiteNav() {
           <Link className={isActive('/restaurants') ? 'active' : ''} href="/restaurants">Explore</Link>
           <Link href="/restaurants?offers=true">Offers</Link>
           <Link href="/restaurants">Categories</Link>
+          <Link className={isActive('/account') ? 'active' : ''} href="/account">Account</Link>
         </nav>
         <Link className="nav-cart" href="/cart" aria-label={`Bag with ${cartCount} items`}><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</Link>
       </div>
@@ -76,7 +77,8 @@ export default function SiteNav() {
         <Link className={isActive('/restaurants') ? 'active' : ''} href="/restaurants"><span>Explore</span></Link>
         <Link href="/restaurants?offers=true"><span>Offers</span></Link>
         <Link className={isActive('/orders') ? 'active' : ''} href="/orders"><span>Orders</span></Link>
-        <Link className={isActive('/cart') ? 'active' : ''} href="/cart"><span>Bag</span></Link>
+        <Link className={isActive('/account') ? 'active' : ''} href="/account"><span>Account</span></Link>
+        <Link className={isActive('/cart') ? 'active' : ''} href="/cart"><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</Link>
       </nav>
     </header>
   );
