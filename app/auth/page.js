@@ -2,10 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+function dashboardForRole(role) {
+  if (role === "restaurant_staff") return "/restaurant";
+  if (role === "rider") return "/delivery";
+  if (role === "admin") return "/admin";
+  return "/";
+}
+
 export default function AuthPage() {
+  const router = useRouter();
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +44,9 @@ export default function AuthPage() {
         return;
       }
 
-      setMessage(mode === "signup" ? "Account created. You are now signed in." : "Login successful. You can continue ordering.");
+      const user = payload?.data?.user;
+      setMessage(mode === "signup" ? "Account created. Redirecting…" : "Login successful. Redirecting…");
+      router.replace(dashboardForRole(user?.role));
     } catch {
       setMessage("Unable to reach the server. Please try again.");
     } finally {
