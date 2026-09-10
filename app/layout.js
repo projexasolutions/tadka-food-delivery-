@@ -8,6 +8,7 @@ import './tadka-v3-extra.css';
 import './tadka-reference.css';
 import './tadka-reference-nav.css';
 import './tadka-final-ui.css';
+import './restaurant-modern.css';
 
 export const metadata = {
   title: 'Tadka — Food Delivery',
