@@ -9,20 +9,8 @@ import './tadka-reference.css';
 import './tadka-reference-nav.css';
 import './tadka-final-ui.css';
 import './restaurant-modern.css';
+import './restaurant/access-state.css';
 import './admin/tadka-admin-users.css';
 
-export const metadata = {
-  title: 'Tadka — Food Delivery',
-  description: 'Order from local kitchens with Tadka.',
-};
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>
-        <SiteNav />
-        {children}
-      </body>
-    </html>
-  );
-}
+export const metadata = { title:'Tadka — Food Delivery', description:'Order from local kitchens with Tadka.' };
+export default function RootLayout({ children }) { return <html lang="en"><body><SiteNav />{children}</body></html>; }
