@@ -14,6 +14,7 @@ import './admin/tadka-admin-users.css';
 import './auth/tadka-auth.css';
 import './restaurant-polish.css';
 import './restaurant/tadka-partner-v2.css';
+import './restaurant-reference.css';
 
 export const metadata = { title:'Tadka — Food Delivery', description:'Order from local kitchens with Tadka.' };
 export default function RootLayout({ children }) { return <html lang="en"><body><SiteNav />{children}</body></html>; }
