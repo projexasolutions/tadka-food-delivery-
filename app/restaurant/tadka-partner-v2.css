@@ -1,0 +1,52 @@
+/* TADKA Partner Hub v2 — larger type, tighter viewport fit, food-first dashboard polish. */
+body:has(.partner-app){overflow-x:hidden!important;background:#f8f7f3!important}
+body:has(.partner-app) *{box-sizing:border-box}
+.partner-app{width:100%;min-width:0;max-width:100vw;overflow-x:hidden;background:#f8f7f3!important;color:#17231f!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+.partner-sidebar{width:278px!important;min-width:278px!important;padding:22px 18px!important;background:#fff!important;border-right:1px solid #e6e2da!important}
+.partner-brand{padding:2px 8px 24px!important;gap:13px!important;font-size:24px!important;letter-spacing:-.04em!important}
+.partner-logo{width:46px!important;height:46px!important;border-radius:14px!important;font-size:20px!important;background:#f15b22!important;box-shadow:0 10px 24px rgba(241,91,34,.18)!important}
+.partner-brand small{font-size:9px!important;letter-spacing:.16em!important}
+.partner-restaurant-card{padding:17px!important;margin-bottom:20px!important;border-radius:20px!important;background:#f1f7ef!important}
+.partner-restaurant-card .verified{font-size:9px!important;margin-bottom:16px!important}
+.partner-open{font-size:9px!important;padding:7px 9px!important}
+.partner-restaurant-card>b{font-size:17px!important;margin-bottom:5px!important}
+.partner-restaurant-card>span:last-child{font-size:12px!important}
+.partner-nav{gap:5px!important}
+.partner-nav a{min-height:45px!important;padding:12px 13px!important;border-radius:13px!important;font-size:14px!important;font-weight:800!important;color:#3f4b45!important}
+.partner-nav a.active{background:#145b4e!important;box-shadow:0 9px 22px rgba(20,91,78,.16)!important}
+.partner-nav em{font-size:8px!important;padding:5px 7px!important;background:#ff6540!important}
+.partner-sidebar-bottom{margin-top:auto!important}
+.kitchen-chime{padding:13px!important;border-radius:16px!important;margin-bottom:12px!important}
+.kitchen-chime span{font-size:11px!important}.kitchen-chime small{font-size:10px!important}.kitchen-chime b{font-size:9px!important}
+.partner-user{padding:10px 7px!important;gap:10px!important}.partner-user b{font-size:11px!important}.partner-user small{font-size:9px!important}
+.avatar{width:36px!important;height:36px!important;font-size:12px!important}
+.partner-main{width:calc(100% - 278px);min-width:0;max-width:calc(100vw - 278px);overflow-x:hidden!important}
+.partner-topbar{height:76px!important;padding:0 28px!important;gap:24px!important}
+.partner-search{max-width:620px!important;min-width:0!important;position:relative}
+.partner-search input{height:46px!important;border-radius:16px!important;padding:0 54px 0 18px!important;font-size:14px!important;background:#f8f8f5!important}
+.partner-search:after{content:'Ctrl K';position:absolute;right:13px;top:50%;transform:translateY(-50%);padding:4px 7px;border:1px solid #e3e1da;border-radius:7px;background:#fff;color:#8b918b;font-size:10px;font-weight:800;pointer-events:none}
+.partner-top-actions{gap:11px!important;flex-shrink:0}.kitchen-live{font-size:12px!important}.partner-add{padding:12px 16px!important;font-size:12px!important;border-radius:12px!important;background:#f15b22!important}.icon-action{height:42px!important;min-width:42px!important;border-radius:12px!important;font-size:13px!important}
+.partner-content{width:100%!important;max-width:none!important;padding:34px clamp(22px,3vw,42px) 52px!important;margin:0!important;overflow-x:hidden!important}
+.partner-page-title{margin-bottom:25px!important;align-items:flex-end!important}.partner-kicker{font-size:10px!important;letter-spacing:.17em!important;color:#166053!important}.partner-page-title h1{font-size:clamp(32px,3.2vw,46px)!important;line-height:1.04!important;letter-spacing:-.055em!important;margin:9px 0 0!important;color:#121917!important}
+.partner-panel{border-radius:20px!important;padding:22px!important;margin-bottom:18px!important;border-color:#e5e1d9!important;box-shadow:0 8px 28px rgba(50,44,35,.045)!important}
+.panel-head h2{font-size:22px!important}.panel-head p{font-size:12px!important;color:#77817b!important}
+.partner-hero{border-radius:20px!important;border:1px solid #e7e2d9!important;background:#fff!important;padding:20px 22px!important;margin-bottom:18px!important}
+.partner-hero p{font-size:13px!important;line-height:1.55!important;color:#68736d!important}
+.accept-toggle{min-width:220px!important;border-radius:999px!important;font-size:11px!important;padding:13px 17px!important}
+.accept-toggle span{font-size:9px!important}
+.partner-metrics{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:12px!important;margin-bottom:18px!important}
+.metric{min-width:0!important;min-height:128px!important;padding:18px!important;border:1px solid #e7e2d9!important;border-radius:17px!important;background:#fff!important;box-shadow:0 6px 18px rgba(50,44,35,.035)!important}
+.metric small{font-size:11px!important;color:#637069!important;font-weight:750!important}.metric strong{display:block!important;font-size:31px!important;line-height:1!important;letter-spacing:-.045em!important;margin:19px 0 7px!important;color:#111714!important}.metric span{font-size:10px!important;color:#8a938e!important}.metric.urgent strong{color:#ef5729!important}
+.order-table{width:100%!important;min-width:0!important;overflow:hidden!important;border-radius:14px!important}
+.order-table-head,.order-line{grid-template-columns:1.1fr .8fr .7fr 1.25fr 1fr 1fr!important;column-gap:16px!important;align-items:center!important}
+.order-table-head{padding:11px 14px!important;border-radius:11px!important;background:#f1f4ef!important}.order-table-head span{font-size:9px!important;letter-spacing:.08em!important;color:#66736b!important;font-weight:900!important}
+.order-line{min-height:57px!important;padding:10px 14px!important;border-bottom:1px solid #eeeae3!important;font-size:12px!important}.order-line>b{font-size:12px!important}.order-line strong{font-size:13px!important}.order-line .status{font-size:9px!important;font-weight:900!important;padding:6px 10px!important;border-radius:999px!important;text-align:center!important}.status-action,.view-action{min-height:36px!important;border-radius:10px!important;font-size:10px!important;padding:8px 11px!important;text-align:center!important}.view-action{background:#f0f2f6!important;color:#24312c!important;text-decoration:none!important}
+.table-footer{padding:14px!important;font-size:11px!important}.table-footer a{font-size:11px!important;color:#08735e!important;font-weight:900!important}
+.partner-insights{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}.insight{min-height:84px!important;padding:17px!important;border:1px solid #e5e1d9!important;border-radius:17px!important;background:#fff!important}.insight b{font-size:14px!important}.insight small{font-size:10px!important;margin-top:4px!important}
+/* profile/details and form readability */
+.partner-panel h2,.partner-panel h3{color:#141b18!important}.partner-panel p{font-size:12px!important}.menu-add-form input,.menu-add-form select,.catalog-search,.partner-modal input,.partner-modal select,.partner-modal textarea{height:48px!important;font-size:13px!important;border-radius:13px!important}.partner-btn{font-size:11px!important;padding:11px 15px!important}.dish-admin-copy h3{font-size:16px!important}.dish-admin-copy p{font-size:10px!important}.dish-admin-copy strong{font-size:13px!important}
+/* prevent the right edge from being pushed off-screen */
+.partner-content>*{max-width:100%!important;min-width:0!important}.partner-page-title>div{min-width:0}.partner-panel,.partner-hero,.partner-metrics,.partner-insights{width:100%;min-width:0}.order-line>*{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:1200px){.partner-sidebar{width:238px!important;min-width:238px!important}.partner-main{width:calc(100% - 238px);max-width:calc(100vw - 238px)}.partner-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important}.partner-content{padding-left:26px!important;padding-right:26px!important}.order-table{overflow-x:auto!important}.order-table-head,.order-line{min-width:760px!important}}
+@media(max-width:760px){.partner-sidebar{width:74px!important;min-width:74px!important;padding:16px 9px!important}.partner-main{width:calc(100% - 74px);max-width:calc(100vw - 74px)}.partner-brand{justify-content:center;padding:0 0 20px!important}.partner-brand>span:last-child,.partner-restaurant-card,.partner-nav a span,.partner-nav em,.kitchen-chime,.partner-user span:not(.avatar){display:none!important}.partner-nav a{justify-content:center;min-height:46px!important;padding:10px!important}.partner-user{justify-content:center;padding:0!important}.partner-topbar{height:66px!important;padding:0 12px!important}.partner-search{max-width:none}.partner-search input{height:42px!important;font-size:12px!important}.partner-search:after{display:none}.partner-top-actions{gap:6px!important}.kitchen-live,.partner-add{display:none!important}.partner-content{padding:24px 14px 80px!important}.partner-page-title{margin-bottom:18px!important}.partner-page-title h1{font-size:28px!important}.partner-hero{flex-direction:column!important;align-items:stretch!important;gap:15px!important}.accept-toggle{width:100%!important}.partner-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}.metric{min-height:112px!important;padding:14px!important}.metric strong{font-size:27px!important;margin-top:14px!important}.partner-insights{grid-template-columns:1fr!important}.panel-head{gap:12px}.order-table{overflow-x:auto!important}.order-table-head,.order-line{min-width:720px!important}}
+@media(max-width:430px){.partner-sidebar{width:62px!important;min-width:62px!important}.partner-main{width:calc(100% - 62px);max-width:calc(100vw - 62px)}.partner-content{padding-left:10px!important;padding-right:10px!important}.partner-metrics{gap:8px!important}.metric{padding:12px!important}.metric small{font-size:9px!important}.metric strong{font-size:23px!important}.metric span{font-size:9px!important}.partner-panel{padding:14px!important}.partner-page-title h1{font-size:25px!important}}
