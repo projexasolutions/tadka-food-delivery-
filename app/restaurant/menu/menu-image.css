@@ -1,0 +1,14 @@
+.menu-image-picker { position: relative; min-width: 180px; }
+.menu-image-picker > input[type='file'], .edit-image-actions > input[type='file'] { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.image-picker-button { width: 100%; min-height: 46px; border: 1px dashed rgba(0,0,0,.18); border-radius: 12px; background: rgba(255,255,255,.7); display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; cursor: pointer; }
+.menu-image-preview { position: relative; width: 100%; height: 46px; border-radius: 12px; overflow: hidden; background: #f4f4f4; }
+.menu-image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.image-remove { position: absolute; top: 5px; right: 5px; width: 28px; height: 28px; border: 0; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; cursor: pointer; font-size: 20px; line-height: 1; }
+.dish-admin-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.edit-image-section { margin-top: 8px; }
+.image-section-label { display: block; margin-bottom: 8px; font-weight: 600; }
+.edit-image-preview { border: 1px solid rgba(0,0,0,.1); border-radius: 14px; overflow: hidden; background: #f7f7f7; }
+.edit-image-preview > img { width: 100%; height: 190px; object-fit: cover; display: block; }
+.edit-image-empty { height: 190px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; opacity: .55; }
+.edit-image-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; }
+@media (max-width: 700px) { .menu-image-picker { min-width: 0; } .edit-image-preview > img, .edit-image-empty { height: 150px; } }
