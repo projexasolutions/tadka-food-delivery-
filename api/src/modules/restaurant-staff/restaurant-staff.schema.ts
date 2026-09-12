@@ -5,12 +5,19 @@ export const itemIdParamsSchema = uuidParams;
 export const orderIdParamsSchema = uuidParams;
 export const categoryIdParamsSchema = uuidParams;
 
+// Menu images are stored as compressed data URLs by the current restaurant UI.
+// Keep a generous limit so portrait/vertical food photos can be saved as well.
+const menuImageUrlSchema = z.string().max(900_000).refine(
+  (value) => value.startsWith('data:image/') || z.string().url().safeParse(value).success,
+  { message: 'Image must be a valid image data URL or URL.' },
+).optional().nullable();
+
 export const createMenuItemSchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: z.string().trim().max(500).optional().nullable(),
   price: z.number().int().min(1).max(100000),
   categoryId: z.string().uuid().optional().nullable(),
-  imageUrl: z.string().url().max(2048).optional().nullable(),
+  imageUrl: menuImageUrlSchema,
   isAvailable: z.boolean().optional().default(true),
 });
 
