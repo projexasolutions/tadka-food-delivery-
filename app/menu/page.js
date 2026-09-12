@@ -51,11 +51,17 @@ function MenuContent() {
         const response = await fetch(`${apiUrl}/v1/restaurants/${restaurantId}/menu`, { signal: controller.signal, cache: 'no-store' });
         const body = await response.json().catch(() => null);
         if (!response.ok) throw new Error(body?.error?.message || 'Unable to load this menu.');
-        setRestaurant(body?.data?.restaurant || null); setItems(body?.data?.items || []); setCategories(body?.data?.categories || []);
-      } catch (error) { if (error.name !== 'AbortError') setMessage(error.message || 'Unable to load this menu.'); }
-      finally { if (!controller.signal.aborted) setLoading(false); }
+        setRestaurant(body?.data?.restaurant || null);
+        setItems(body?.data?.items || []);
+        setCategories(body?.data?.categories || []);
+      } catch (error) {
+        if (error.name !== 'AbortError') setMessage(error.message || 'Unable to load this menu.');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
     }
-    void load(); void loadCart();
+    void load();
+    void loadCart();
     return () => controller.abort();
   }, [restaurantId, loadCart]);
 
@@ -68,27 +74,48 @@ function MenuContent() {
   async function addToCart(itemId) {
     setAddingId(itemId); setMessage('');
     try {
-      const response = await fetch(`${apiUrl}/v1/cart/items`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ menuItemId: itemId, quantity: 1 }) });
+      const response = await fetch(`${apiUrl}/v1/cart/items`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menuItemId: itemId, quantity: 1 }),
+      });
       const body = await response.json().catch(() => null);
       if (response.status === 401) { setMessage('Please sign in to add dishes to your bag.'); return; }
       if (!response.ok) throw new Error(body?.error?.message || 'Unable to add this dish.');
-      setCart(body?.data || null); window.dispatchEvent(new Event('tadka:cart-updated'));
-    } catch (error) { setMessage(error.message || 'Unable to add this dish.'); }
-    finally { setAddingId(null); }
+      setCart(body?.data || null);
+      window.dispatchEvent(new Event('tadka:cart-updated'));
+    } catch (error) {
+      setMessage(error.message || 'Unable to add this dish.');
+    } finally {
+      setAddingId(null);
+    }
   }
 
   async function updateCartItem(itemId, quantity) {
     setUpdatingCartId(itemId);
     try {
-      const response = await fetch(`${apiUrl}/v1/cart/items/${itemId}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quantity }) });
+      const response = await fetch(`${apiUrl}/v1/cart/items/${itemId}`, {
+        method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity }),
+      });
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error?.message || 'Unable to update your bag.');
-      setCart(body?.data || null); window.dispatchEvent(new Event('tadka:cart-updated'));
-    } catch (error) { setMessage(error.message || 'Unable to update your bag.'); }
-    finally { setUpdatingCartId(null); }
+      setCart(body?.data || null);
+      window.dispatchEvent(new Event('tadka:cart-updated'));
+    } catch (error) {
+      setMessage(error.message || 'Unable to update your bag.');
+    } finally {
+      setUpdatingCartId(null);
+    }
   }
 
-  const visible = useMemo(() => activeCategory === 'all' ? items : items.filter((item) => item.categoryId === activeCategory), [activeCategory, items]);
+  function findCartItem(menuItemId) {
+    return cart?.items?.find((entry) => entry.menuItemId === menuItemId || entry.menuItem?.id === menuItemId || entry.menu_item_id === menuItemId) || null;
+  }
+
+  const visible = useMemo(
+    () => activeCategory === 'all' ? items : items.filter((item) => item.categoryId === activeCategory),
+    [activeCategory, items]
+  );
   const cartCount = cart?.items?.reduce((sum, item) => sum + Number(item.quantity || 0), 0) || 0;
   const heroImage = restaurant?.imageUrl || items.find((item) => item.imageUrl)?.imageUrl || fallbackImage;
 
@@ -99,7 +126,11 @@ function MenuContent() {
           <div className="restaurant-breadcrumb">{restaurant?.cuisine || 'Indian'} <span>•</span> Freshly prepared <span>•</span> Order online</div>
           <h1>{restaurant?.name || 'Restaurant menu'}</h1>
           <p>{restaurant?.description || 'Fresh Indian favourites prepared to order.'}</p>
-          <div className="hero-meta"><span className="rating-dot">★ {restaurant?.rating || 'New'}</span><span><Icon name="clock" size={16}/>25–35 min</span><span><Icon name="truck" size={16}/>₹{restaurant?.deliveryFee || 0} delivery</span></div>
+          <div className="hero-meta">
+            <span className="rating-dot">★ {restaurant?.rating || 'New'}</span>
+            <span><Icon name="clock" size={16}/>25–35 min</span>
+            <span><Icon name="truck" size={16}/>₹{restaurant?.deliveryFee || 0} delivery</span>
+          </div>
           <div className="trust-pills"><span><Icon name="leaf" size={15}/>Quality ingredients</span><span><Icon name="leaf" size={15}/>Freshly prepared</span></div>
         </div>
         <div className="hero-photo"><img src={heroImage} alt="Restaurant food"/></div>
@@ -112,13 +143,32 @@ function MenuContent() {
           <button className={activeCategory === 'all' ? 'active' : ''} onClick={() => setActiveCategory('all')}>Recommended</button>
           {categories.map((category) => <button key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => setActiveCategory(category.id)}>{category.name}</button>)}
         </div>
-        <div className="section-heading"><div><h2>{activeCategory === 'all' ? 'Recommended for you' : categories.find((c) => c.id === activeCategory)?.name || 'Menu'}</h2><p>Popular dishes from this kitchen</p></div><span>{visible.length} dishes</span></div>
+        <div className="section-heading">
+          <div><h2>{activeCategory === 'all' ? 'Recommended for you' : categories.find((c) => c.id === activeCategory)?.name || 'Menu'}</h2><p>Popular dishes from this kitchen</p></div>
+          <span>{visible.length} dishes</span>
+        </div>
         {message && <div className="menu-notice">{message}</div>}
         {loading ? <div className="loading-card">Loading menu...</div> : visible.length === 0 ? <div className="empty-card"><h3>No dishes here yet.</h3><p>Try another category.</p></div> : <div className="menu-list">
-          {visible.map((item, index) => <article className="menu-item-card" key={item.id}>
-            <div className="menu-item-copy">{index < 2 && <span className="pick-label">CHEF'S PICK</span>}<h3>{item.name}</h3><p>{item.description || 'Freshly prepared and delivered with care.'}</p><strong>₹{Number(item.price).toFixed(0)}</strong></div>
-            <div className="menu-item-action"><img src={item.imageUrl || fallbackImage} alt=""/><button disabled={addingId === item.id} onClick={() => addToCart(item.id)}>{addingId === item.id ? 'ADDING...' : '+ ADD'}</button></div>
-          </article>)}
+          {visible.map((item, index) => {
+            const cartItem = findCartItem(item.id);
+            const quantity = Number(cartItem?.quantity || 0);
+            return <article className="menu-item-card" key={item.id}>
+              <div className="menu-item-copy">
+                {index < 2 && <span className="pick-label">CHEF'S PICK</span>}
+                <h3>{item.name}</h3>
+                <p>{item.description || 'Freshly prepared and delivered with care.'}</p>
+                <strong>₹{Number(item.price).toFixed(0)}</strong>
+              </div>
+              <div className="menu-item-action">
+                <img src={item.imageUrl || fallbackImage} alt=""/>
+                {quantity > 0 && cartItem ? <div className="menu-quantity-control" aria-label={`Quantity for ${item.name}`}>
+                  <button disabled={updatingCartId === cartItem.id} onClick={() => updateCartItem(cartItem.id, Math.max(0, quantity - 1))}>−</button>
+                  <span>{quantity}</span>
+                  <button disabled={updatingCartId === cartItem.id} onClick={() => updateCartItem(cartItem.id, Math.min(50, quantity + 1))}>+</button>
+                </div> : <button className="add-button" disabled={addingId === item.id} onClick={() => addToCart(item.id)}>{addingId === item.id ? 'Adding...' : '+ Add'}</button>}
+              </div>
+            </article>;
+          })}
         </div>}
       </div>
 
@@ -126,9 +176,10 @@ function MenuContent() {
         <div className="cart-panel-header"><span>YOUR ORDER</span><span>{cartCount ? `${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : 'Your bag'}</span></div>
         {cartLoading ? <div className="cart-empty"><p>Loading your bag...</p></div> : cart?.items?.length ? <>
           <div className="cart-items">{cart.items.map((item) => <div className="cart-item" key={item.id}>
-            <img src={item.imageUrl || fallbackImage} alt=""/><div className="cart-item-info"><strong>{item.name}</strong><b>₹{Number(item.price * item.quantity).toFixed(0)}</b></div>
+            <img src={item.imageUrl || fallbackImage} alt=""/>
+            <div className="cart-item-info"><strong>{item.name}</strong><b>₹{Number(item.price * item.quantity).toFixed(0)}</b></div>
             <div className="quantity-control"><button disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, Math.max(0, item.quantity - 1))}>−</button><span>{item.quantity}</span><button disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, Math.min(50, item.quantity + 1))}>+</button></div>
-            <button className="remove-button" aria-label={`Remove ${item.name}`} disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, 0)}><Icon name="trash" size={17}/></button>
+            <button className="remove-button" aria-label={`Remove ${item.name}`} disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, 0)}><Icon name="trash" size={16}/></button>
           </div>)}</div>
           <div className="cart-summary"><div><span>Item total</span><b>₹{Number(cart.subtotal || 0).toFixed(0)}</b></div><div><span>Delivery fee</span><b>₹{Number(cart.deliveryFee || 0).toFixed(0)}</b></div><div className="cart-total"><span>Total</span><b>₹{Number(cart.total || 0).toFixed(0)}</b></div></div>
           <Link href="/cart" className="checkout-button">Proceed to Checkout <span>→</span></Link>
@@ -139,15 +190,16 @@ function MenuContent() {
     </section>
 
     <style jsx global>{`
-      .tadka-menu-page{--green:#075c4d;--orange:#ff6422;--ink:#17231f;--muted:#68736f;--line:#e8e8e3;min-height:100vh;background:#fff;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:55px}
-      .restaurant-hero{background:#f5ecdf;border-bottom:1px solid #ebe1d3;padding:26px 24px}.restaurant-hero-inner{max-width:1280px;margin:auto;background:#f9f3ea;border:1px solid #eee1d0;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:1fr .72fr;min-height:280px;box-shadow:0 10px 28px rgba(30,45,39,.05)}.hero-content{padding:38px 46px;display:flex;flex-direction:column;justify-content:center}.restaurant-breadcrumb{font-size:13px;color:#6d7974;display:flex;gap:9px;margin-bottom:12px}.restaurant-breadcrumb span{color:#b8afa5}.hero-content h1{font-size:42px;line-height:1.05;letter-spacing:-1.5px;margin:0 0 12px}.hero-content>p{font-size:16px;color:#697671;margin:0 0 20px}.hero-meta{display:flex;gap:18px;align-items:center;flex-wrap:wrap;color:#465852;font-size:14px}.hero-meta span{display:flex;gap:6px;align-items:center}.rating-dot{color:#0a6253;font-weight:800}.trust-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.trust-pills span{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid #dce7e1;border-radius:999px;padding:7px 11px;font-size:12px;color:#256656;font-weight:700}.hero-photo{min-height:280px}.hero-photo img{width:100%;height:100%;object-fit:cover;display:block}
-      .menu-layout{max-width:1280px;margin:28px auto 0;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:26px;align-items:start}.category-row{display:flex;gap:10px;overflow:auto;padding:2px 2px 12px;scrollbar-width:none}.category-row::-webkit-scrollbar{display:none}.category-row button{white-space:nowrap;border:1px solid #e4e4df;background:#fff;color:#263a35;border-radius:13px;padding:11px 20px;font-size:14px;cursor:pointer}.category-row button.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 6px 14px rgba(7,92,77,.16)}.section-heading{display:flex;justify-content:space-between;align-items:end;margin:10px 0 16px}.section-heading h2{font-size:25px;letter-spacing:-.6px;margin:0 0 4px}.section-heading p{margin:0;color:#7a8581;font-size:14px}.section-heading>span{color:#8b928f;font-size:13px}.menu-notice{margin-bottom:14px;background:#fff7f2;border:1px solid #f1d7c7;color:#8a5136;border-radius:12px;padding:11px 14px;font-size:13px}.menu-list{display:flex;flex-direction:column;gap:11px}.menu-item-card{background:#fff;border:1px solid #e7e6e1;border-radius:17px;min-height:128px;padding:14px 15px 14px 19px;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:center;box-shadow:0 4px 15px rgba(25,42,36,.035);transition:.18s}.menu-item-card:hover{border-color:#d4ddd8;box-shadow:0 8px 23px rgba(25,42,36,.065)}.pick-label{font-size:10px;letter-spacing:1.5px;font-weight:900;color:#0b6354;display:block;margin-bottom:6px}.menu-item-copy h3{font-size:18px;margin:0 0 5px}.menu-item-copy p{font-size:13px;color:#74807b;margin:0 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.menu-item-copy>strong{font-size:17px;color:#e7601e}.menu-item-action{display:grid;grid-template-columns:145px 1fr;gap:12px;align-items:center}.menu-item-action img{width:145px;height:92px;object-fit:cover;border-radius:13px}.menu-item-action button{height:43px;border:1px solid #efa06e;background:#fff;color:#e7601e;border-radius:12px;font-weight:800;cursor:pointer}.menu-item-action button:hover{background:#fff5ef}.menu-item-action button:disabled{opacity:.55;cursor:wait}
-      .cart-panel{background:#fff;border:1px solid #e5e4df;border-radius:20px;box-shadow:0 8px 28px rgba(26,45,39,.055);position:sticky;top:96px;overflow:hidden}.cart-panel-header{background:#f1f7f3;padding:18px 20px;display:flex;justify-content:space-between;color:#0c5e50;font-size:11px;font-weight:900;letter-spacing:1.4px}.cart-panel-header span:last-child{font-weight:500;letter-spacing:0;color:#71807b}.cart-items{padding:6px 17px}.cart-item{display:grid;grid-template-columns:48px minmax(0,1fr) auto 20px;gap:10px;align-items:center;padding:13px 0;border-bottom:1px solid #eeeae5}.cart-item:last-child{border-bottom:0}.cart-item>img{width:48px;height:48px;object-fit:cover;border-radius:10px}.cart-item-info{min-width:0}.cart-item-info strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cart-item-info b{display:block;color:#e7601e;font-size:13px;margin-top:4px}.quantity-control{display:flex;height:31px;border:1px solid #dfe7e3;border-radius:9px;align-items:center}.quantity-control button{width:27px;height:100%;border:0;background:transparent;color:#146252;font-size:17px;cursor:pointer}.quantity-control span{min-width:16px;text-align:center;font-size:12px;font-weight:800}.remove-button{border:0;background:transparent;color:#d94c39;cursor:pointer}.cart-summary{padding:8px 20px}.cart-summary>div{display:flex;justify-content:space-between;padding:6px 0;color:#697571;font-size:13px}.cart-summary b{color:#1c2e2a}.cart-total{border-top:1px solid #e9e6df;margin-top:7px;padding-top:13px!important;font-size:18px!important}.checkout-button{margin:8px 20px 14px;padding:14px;border-radius:12px;background:var(--green);color:#fff;text-decoration:none;font-weight:800;font-size:14px;display:flex;justify-content:center;gap:8px}.cart-promise{margin:0 20px 18px;padding:12px;background:#f1f7ec;border-radius:13px;display:flex;gap:10px;align-items:center}.cart-promise>span{color:#286450}.cart-promise strong{font-size:12px}.cart-promise p{margin:2px 0 0;font-size:11px;color:#78837e}.cart-empty{text-align:center;padding:42px 26px 46px}.empty-bag{width:52px;height:52px;margin:0 auto 14px;border-radius:50%;background:#fff2e9;color:var(--orange);display:grid;place-items:center}.cart-empty h3{margin:0 0 7px;font-size:18px}.cart-empty p{margin:0 auto 14px;max-width:260px;color:#78837f;font-size:13px;line-height:1.55}.browse-link{color:#086354;text-decoration:none;font-size:13px;font-weight:800}.cart-help{border-top:1px solid #eeeae4;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}.cart-help strong{font-size:12px}.cart-help p{margin:3px 0 0;color:#808985;font-size:11px}.cart-help a{border:1px solid #efa06e;color:#e7601e;border-radius:10px;padding:9px 11px;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap}.loading-card,.empty-card{background:#fff;border:1px solid #e7e6e1;border-radius:17px;padding:40px;text-align:center;color:#75807c}.empty-card h3{margin:0 0 6px;color:#1a302b}.empty-card p{margin:0}
-      @media(max-width:1000px){.restaurant-hero-inner,.menu-layout{margin-left:16px;margin-right:16px}.menu-layout{grid-template-columns:minmax(0,1fr) 320px}.menu-item-card{grid-template-columns:minmax(0,1fr) 220px}.menu-item-action{grid-template-columns:120px 1fr}.menu-item-action img{width:120px}}
-      @media(max-width:780px){.restaurant-hero{padding:14px 12px}.restaurant-hero-inner{grid-template-columns:1fr}.hero-content{padding:27px}.hero-content h1{font-size:32px}.hero-photo{height:210px;min-height:0}.menu-layout{grid-template-columns:1fr;margin-top:18px}.cart-panel{position:static;order:-1}.menu-item-card{grid-template-columns:1fr}.menu-item-action{grid-template-columns:120px 1fr}.menu-item-copy p{white-space:normal}.section-heading h2{font-size:22px}}
-      @media(max-width:480px){.hero-content{padding:22px 19px}.restaurant-hero-inner,.menu-layout{margin-left:0;margin-right:0}.menu-item-card{padding:13px}.menu-item-action{grid-template-columns:105px 1fr}.menu-item-action img{width:105px;height:76px}}
+      .tadka-menu-page{--green:#075c4d;--green-2:#0d6b5b;--orange:#ff6422;--ink:#17231f;--muted:#6d7974;--line:#e6e6e1;min-height:100vh;background:#fff;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:55px}
+      .restaurant-hero{background:#f5ecdf;border-bottom:1px solid #ebe1d3;padding:22px 24px 24px}.restaurant-hero-inner{max-width:1280px;height:300px;margin:auto;background:#faf5ed;border:1px solid #eee1d0;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 430px;box-shadow:0 10px 28px rgba(30,45,39,.045)}.hero-content{padding:34px 44px;display:flex;flex-direction:column;justify-content:center}.restaurant-breadcrumb{font-size:13px;color:#6d7974;display:flex;gap:9px;margin-bottom:12px}.restaurant-breadcrumb span{color:#b8afa5}.hero-content h1{font-size:40px;line-height:1.05;letter-spacing:-1.4px;margin:0 0 11px}.hero-content>p{font-size:16px;color:#697671;margin:0 0 18px}.hero-meta{display:flex;gap:18px;align-items:center;flex-wrap:wrap;color:#465852;font-size:14px}.hero-meta span{display:flex;gap:6px;align-items:center}.rating-dot{color:#0a6253;font-weight:800}.trust-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.trust-pills span{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid #dce7e1;border-radius:999px;padding:7px 11px;font-size:12px;color:#256656;font-weight:700}.hero-photo{height:300px}.hero-photo img{width:100%;height:100%;object-fit:cover;display:block}
+      .menu-layout{max-width:1280px;margin:24px auto 0;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}.category-row{display:flex;gap:9px;overflow:auto;padding:2px 2px 12px;scrollbar-width:none}.category-row::-webkit-scrollbar{display:none}.category-row button{white-space:nowrap;border:1px solid #e4e4df;background:#fff;color:#263a35;border-radius:12px;padding:10px 18px;font-size:14px;cursor:pointer}.category-row button.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 6px 14px rgba(7,92,77,.15)}.section-heading{display:flex;justify-content:space-between;align-items:end;margin:8px 0 14px}.section-heading h2{font-size:24px;letter-spacing:-.6px;margin:0 0 4px}.section-heading p{margin:0;color:#7a8581;font-size:13px}.section-heading>span{color:#8b928f;font-size:13px}.menu-notice{margin-bottom:14px;background:#fff7f2;border:1px solid #f1d7c7;color:#8a5136;border-radius:12px;padding:11px 14px;font-size:13px}.menu-list{display:flex;flex-direction:column;gap:10px}.menu-item-card{background:#fff;border:1px solid #e5e5e0;border-radius:16px;min-height:116px;padding:11px 14px 11px 18px;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:center;box-shadow:0 3px 12px rgba(25,42,36,.03);transition:.18s}.menu-item-card:hover{border-color:#d4ddd8;box-shadow:0 7px 20px rgba(25,42,36,.06)}.pick-label{font-size:9px;letter-spacing:1.4px;font-weight:900;color:#0b6354;display:block;margin-bottom:5px}.menu-item-copy h3{font-size:18px;line-height:1.2;margin:0 0 4px}.menu-item-copy p{font-size:13px;color:#74807b;margin:0 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.menu-item-copy strong{font-size:16px;color:var(--orange)}.menu-item-action{display:flex;align-items:center;justify-content:flex-end;gap:14px}.menu-item-action img{width:148px;height:92px;object-fit:cover;border-radius:13px;display:block}.add-button,.menu-quantity-control{height:48px;min-width:102px;border-radius:12px;font-weight:800;font-size:14px}.add-button{border:1px solid #ffb08e;background:#fff;color:var(--orange);cursor:pointer;padding:0 17px;text-transform:none}.add-button:hover{background:#fff7f2;border-color:#ff8d62}.add-button:disabled{opacity:.6;cursor:wait}.menu-quantity-control{display:flex;align-items:center;justify-content:space-between;border:1px solid #dfe7e2;background:#fff;overflow:hidden}.menu-quantity-control button{width:36px;height:100%;border:0;background:#f4f8f5;color:var(--green);font-size:22px;line-height:1;cursor:pointer}.menu-quantity-control button:last-child{background:#fff5ef;color:var(--orange)}.menu-quantity-control button:hover{filter:brightness(.97)}.menu-quantity-control button:disabled{opacity:.5;cursor:wait}.menu-quantity-control span{min-width:28px;text-align:center;font-size:15px;font-weight:800;color:#263a35}.loading-card,.empty-card{border:1px solid #e7e6e1;border-radius:16px;padding:30px;text-align:center;color:#74807b}.loading-card{background:#fafbf9}.empty-card h3{margin:0 0 5px;color:var(--ink)}.empty-card p{margin:0}.cart-panel{position:sticky;top:104px;max-height:calc(100vh - 122px);overflow:auto;background:#fff;border:1px solid #e4e7e3;border-radius:18px;box-shadow:0 8px 24px rgba(25,42,36,.045);scrollbar-width:thin}.cart-panel-header{height:52px;padding:0 17px;display:flex;align-items:center;justify-content:space-between;background:#f1f7f3;border-bottom:1px solid #e1ebe5;color:#0b6354}.cart-panel-header span:first-child{font-size:12px;font-weight:900;letter-spacing:1.4px}.cart-panel-header span:last-child{font-size:12px;color:#6f7b76}.cart-items{padding:6px 16px}.cart-item{display:grid;grid-template-columns:52px minmax(0,1fr) auto 18px;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #eceeea}.cart-item>img{width:52px;height:52px;object-fit:cover;border-radius:10px}.cart-item-info{min-width:0;display:flex;flex-direction:column;gap:4px}.cart-item-info strong{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cart-item-info b{font-size:12px;color:var(--orange)}.quantity-control{display:flex;align-items:center;height:34px;border:1px solid #dfe7e2;border-radius:9px;overflow:hidden}.quantity-control button{width:28px;height:100%;border:0;background:#fff;color:var(--green);font-size:18px;cursor:pointer}.quantity-control button:first-child{background:#f5faf7}.quantity-control span{min-width:25px;text-align:center;font-size:12px;font-weight:800}.quantity-control button:disabled{opacity:.5}.remove-button{width:18px;height:28px;padding:0;border:0;background:transparent;color:#df5630;display:grid;place-items:center;cursor:pointer}.remove-button:disabled{opacity:.5}.cart-summary{padding:10px 17px}.cart-summary>div{display:flex;justify-content:space-between;padding:7px 0;color:#66736d;font-size:13px}.cart-summary b{color:#263a35}.cart-summary .cart-total{margin-top:4px;padding-top:12px;border-top:1px solid #e7e9e5;font-size:18px;color:var(--ink)}.cart-summary .cart-total b{font-size:18px;color:var(--ink)}.checkout-button{display:flex;align-items:center;justify-content:center;margin:4px 17px 12px;height:48px;border-radius:12px;background:var(--green);color:#fff;text-decoration:none;font-size:14px;font-weight:800}.checkout-button:hover{background:var(--green-2)}.checkout-button span{margin-left:8px;font-size:18px}.cart-promise{display:flex;gap:10px;margin:0 17px 12px;padding:12px;background:#f0f7ea;border-radius:13px}.cart-promise>span{color:var(--green);display:grid;place-items:center}.cart-promise strong{font-size:12px}.cart-promise p{margin:3px 0 0;font-size:11px;color:#718078}.cart-empty{padding:32px 22px;text-align:center;color:#74807b}.empty-bag{width:48px;height:48px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:#fff3ec;color:var(--orange)}.cart-empty h3{margin:0 0 6px;color:var(--ink);font-size:16px}.cart-empty p{font-size:12px;line-height:1.5;margin:0 auto 12px;max-width:240px}.browse-link{color:var(--green);font-size:12px;font-weight:800;text-decoration:none}.cart-help{border-top:1px solid #e8ebe7;padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:10px}.cart-help strong{font-size:12px}.cart-help p{margin:3px 0 0;color:#78847e;font-size:11px}.cart-help a{flex:none;border:1px solid #ffad89;border-radius:10px;padding:8px 10px;color:var(--orange);text-decoration:none;font-size:11px;font-weight:800}
+      @media(max-width:1100px){.restaurant-hero-inner{grid-template-columns:minmax(0,1fr) 380px}.menu-layout{width:calc(100% - 40px);grid-template-columns:minmax(0,1fr) 320px}.menu-item-card{grid-template-columns:minmax(0,1fr) 225px}.menu-item-action img{width:125px}}
+      @media(max-width:800px){.restaurant-hero{padding:14px}.restaurant-hero-inner{height:auto;grid-template-columns:1fr}.hero-content{padding:28px 24px}.hero-photo{height:230px}.menu-layout{width:calc(100% - 28px);margin-top:18px;grid-template-columns:1fr}.cart-panel{position:static;max-height:none;order:-1}.menu-item-card{grid-template-columns:minmax(0,1fr) 180px}.menu-item-action img{width:105px;height:80px}.menu-quantity-control{min-width:74px;height:42px}.menu-quantity-control button{width:27px}}
+      @media(max-width:560px){.menu-item-card{grid-template-columns:1fr;gap:10px}.menu-item-action{justify-content:space-between}.menu-item-action img{width:calc(100% - 92px);height:96px}.add-button,.menu-quantity-control{min-width:82px}.hero-content h1{font-size:32px}}
     `}</style>
   </main>;
 }
 
-export default function Menu() { return <Suspense fallback={<main className="tadka-menu-page"><div className="loading-card">Loading menu...</div></main>}><MenuContent /></Suspense>; }
+export default function MenuPage() {
+  return <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Loading menu...</div>}><MenuContent /></Suspense>;
+}
