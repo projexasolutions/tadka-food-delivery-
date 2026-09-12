@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import RestaurantShell from '@/components/RestaurantShell';
+import './menu-image.css';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const emptyForm = { name: '', description: '', price: '', categoryId: '', imageUrl: '' };
