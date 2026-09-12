@@ -1,11 +1,38 @@
 /* Restaurant menu UI fixes — targeted to the Partner Hub menu screen. */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0..1');
 body:has(.partner-app){overflow-x:hidden!important}
-.partner-app .material-symbols-outlined{font-family:'Material Symbols Outlined'!important;font-weight:400!important;font-style:normal!important;font-size:20px!important;line-height:1!important;letter-spacing:normal!important;text-transform:none!important;display:inline-block!important;white-space:nowrap!important;word-wrap:normal!important;direction:ltr!important;-webkit-font-feature-settings:'liga'!important;-webkit-font-smoothing:antialiased!important;font-feature-settings:'liga'!important;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24!important}
+
+/* Keep icon slots reliable even when the external Material Symbols font is unavailable. */
+.partner-app .material-symbols-outlined{font-family:inherit!important;font-weight:700!important;font-style:normal!important;font-size:0!important;line-height:1!important;letter-spacing:normal!important;text-transform:none!important;display:inline-grid!important;place-items:center!important;white-space:nowrap!important;word-wrap:normal!important;direction:ltr!important;-webkit-font-smoothing:antialiased!important}
+.partner-app .material-symbols-outlined::before{font-family:Arial,sans-serif!important;font-size:18px!important;line-height:1!important;font-weight:400!important}
+.partner-app .material-symbols-outlined[aria-hidden="true"]{font-size:0!important}
+
+/* Action icons */
+.dish-admin-actions .material-symbols-outlined{width:18px!important;height:18px!important}
+.dish-admin-actions .material-symbols-outlined::before{font-size:18px!important}
+.dish-admin-actions .material-symbols-outlined{color:inherit!important}
+.dish-admin-actions button:first-child .material-symbols-outlined::before{content:'◉'!important;font-size:17px!important}
+.dish-admin-actions button:first-child .material-symbols-outlined{position:relative!important}
+.dish-admin-actions button:first-child .material-symbols-outlined::after{content:'×'!important;position:absolute!important;font-size:12px!important;line-height:1!important;font-weight:900!important;transform:translate(4px,-4px)!important}
+.dish-admin-actions button:first-child:has(.material-symbols-outlined[aria-label]) .material-symbols-outlined::before{content:'◉'!important}
+.dish-admin-actions .icon-action:not(.danger-icon) .material-symbols-outlined::before{content:'✎'!important;font-size:20px!important}
+.dish-admin-actions .danger-icon .material-symbols-outlined::before{content:'▥'!important;font-size:19px!important}
+
+/* General interface icons */
+.partner-app button[aria-label="Refresh menu"] .material-symbols-outlined::before{content:'↻'!important;font-size:21px!important}
+.partner-app .partner-btn.primary .material-symbols-outlined::before{content:'+'!important;font-size:21px!important}
+.partner-app .modal-actions .partner-btn.primary .material-symbols-outlined::before{content:'✓'!important;font-size:18px!important}
+.partner-app .partner-empty .material-symbols-outlined::before{content:'⌕'!important;font-size:22px!important}
+
 .dish-admin-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;align-items:stretch!important}
 .dish-admin{position:relative!important;display:grid!important;grid-template-columns:96px minmax(0,1fr)!important;grid-template-rows:auto auto!important;column-gap:16px!important;min-width:0!important;min-height:174px!important;padding:14px!important;overflow:hidden!important;border:1px solid #e3e8e2!important;border-radius:16px!important;background:#fff!important;box-shadow:0 6px 18px rgba(24,43,36,.035)!important}
-.dish-admin-image{grid-column:1!important;grid-row:1 / span 2!important;width:96px!important;height:96px!important;border-radius:13px!important;overflow:hidden!important;flex:none!important;background:#eee7dc url('https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=500&q=85') center/cover no-repeat!important;display:grid!important;place-items:center!important}
+
+/* Use varied food photography instead of the same image on every dish. */
+.dish-admin-image{grid-column:1!important;grid-row:1 / span 2!important;width:96px!important;height:96px!important;border-radius:13px!important;overflow:hidden!important;flex:none!important;background-color:#eee7dc!important;background-image:url('https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=500&q=85')!important;background-position:center!important;background-size:cover!important;display:grid!important;place-items:center!important}
+.dish-admin:nth-child(2) .dish-admin-image{background-image:url('https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=85')!important}
+.dish-admin:nth-child(3) .dish-admin-image{background-image:url('https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=500&q=85')!important}
+.dish-admin:nth-child(4) .dish-admin-image{background-image:url('https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=500&q=85')!important}
 .dish-admin-image .material-symbols-outlined{display:none!important}
+
 .dish-admin-copy{grid-column:2!important;grid-row:1!important;min-width:0!important;padding:2px 0 0!important}
 .dish-admin-copy>div:first-child{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;min-height:18px!important;margin-bottom:7px!important}
 .dish-admin-copy .category-type{margin-left:auto!important;font-size:8px!important;line-height:1!important;font-weight:800!important;color:#7f8b84!important;letter-spacing:.05em!important;text-transform:uppercase!important}
@@ -16,9 +43,8 @@ body:has(.partner-app){overflow-x:hidden!important}
 .dish-admin-copy strong{display:block!important;margin-top:3px!important;color:#ef5729!important;font-size:14px!important;line-height:1!important}
 .dish-admin-actions{grid-column:1 / -1!important;grid-row:2!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;margin-top:7px!important;padding-top:10px!important;border-top:1px solid #edf0ec!important}
 .dish-admin-actions .partner-btn.secondary{min-height:38px!important;padding:8px 13px!important;border:1px solid #e0e6df!important;border-radius:10px!important;background:#f5f7f4!important;color:#24423a!important;font-size:10px!important;font-weight:900!important}
-.dish-admin-actions .partner-btn.secondary .material-symbols-outlined{font-size:16px!important}
 .dish-admin-actions .icon-action{width:38px!important;min-width:38px!important;height:38px!important;padding:0!important;display:grid!important;place-items:center!important;border:1px solid #e0e6df!important;border-radius:10px!important;background:#fff!important;color:#38564d!important}
-.dish-admin-actions .icon-action:hover{background:#f1f6f3!important;border-color:#cbdad3!important}.dish-admin-actions .danger-icon{color:#d9522a!important}.dish-admin-actions .material-symbols-outlined{font-size:18px!important}
+.dish-admin-actions .icon-action:hover{background:#f1f6f3!important;border-color:#cbdad3!important}.dish-admin-actions .danger-icon{color:#d9522a!important}
 .dish-admin.hidden{opacity:.72!important}.dish-admin.hidden .dish-admin-image{filter:grayscale(.45)!important}
 .catalog-search{width:min(300px,100%)!important;flex:0 1 300px!important}
 .menu-command-tabs{display:flex!important;gap:8px!important;margin:0 0 18px!important;overflow-x:auto!important;scrollbar-width:none!important}.menu-command-tabs::-webkit-scrollbar{display:none!important}
