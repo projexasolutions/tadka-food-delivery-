@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import './restaurant-notifications.css';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const NAV_ITEMS = [['Overview','/restaurant'],['Live Orders','/restaurant/orders'],['Menu Management','/restaurant/menu'],['Categories','/restaurant/categories'],['Analytics & Revenue','/restaurant/analytics'],['Customer Reviews','/restaurant/reviews'],['Restaurant Profile','/restaurant/profile'],['Notifications','/restaurant/notifications']];
