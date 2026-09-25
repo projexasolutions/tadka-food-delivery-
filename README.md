@@ -5,7 +5,7 @@ TADKA is a production-oriented food-delivery platform focused on a clean custome
 ## Engineering stack
 
 - **Web:** Next.js, React, TypeScript
-- **Styling:** Tailwind CSS (migration in progress)
+- **Styling:** CSS
 - **API:** Node.js, TypeScript, Express REST API
 - **Database:** PostgreSQL
 - **ORM:** Drizzle ORM

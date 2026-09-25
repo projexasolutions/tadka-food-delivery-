@@ -105,7 +105,6 @@ export default function AuthPage() {
               <div className="tadka-auth-field"><label htmlFor="email">Email</label><input id="email" className="tadka-auth-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required /></div>
               <div className="tadka-auth-field"><label htmlFor="password">Password</label><div className="tadka-auth-input-wrap"><input id="password" className="tadka-auth-input has-toggle" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your password" autoComplete={isSignup ? "new-password" : "current-password"} minLength={8} required /><button type="button" className="tadka-auth-toggle" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? "◉" : "◌"}</button></div></div>
               {isSignup && <div className="tadka-auth-password-hint">Use at least 8 characters for a secure account.</div>}
-              {!isSignup && <div className="tadka-auth-row"><span>Secure Tadka account</span><Link href="/auth/reset">Forgot password?</Link></div>}
               <button className="tadka-auth-submit" disabled={loading}>{loading ? "Please wait…" : isSignup ? "Create account →" : "Login →"}</button>
             </form>
 

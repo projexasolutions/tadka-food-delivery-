@@ -1,13 +1,10 @@
 import SiteNav from '@/components/SiteNav';
 import './globals.css';
-import './tadka-theme.css';
-import './tadka-modern.css';
 import './tadka-icons.css';
-import './tadka-v3.css';
+import './order-tracking.css';
 import './tadka-v3-extra.css';
-import './tadka-reference.css';
 import './tadka-reference-nav.css';
-import './tadka-final-ui.css';
+import './tadka-home.css';
 import './restaurant-modern.css';
 import './restaurant/access-state.css';
 import './admin/tadka-admin-users.css';
