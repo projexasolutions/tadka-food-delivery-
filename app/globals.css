@@ -199,3 +199,23 @@ input,select,textarea{border-radius:8px;background:#fff;border-color:#dcd1c7}inp
  .admin-restaurant-card{grid-template-columns:42px 1fr}.admin-restaurant-avatar{width:42px;height:42px}.admin-restaurant-action{grid-column:2}.admin-restaurant-action button{width:100%}
  .admin-list-heading{padding:16px}.admin-restaurant-card{padding:15px 16px}
 }
+
+
+/* Dedicated admin navigation */
+.admin-navbar{position:sticky;top:0;z-index:200;background:#17130f;color:#fff;border-bottom:1px solid #302821;box-shadow:0 5px 20px rgba(23,19,15,.14)}
+.admin-navbar-inner{width:min(1240px,calc(100% - 40px));min-height:72px;margin:auto;display:flex;align-items:center;gap:30px}
+.admin-brand{display:flex;align-items:center;gap:10px;color:#fff;min-width:190px}
+.admin-brand-mark{width:36px;height:36px;border-radius:10px;background:#ef5b25;color:#fff;display:grid;place-items:center;font-size:18px;font-weight:950;box-shadow:0 6px 16px rgba(239,91,37,.25)}
+.admin-brand b{display:block;font-size:16px;letter-spacing:.04em;line-height:1}
+.admin-brand small{display:block;margin-top:4px;color:#9e9288;font-size:8px;font-weight:900;letter-spacing:.14em}
+.admin-nav-links{display:flex;align-items:center;gap:3px;flex:1}
+.admin-nav-links a{color:#bdb3aa;padding:10px 13px;border-radius:8px;font-size:11px;font-weight:850;transition:.15s}
+.admin-nav-links a:hover{color:#fff;background:#29221c}
+.admin-nav-links a.active{color:#fff;background:#ef5b25;box-shadow:0 5px 14px rgba(239,91,37,.2)}
+.admin-nav-actions{display:flex;align-items:center;gap:9px}
+.admin-online{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #393029;border-radius:8px;color:#d5ccc4;font-size:10px;font-weight:850}
+.admin-online i{width:6px;height:6px;border-radius:50%;background:#28a66a;box-shadow:0 0 0 3px rgba(40,166,106,.12)}
+.admin-customer-link{padding:9px 12px;border:1px solid #4a3d34;border-radius:8px;color:#fff;font-size:10px;font-weight:850}
+.admin-customer-link:hover{background:#fff;color:#17130f}
+@media(max-width:900px){.admin-navbar-inner{width:calc(100% - 24px);gap:14px}.admin-brand{min-width:auto}.admin-nav-links{overflow:auto;scrollbar-width:none}.admin-nav-links::-webkit-scrollbar{display:none}.admin-nav-links a{white-space:nowrap}.admin-nav-actions .admin-online{display:none}}
+@media(max-width:600px){.admin-brand small{display:none}.admin-brand b{font-size:14px}.admin-brand-mark{width:32px;height:32px}.admin-customer-link{display:none}.admin-navbar-inner{min-height:62px}}
