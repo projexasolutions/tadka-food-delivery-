@@ -160,6 +160,10 @@ export default function SiteNav() {
     }
   }
 
+  if (pathname.startsWith('/admin')) {
+    return <AdminNav pathname={pathname} />;
+  }
+
   const searchValue = locationSearch.trim().toLowerCase();
   const filteredAddresses = addresses.filter((item) => !searchValue || [item.label, item.address, item.landmark, item.city, item.pincode].filter(Boolean).join(' ').toLowerCase().includes(searchValue));
 
@@ -243,6 +247,37 @@ export default function SiteNav() {
         @media(max-width:900px){.premium-address-form{grid-template-columns:1fr}.address-visual-panel{display:none}.location-dialog.address-dialog{width:min(600px,100%)}.address-form-panel{padding:24px 20px 20px}.address-close-mobile{display:grid;position:absolute;right:15px;top:15px;width:34px;height:34px;border:1px solid #e5ddd5;border-radius:8px;background:#fff;color:#566761;place-items:center}.address-close{display:none}.address-form-title{padding-right:45px}.location-backdrop{padding:72px 14px 24px}}
         @media(max-width:800px){.location-list-dialog{width:100%;margin:0}.location-backdrop{padding:78px 12px 18px}.address-field-grid{grid-template-columns:1fr}.address-labels{gap:7px}.address-labels button{height:46px}}
       `}</style>
+    </header>
+  );
+}
+
+
+function AdminNav({ pathname }) {
+  const links = [
+    ['/admin', 'Overview'],
+    ['/admin/users', 'Users'],
+    ['/admin/restaurants', 'Restaurants'],
+    ['/admin/operations', 'Operations'],
+    ['/admin/categories', 'Categories'],
+  ];
+
+  return (
+    <header className="admin-navbar">
+      <div className="admin-navbar-inner">
+        <Link href="/admin" className="admin-brand">
+          <span className="admin-brand-mark">T</span>
+          <span><b>TADKA</b><small>ADMIN CONSOLE</small></span>
+        </Link>
+        <nav className="admin-nav-links" aria-label="Admin navigation">
+          {links.map(([href, label]) => (
+            <Link key={href} href={href} className={pathname === href ? 'active' : ''}>{label}</Link>
+          ))}
+        </nav>
+        <div className="admin-nav-actions">
+          <span className="admin-online"><i /> Admin</span>
+          <Link href="/" className="admin-customer-link">Customer view ↗</Link>
+        </div>
+      </div>
     </header>
   );
 }
