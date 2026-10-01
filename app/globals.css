@@ -137,3 +137,65 @@ input,select,textarea{border-radius:8px;background:#fff;border-color:#dcd1c7}inp
 .delivery-admin-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px}
 .delivery-admin-head h3{margin:0 0 4px}.delivery-admin-head p{margin:0}
 @media(max-width:760px){.user-table .table-row,.operations-table .table-row{grid-template-columns:1fr}.table-heading{display:none}.admin-restaurant-row{grid-template-columns:1fr}.delivery-admin-head{flex-direction:column}}
+
+
+/* Admin restaurant management — premium operations UI */
+.admin-restaurants-page{min-height:calc(100vh - 72px);background:#f7f3ee;padding:34px 0 80px}
+.admin-restaurants-wrap{width:min(1180px,calc(100% - 40px));margin:0 auto}
+.admin-restaurants-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:24px}
+.admin-breadcrumb{display:flex;gap:8px;align-items:center;font-size:10px;font-weight:900;letter-spacing:.1em;color:#a09389;margin-bottom:12px}
+.admin-breadcrumb span:first-child{color:#e05224}.admin-breadcrumb b{color:#c9beb5}
+.admin-restaurants-title-row{display:flex;align-items:center;gap:15px}
+.admin-page-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#fff0e7;border:1px solid #f1d0bb;color:#d94b1f;font-weight:900;font-size:18px;box-shadow:0 5px 16px rgba(70,40,20,.06)}
+.admin-restaurants-title-row h1{margin:0 0 6px;font-size:36px;line-height:1.05;letter-spacing:-.045em}
+.admin-restaurants-title-row p{margin:0;color:#756e68;font-size:13px}
+.admin-live-pill{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #dfe8e1;background:#f5fbf7;color:#23724e;border-radius:999px;font-size:11px;font-weight:900}
+.admin-live-pill i{width:7px;height:7px;border-radius:50%;background:#22a064;box-shadow:0 0 0 4px rgba(34,160,100,.1)}
+.admin-restaurant-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.admin-restaurant-stats>div{background:#fff;border:1px solid #e5dbd1;border-radius:14px;padding:17px 19px;box-shadow:0 2px 10px rgba(39,25,15,.035)}
+.admin-restaurant-stats span,.admin-restaurant-stats small{display:block;color:#83786f;font-size:10px;font-weight:800}
+.admin-restaurant-stats strong{display:block;font-size:28px;letter-spacing:-.04em;margin:5px 0 2px;color:#1d1814}
+.admin-restaurant-stats small.positive{color:#238153}
+.admin-restaurant-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fff;border:1px solid #e5dbd1;border-radius:14px;padding:11px;margin-bottom:16px}
+.admin-restaurant-search{display:flex;align-items:center;gap:8px;flex:1;max-width:480px}
+.admin-restaurant-search span{font-size:23px;color:#8b8178;line-height:1}
+.admin-restaurant-search input{border:0!important;box-shadow:none!important;background:transparent!important;padding:8px 4px;font-size:13px}
+.admin-filter-group{display:flex;gap:5px;background:#f5f0eb;border-radius:9px;padding:4px}
+.admin-filter-group button{border:0;background:transparent;border-radius:7px;padding:8px 13px;color:#756e68;font-size:11px;font-weight:900}
+.admin-filter-group button.active{background:#1d1814;color:#fff;box-shadow:0 2px 6px rgba(29,24,20,.12)}
+.admin-restaurant-alert{margin-bottom:16px;border:1px solid #efd1bf;background:#fff7f2;color:#9b471f;border-radius:12px;padding:12px 14px;font-size:12px}
+.admin-restaurant-list{background:#fff;border:1px solid #e5dbd1;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(39,25,15,.035)}
+.admin-list-heading{display:flex;justify-content:space-between;align-items:flex-end;padding:19px 20px;border-bottom:1px solid #eee6df}
+.admin-list-heading h2{margin:4px 0 0;font-size:20px;letter-spacing:-.025em}
+.admin-list-heading h2 em{font-style:normal;font-size:10px;padding:4px 7px;border-radius:999px;background:#f1ebe4;color:#756e68;vertical-align:middle;margin-left:4px}
+.admin-list-heading>span{font-size:10px;color:#958980;font-weight:800}
+.admin-restaurant-card{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:14px;padding:17px 20px;border-bottom:1px solid #eee6df;transition:.16s}
+.admin-restaurant-card:last-child{border-bottom:0}
+.admin-restaurant-card:hover{background:#fffaf6}
+.admin-restaurant-avatar{width:48px;height:48px;border-radius:13px;background:#f8eee7;border:1px solid #eeded0;color:#c84a1c;display:grid;place-items:center;font-weight:900;font-size:17px}
+.admin-restaurant-info{min-width:0}
+.admin-restaurant-name-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.admin-restaurant-name-row h3{margin:0;font-size:14px;letter-spacing:-.015em}
+.admin-restaurant-info p{margin:5px 0 0;color:#82776f;font-size:11px}
+.admin-restaurant-info p b{margin:0 5px;color:#c4b8ae}
+.admin-status-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:900}
+.admin-status-chip i{width:5px;height:5px;border-radius:50%}
+.admin-status-chip.open{background:#eaf7ef;color:#21764f}.admin-status-chip.open i{background:#27a165}
+.admin-status-chip.closed{background:#f3eee9;color:#7d7067}.admin-status-chip.closed i{background:#9d8f85}
+.admin-restaurant-action button{border:0;border-radius:8px;padding:10px 13px;font-size:11px;font-weight:900;transition:.15s}
+.admin-close-btn{background:#fff0e9;color:#bd4318;border:1px solid #f3d0bd!important}
+.admin-close-btn:hover{background:#ffe5d9}
+.admin-open-btn{background:#1d1814;color:#fff}.admin-open-btn:hover{background:#332a24}
+.admin-restaurant-action button:disabled{opacity:.55;cursor:wait}
+.admin-restaurant-empty{padding:60px 20px;text-align:center;display:flex;flex-direction:column;gap:5px;color:#83786f}
+.admin-restaurant-empty strong{color:#1d1814;font-size:14px}
+.admin-restaurant-empty span{font-size:11px}
+@media(max-width:760px){
+ .admin-restaurants-page{padding:25px 0 60px}.admin-restaurants-wrap{width:calc(100% - 24px)}
+ .admin-restaurants-head{align-items:flex-start;flex-direction:column}.admin-restaurants-title-row h1{font-size:29px}.admin-live-pill{align-self:flex-start}
+ .admin-restaurant-stats{grid-template-columns:1fr 1fr}.admin-restaurant-stats>div:last-child{grid-column:1/-1}
+ .admin-restaurant-toolbar{align-items:stretch;flex-direction:column}.admin-restaurant-search{max-width:none}
+ .admin-filter-group{width:100%}.admin-filter-group button{flex:1}
+ .admin-restaurant-card{grid-template-columns:42px 1fr}.admin-restaurant-avatar{width:42px;height:42px}.admin-restaurant-action{grid-column:2}.admin-restaurant-action button{width:100%}
+ .admin-list-heading{padding:16px}.admin-restaurant-card{padding:15px 16px}
+}
