@@ -70,9 +70,9 @@ export default function DeliveryPage() {
         </div>
         <nav>
           <Link className="active" href="/delivery"><span className="material-symbols-outlined">inventory_2</span>Deliveries</Link>
-          <Link href="/delivery"><span className="material-symbols-outlined">payments</span>Order Summary</Link>
-          <Link href="/account"><span className="material-symbols-outlined">person</span>My Profile</Link>
-          <Link href="/account"><span className="material-symbols-outlined">support_agent</span>Help & Support</Link>
+          <Link href="/delivery/summary"><span className="material-symbols-outlined">payments</span>Order Summary</Link>
+          <Link href="/delivery/account"><span className="material-symbols-outlined">person</span>My Profile</Link>
+          <Link href="/delivery/support"><span className="material-symbols-outlined">support_agent</span>Help & Support</Link>
         </nav>
         <div className="rider-safety-card">
           <div className="rider-safety-icon"><span className="material-symbols-outlined">two_wheeler</span></div>
@@ -153,7 +153,7 @@ export default function DeliveryPage() {
               <div><span>2</span><section><b>Pick up</b><small>Collect the order from restaurant</small></section></div>
               <div><span>3</span><section><b>Deliver</b><small>Complete the handoff to customer</small></section></div>
             </div>
-            <div className="rider-help"><span className="material-symbols-outlined">support_agent</span><div><b>Need help?</b><small>Contact TADKA support</small></div><Link href="/account">Open</Link></div>
+            <div className="rider-help"><span className="material-symbols-outlined">support_agent</span><div><b>Need help?</b><small>Contact TADKA support</small></div><Link href="/delivery/support">Open</Link></div>
           </aside>
         </div>
       </section>
