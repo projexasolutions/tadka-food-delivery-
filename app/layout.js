@@ -8,7 +8,6 @@ import './customer-ui.css';
 import './tadka-icons.css';
 import './restaurant/access-state.css';
 import './admin/tadka-admin-users.css';
-import './auth/tadka-auth.css';
 import './restaurant/partner-ui.css';
 import './restaurant-scroll-fix.css';
 import './restaurant/menu-ui-fix.css';
