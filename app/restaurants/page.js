@@ -73,75 +73,75 @@ function RestaurantContent() {
   const heading = query ? `Results for “${query}”` : cuisine ? `${cuisine} kitchens` : 'Find your next favourite.';
 
   return (
-    <main className="tadka-discovery">
-      <section className="tadka-discovery-wrap">
-        <div className="discovery-hero">
-          <div className="hero-copy">
-            <span className="eyebrow">DISCOVER TADKA</span>
-            <h1>{heading}</h1>
-            <p>Delicious food from trusted local kitchens, delivered to your doorstep.</p>
-            <div className="hero-filters" role="tablist" aria-label="Restaurant filters">
+    <main className="min-h-screen bg-white px-4 py-7 text-tadka-ink sm:px-6">
+      <section className="mx-auto w-full max-w-[1240px]">
+        <div className="grid min-h-[300px] overflow-hidden rounded-tadka-xl bg-tadka-green lg:grid-cols-[1fr_1.18fr]">
+          <div className="relative z-10 flex flex-col justify-center p-7 sm:p-10">
+            <span className="text-[11px] font-black tracking-[0.18em] text-green-200">DISCOVER TADKA</span>
+            <h1 className="my-3 max-w-[610px] text-4xl font-bold leading-none tracking-tight text-white sm:text-5xl lg:text-6xl">{heading}</h1>
+            <p className="mb-6 max-w-[560px] text-base leading-6 text-white/75">Delicious food from trusted local kitchens, delivered to your doorstep.</p>
+            <div className="flex flex-wrap gap-2.5" role="tablist" aria-label="Restaurant filters">
               {[['all', 'All', 'apps'], ['rating', '4.0+ Rated', 'star'], ['offers', 'Offers', 'local_offer']].map(([value, label, icon]) => (
-                <button type="button" key={value} className={`hero-filter ${filter === value ? 'active' : ''}`} onClick={() => setFilter(value)}>
+                <button type="button" key={value} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-bold transition ${filter === value ? "border-green-200 bg-green-200 text-tadka-green" : "border-white/25 bg-white text-tadka-green"}`} onClick={() => setFilter(value)}>
                   <span className="material-symbols-outlined">{icon}</span>{label}
                 </button>
               ))}
             </div>
           </div>
-          <div className="hero-food" aria-hidden="true">
+          <div className="relative min-h-[300px]" aria-hidden="true">
             <div className="hero-food-image" />
           </div>
         </div>
 
-        <div className="category-strip" aria-label="Popular cuisines">
-          <button type="button" className={`category-card ${activeCategory === 'All' ? 'active' : ''}`} onClick={() => setActiveCategory('All')}>
-            <span className="category-icon"><span className="material-symbols-outlined">apps</span></span><span>All</span>
+        <div className="flex gap-3 overflow-x-auto py-5 pb-7" aria-label="Popular cuisines">
+          <button type="button" className={`flex h-[104px] w-[104px] shrink-0 flex-col items-center justify-center gap-2 rounded-tadka-lg border text-sm font-bold transition ${activeCategory === "All" ? "border-tadka-green bg-tadka-green-soft text-tadka-green" : "border-tadka-line bg-white text-tadka-ink"}`} onClick={() => setActiveCategory('All')}>
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-orange-50 text-tadka-orange"><span className="material-symbols-outlined">apps</span></span><span>All</span>
           </button>
           {categories.map(([icon, name]) => (
-            <button type="button" key={name} className={`category-card ${activeCategory === name ? 'active' : ''}`} onClick={() => setActiveCategory(name)}>
-              <span className="category-icon"><span className="material-symbols-outlined">{icon}</span></span><span>{name}</span>
+            <button type="button" key={name} className={`flex h-[104px] w-[104px] shrink-0 flex-col items-center justify-center gap-2 rounded-tadka-lg border text-sm font-bold transition ${activeCategory === name ? "border-tadka-green bg-tadka-green-soft text-tadka-green" : "border-tadka-line bg-white text-tadka-ink"}`} onClick={() => setActiveCategory(name)}>
+              <span className="grid h-14 w-14 place-items-center rounded-full bg-orange-50 text-tadka-orange"><span className="material-symbols-outlined">{icon}</span></span><span>{name}</span>
             </button>
           ))}
         </div>
 
-        <div className="section-heading">
+        <div className="mb-5 flex items-end justify-between gap-6">
           <div>
-            <span className="section-kicker">TOP PICKS FOR YOU</span>
-            <h2>Restaurants near you</h2>
-            <p>Explore top restaurants, cuisines and exclusive offers</p>
+            <span className="text-[10px] font-black tracking-[0.12em] text-tadka-orange">TOP PICKS FOR YOU</span>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-tadka-ink">Restaurants near you</h2>
+            <p className="text-sm text-tadka-muted">Explore top restaurants, cuisines and exclusive offers</p>
           </div>
-          <label className="sort-control">Sort by <select defaultValue="relevance"><option value="relevance">Relevance</option><option value="rating">Rating</option><option value="time">Delivery time</option></select></label>
+          <label className="whitespace-nowrap rounded-xl border border-tadka-line bg-white px-3 py-2 text-xs text-tadka-muted">Sort by <select defaultValue="relevance"><option value="relevance">Relevance</option><option value="rating">Rating</option><option value="time">Delivery time</option></select></label>
         </div>
 
-        {error && <div className="soft-notice"><span className="material-symbols-outlined">info</span>{error}</div>}
+        {error && <div className="mb-4 flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 text-xs text-orange-900"><span className="material-symbols-outlined">info</span>{error}</div>}
 
         {loading ? (
-          <div className="restaurant-grid loading-grid">{[1, 2, 3, 4].map((item) => <div className="restaurant-card skeleton" key={item} />)}</div>
+          <div className="grid gap-4 sm:grid-cols-2">{[1, 2, 3, 4].map((item) => <div className="h-72 animate-pulse rounded-tadka-lg border border-tadka-line bg-tadka-bg" key={item} />)}</div>
         ) : (
-          <div className="restaurant-layout">
-            <div className="restaurant-grid">
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+            <div className="grid gap-4 sm:grid-cols-2">
               {visibleRestaurants.map((restaurant, index) => (
-                <Link className="restaurant-card" href={`/menu?restaurant=${restaurant.id}`} key={restaurant.id || `${restaurant.name}-${index}`}>
-                  <div className="restaurant-photo" style={{ backgroundImage: `url(${restaurant.imageUrl || fallbackRestaurants[index % fallbackRestaurants.length].imageUrl})` }}>
-                    <span className="offer-badge">{restaurant.badge || (index % 2 === 0 ? 'SPECIAL OFFER' : 'FREE DELIVERY')}</span>
-                    <span className="heart-button" aria-label={`Save ${restaurant.name}`}><span className="material-symbols-outlined">favorite_border</span></span>
+                <Link className="block overflow-hidden rounded-tadka-lg border border-tadka-line bg-white text-tadka-ink shadow-tadka-sm transition hover:-translate-y-0.5 hover:shadow-tadka-md" href={`/menu?restaurant=${restaurant.id}`} key={restaurant.id || `${restaurant.name}-${index}`}>
+                  <div className="relative h-52 bg-cover bg-center" style={{ backgroundImage: `url(${restaurant.imageUrl || fallbackRestaurants[index % fallbackRestaurants.length].imageUrl})` }}>
+                    <span className="absolute left-3 top-3 rounded-lg bg-white px-2 py-1.5 text-[9px] font-black tracking-wider text-tadka-orange shadow-sm">{restaurant.badge || (index % 2 === 0 ? 'SPECIAL OFFER' : 'FREE DELIVERY')}</span>
+                    <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white text-tadka-green shadow-sm" aria-label={`Save ${restaurant.name}`}><span className="material-symbols-outlined">favorite_border</span></span>
                   </div>
-                  <div className="restaurant-card-body">
-                    <div className="restaurant-title-row">
-                      <h3>{restaurant.name}</h3>
-                      <span className="delivery-time"><span className="material-symbols-outlined">schedule</span>{restaurant.time || '25–35 min'}</span>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-lg font-bold tracking-tight">{restaurant.name}</h3>
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-tadka-muted"><span className="material-symbols-outlined">schedule</span>{restaurant.time || '25–35 min'}</span>
                     </div>
-                    <p className="restaurant-cuisine">{restaurant.cuisine || restaurant.description || 'Indian food & beverages'}</p>
-                    <div className="restaurant-meta">
-                      <span className="rating-pill"><span className="material-symbols-outlined">star</span>{restaurant.rating || 'New'} <small>({restaurant.reviews || '—'})</small></span>
+                    <p className="my-2.5 text-xs text-tadka-muted">{restaurant.cuisine || restaurant.description || 'Indian food & beverages'}</p>
+                    <div className="flex items-center justify-between text-xs text-tadka-muted">
+                      <span className="inline-flex items-center gap-1 text-tadka-green"><span className="material-symbols-outlined">star</span>{restaurant.rating || 'New'} <small>({restaurant.reviews || '—'})</small></span>
                       <span>{restaurant.price || `₹${restaurant.deliveryFee || 0} delivery`}</span>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
-            <aside className="offer-panel">
-              <span className="offer-mini">TODAY'S OFFERS</span>
+            <aside className="rounded-tadka-lg border border-tadka-line bg-tadka-green-soft p-6 lg:sticky lg:top-24">
+              <span className="text-[10px] font-black tracking-wider text-tadka-green">TODAY'S OFFERS</span>
               <h3>Good food,<br /><em>better value.</em></h3>
               <p>Discover offers and free-delivery deals from selected kitchens.</p>
               <Link href="/restaurants?filter=offers" className="offer-button">View offers <span className="material-symbols-outlined">arrow_forward</span></Link>
@@ -150,14 +150,14 @@ function RestaurantContent() {
         )}
 
         {!loading && visibleRestaurants.length === 0 && (
-          <div className="empty-card"><span className="material-symbols-outlined">search_off</span><h3>No matching kitchens.</h3><p>Try another cuisine or clear the filters.</p><Link href="/restaurants">Show all restaurants</Link></div>
+          <div className="flex flex-col items-center gap-2 rounded-tadka-lg border border-dashed border-tadka-line p-10 text-center"><span className="material-symbols-outlined">search_off</span><h3>No matching kitchens.</h3><p>Try another cuisine or clear the filters.</p><Link href="/restaurants">Show all restaurants</Link></div>
         )}
 
-        <div className="trust-strip">
-          <div><span className="trust-icon"><span className="material-symbols-outlined">delivery_dining</span></span><div><strong>Fast delivery</strong><small>Fresh food, on time</small></div></div>
-          <div><span className="trust-icon"><span className="material-symbols-outlined">lock</span></span><div><strong>Secure payments</strong><small>Protected transactions</small></div></div>
-          <div><span className="trust-icon"><span className="material-symbols-outlined">restaurant</span></span><div><strong>Trusted kitchens</strong><small>Curated for you</small></div></div>
-          <div><span className="trust-icon"><span className="material-symbols-outlined">favorite</span></span><div><strong>Made for you</strong><small>Your favourites, nearby</small></div></div>
+        <div className="mt-8 grid gap-3 border-t border-tadka-line py-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">delivery_dining</span></span><div><strong>Fast delivery</strong><small>Fresh food, on time</small></div></div>
+          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">lock</span></span><div><strong>Secure payments</strong><small>Protected transactions</small></div></div>
+          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">restaurant</span></span><div><strong>Trusted kitchens</strong><small>Curated for you</small></div></div>
+          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">favorite</span></span><div><strong>Made for you</strong><small>Your favourites, nearby</small></div></div>
         </div>
       </section>
 
@@ -236,5 +236,5 @@ function RestaurantContent() {
 }
 
 export default function RestaurantsPage() {
-  return <Suspense fallback={<main className="tadka-discovery"><div className="tadka-discovery-wrap"><div className="restaurant-grid"><div className="restaurant-card skeleton" /><div className="restaurant-card skeleton" /></div></div></main>}><RestaurantContent /></Suspense>;
+  return <Suspense fallback={<main className="min-h-screen bg-white px-4 py-7 text-tadka-ink sm:px-6"><div className="mx-auto w-full max-w-[1240px]"><div className="grid gap-4 sm:grid-cols-2"><div className="h-72 animate-pulse rounded-tadka-lg border border-tadka-line bg-tadka-bg" /><div className="h-72 animate-pulse rounded-tadka-lg border border-tadka-line bg-tadka-bg" /></div></div></main>}><RestaurantContent /></Suspense>;
 }
