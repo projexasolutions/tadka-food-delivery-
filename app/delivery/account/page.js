@@ -64,40 +64,40 @@ export default function RiderAccountPage() {
     window.location.href = '/auth';
   }
 
-  if (loading) return <main className="rider-settings"><div className="rider-settings-loading">Loading rider settings…</div></main>;
-  if (!user) return <main className="rider-settings"><div className="rider-settings-loading"><h2>Sign in required</h2><p>{error || 'Please sign in to access rider settings.'}</p><Link href="/auth" className="rider-settings-primary">Sign in</Link></div></main>;
+  if (loading) return <main className="min-h-screen bg-tadka-bg px-4 py-8 text-tadka-ink sm:px-6"><div className="mx-auto max-w-xl rounded-2xl border border-tadka-line bg-white p-10 text-center">Loading rider settings…</div></main>;
+  if (!user) return <main className="min-h-screen bg-tadka-bg px-4 py-8 text-tadka-ink sm:px-6"><div className="mx-auto max-w-xl rounded-2xl border border-tadka-line bg-white p-10 text-center"><h2>Sign in required</h2><p>{error || 'Please sign in to access rider settings.'}</p><Link href="/auth" className="rounded-xl bg-tadka-orange px-4 py-2.5 text-sm font-bold text-white hover:bg-tadka-orange-dark">Sign in</Link></div></main>;
 
   const initials = (user.fullName || user.email || 'R').split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <main className="rider-settings">
-      <div className="rider-settings-wrap">
-        <div className="rider-settings-head">
-          <div><span className="rider-kicker"><i /> RIDER ACCOUNT</span><h1>Account settings</h1><p>Manage your rider profile, availability and delivery preferences.</p></div>
-          <Link href="/delivery" className="rider-settings-back"><span className="material-symbols-outlined">arrow_back</span>Back to deliveries</Link>
+    <main className="min-h-screen bg-tadka-bg px-4 py-8 text-tadka-ink sm:px-6">
+      <div className="mx-auto w-full max-w-[1200px]">
+        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div><span className="inline-flex items-center gap-2 text-[10px] font-black tracking-widest text-tadka-orange"><i /> RIDER ACCOUNT</span><h1>Account settings</h1><p>Manage your rider profile, availability and delivery preferences.</p></div>
+          <Link href="/delivery" className="inline-flex items-center gap-2 rounded-xl border border-tadka-line bg-white px-3 py-2 text-sm font-bold"><span className="material-symbols-outlined">arrow_back</span>Back to deliveries</Link>
         </div>
 
-        <div className="rider-settings-grid">
+        <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
           <section className="rider-settings-card rider-profile-card">
-            <div className="rider-profile-banner">
-              <div className="rider-profile-avatar">{initials}</div>
+            <div className="flex flex-wrap items-center gap-4 rounded-xl bg-tadka-green-soft p-4">
+              <div className="grid h-14 w-14 place-items-center rounded-full bg-tadka-orange font-black text-white">{initials}</div>
               <div><span>DELIVERY PARTNER</span><h2>{user.fullName || 'TADKA Rider'}</h2><p>{user.email}</p></div>
               <span className="rider-account-badge"><i /> Active</span>
             </div>
             <form className="rider-profile-form" onSubmit={saveProfile}>
-              <div className="rider-settings-section-title"><span className="material-symbols-outlined">person</span><div><h3>Personal information</h3><small>These details identify you as a TADKA delivery partner.</small></div></div>
+              <div className="mb-5 flex items-start gap-3"><span className="material-symbols-outlined">person</span><div><h3>Personal information</h3><small>These details identify you as a TADKA delivery partner.</small></div></div>
               <label>Full name<input value={fullName} onChange={(e) => setFullName(e.target.value)} required minLength={2} maxLength={100} /></label>
               <label>Email address<input value={user.email || ''} readOnly /><small>Email is linked to your TADKA login.</small></label>
               <div className="rider-settings-role"><span className="material-symbols-outlined">badge</span><div><small>ACCOUNT ROLE</small><b>Delivery Partner</b></div><span>Rider</span></div>
-              {message && <div className="rider-settings-success"><span className="material-symbols-outlined">check_circle</span>{message}</div>}
-              {error && <div className="rider-settings-error"><span className="material-symbols-outlined">error</span>{error}</div>}
-              <button className="rider-settings-primary" disabled={saving}>{saving ? 'Saving changes…' : 'Save profile changes'}</button>
+              {message && <div className="flex items-center gap-2 rounded-xl bg-tadka-green-soft p-3 text-sm text-tadka-success"><span className="material-symbols-outlined">check_circle</span>{message}</div>}
+              {error && <div className="flex items-center gap-2 rounded-xl bg-orange-50 p-3 text-sm text-tadka-danger"><span className="material-symbols-outlined">error</span>{error}</div>}
+              <button className="rounded-xl bg-tadka-orange px-4 py-2.5 text-sm font-bold text-white hover:bg-tadka-orange-dark" disabled={saving}>{saving ? 'Saving changes…' : 'Save profile changes'}</button>
             </form>
           </section>
 
-          <div className="rider-settings-side">
-            <section className="rider-settings-card">
-              <div className="rider-settings-section-title"><span className="material-symbols-outlined">toggle_on</span><div><h3>Rider availability</h3><small>Control whether you receive new delivery assignments.</small></div></div>
+          <div className="space-y-4">
+            <section className="rounded-2xl border border-tadka-line bg-white p-6 shadow-tadka-sm">
+              <div className="mb-5 flex items-start gap-3"><span className="material-symbols-outlined">toggle_on</span><div><h3>Rider availability</h3><small>Control whether you receive new delivery assignments.</small></div></div>
               <button className={'rider-toggle-row ' + (available ? 'on' : '')} onClick={() => setAvailability(!available)}>
                 <span className="rider-toggle-icon"><span className="material-symbols-outlined">{available ? 'two_wheeler' : 'pause_circle'}</span></span>
                 <span><b>{available ? 'Available for deliveries' : 'Currently unavailable'}</b><small>{available ? 'You can receive new orders.' : 'New assignments are paused.'}</small></span>
@@ -105,8 +105,8 @@ export default function RiderAccountPage() {
               </button>
             </section>
 
-            <section className="rider-settings-card">
-              <div className="rider-settings-section-title"><span className="material-symbols-outlined">notifications</span><div><h3>Notifications</h3><small>Choose how you want to receive rider updates.</small></div></div>
+            <section className="rounded-2xl border border-tadka-line bg-white p-6 shadow-tadka-sm">
+              <div className="mb-5 flex items-start gap-3"><span className="material-symbols-outlined">notifications</span><div><h3>Notifications</h3><small>Choose how you want to receive rider updates.</small></div></div>
               <button className={'rider-toggle-row no-border ' + (notifications ? 'on' : '')} onClick={() => setNotificationPreference(!notifications)}>
                 <span className="rider-toggle-icon blue"><span className="material-symbols-outlined">{notifications ? 'notifications_active' : 'notifications_off'}</span></span>
                 <span><b>Delivery notifications</b><small>{notifications ? 'New assignments will alert you.' : 'Notifications are turned off.'}</small></span>
@@ -115,7 +115,7 @@ export default function RiderAccountPage() {
             </section>
 
             <section className="rider-settings-card rider-account-actions">
-              <div className="rider-settings-section-title"><span className="material-symbols-outlined">security</span><div><h3>Account</h3><small>Manage your session.</small></div></div>
+              <div className="mb-5 flex items-start gap-3"><span className="material-symbols-outlined">security</span><div><h3>Account</h3><small>Manage your session.</small></div></div>
               <Link href="/delivery" className="rider-action-link"><span className="material-symbols-outlined">dashboard</span>Rider dashboard<span>→</span></Link>
               <button className="rider-action-link danger" onClick={logout}><span className="material-symbols-outlined">logout</span>Sign out<span>→</span></button>
             </section>
