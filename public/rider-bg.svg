@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 520" fill="none">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1600" y2="520"><stop stop-color="#155b4e"/><stop offset="1" stop-color="#0e4138"/></linearGradient><linearGradient id="o" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff7a3d"/><stop offset="1" stop-color="#ef4f1b"/></linearGradient></defs>
+<rect width="1600" height="520" rx="28" fill="url(#g)"/>
+<circle cx="1370" cy="120" r="190" fill="#fff" opacity=".035"/><circle cx="1510" cy="390" r="260" fill="#fff" opacity=".025"/>
+<g opacity=".14" stroke="#fff" stroke-width="2"><path d="M1040 80h420M1110 130h350M1190 180h270M1260 230h200"/><path d="M1330 280h130"/></g>
+<g transform="translate(1070 105)">
+<path d="M30 250c90-105 205-160 360-185" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".25" stroke-dasharray="12 15"/>
+<circle cx="34" cy="250" r="13" fill="#ff6a2a"/><circle cx="390" cy="62" r="16" fill="#fff"/><circle cx="390" cy="62" r="7" fill="#155b4e"/>
+<g transform="translate(120 105)">
+<circle cx="70" cy="118" r="42" fill="#161310"/><circle cx="250" cy="118" r="42" fill="#161310"/><circle cx="70" cy="118" r="20" fill="#d7d0ca"/><circle cx="250" cy="118" r="20" fill="#d7d0ca"/>
+<path d="M70 118l35-65h100l45 65M105 53l-23-42h65M205 53l30-38h38" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="145" y="-5" width="120" height="88" rx="10" fill="url(#o)"/><path d="M164 20h82M164 43h58" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".8"/>
+<circle cx="170" cy="105" r="9" fill="#fff"/><circle cx="225" cy="105" r="9" fill="#fff"/>
+</g></g>
+<g transform="translate(90 85)" opacity=".95">
+<ellipse cx="120" cy="285" rx="125" ry="25" fill="#000" opacity=".15"/>
+<path d="M30 215c12-90 55-145 115-145s103 55 115 145H30Z" fill="#f5eee8"/>
+<path d="M42 210c15 60 58 92 103 92s88-32 103-92H42Z" fill="#fff"/>
+<ellipse cx="145" cy="210" rx="103" ry="30" fill="#ef5b25"/>
+<ellipse cx="145" cy="202" rx="83" ry="22" fill="#ffb25f"/>
+<path d="M110 173c8-28 16-28 24 0M153 171c7-25 15-25 23 0" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+<path d="M115 142c-18-24-3-43 12-54M160 138c-8-25 5-39 21-49" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+</g>
+<text x="90" y="420" fill="#fff" opacity=".12" font-family="Arial,sans-serif" font-size="82" font-weight="800">TADKA</text>
+</svg>
