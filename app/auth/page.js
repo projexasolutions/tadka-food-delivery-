@@ -66,16 +66,16 @@ export default function AuthPage() {
     <main className="min-h-[calc(100dvh-64px)] overflow-x-hidden bg-[#fbf7f0] text-tadka-ink">
       <section className="mx-auto grid min-h-[calc(100dvh-64px)] max-w-[1440px] lg:grid-cols-[minmax(0,1.08fr)_minmax(430px,.92fr)]">
         <aside className="relative flex min-h-[390px] items-center overflow-hidden bg-[#f9eadb] px-6 py-10 sm:px-10 lg:min-h-0 lg:px-[6vw] lg:py-12" aria-label="Tadka food delivery">
-          <div className="relative flex min-h-[390px] items-center overflow-hidden bg-[#f9eadb] px-6 py-10 sm:px-10 lg:min-h-0 lg:px-[6vw] lg:py-12-content">
+          <div className="relative flex min-h-[390px] items-center overflow-hidden bg-[#f9eadb] px-6 py-10 sm:px-10 lg:min-h-0 lg:px-[6vw] lg:py-12">
             <span className="text-xs font-black uppercase tracking-[.14em] text-tadka-orange">{isSignup ? "Join Tadka" : "Welcome to Tadka"}</span>
             <h1>Good Food<br /><span>Brings Us</span><br />Together.</h1>
-            <p className="relative flex min-h-[390px] items-center overflow-hidden bg-[#f9eadb] px-6 py-10 sm:px-10 lg:min-h-0 lg:px-[6vw] lg:py-12-copy">
+            <p className="relative flex min-h-[390px] items-center overflow-hidden bg-[#f9eadb] px-6 py-10 sm:px-10 lg:min-h-0 lg:px-[6vw] lg:py-12">
               Discover local kitchens, freshly prepared favourites and an easier way to get your next meal delivered.
             </p>
             <div className="my-6 grid gap-2.5">
-              <div className="flex items-center gap-3"><span className="flex items-center gap-3-icon">🚚</span><div><strong>Fast delivery</strong><small>Your food, on time</small></div></div>
-              <div className="flex items-center gap-3"><span className="flex items-center gap-3-icon">🌿</span><div><strong>Fresh & safe</strong><small>Quality you can trust</small></div></div>
-              <div className="flex items-center gap-3"><span className="flex items-center gap-3-icon">♥</span><div><strong>Everyday favourites</strong><small>Something for every craving</small></div></div>
+              <div className="flex items-center gap-3"><span className="flex items-center h-9 w-9 shrink-0 grid place-items-center rounded-xl bg-white/70">🚚</span><div><strong>Fast delivery</strong><small>Your food, on time</small></div></div>
+              <div className="flex items-center gap-3"><span className="flex items-center h-9 w-9 shrink-0 grid place-items-center rounded-xl bg-white/70">🌿</span><div><strong>Fresh & safe</strong><small>Quality you can trust</small></div></div>
+              <div className="flex items-center gap-3"><span className="flex items-center h-9 w-9 shrink-0 grid place-items-center rounded-xl bg-white/70">♥</span><div><strong>Everyday favourites</strong><small>Something for every craving</small></div></div>
             </div>
             <div className="mt-5 flex items-center gap-3">
               <div className="flex" aria-hidden="true">
@@ -91,11 +91,11 @@ export default function AuthPage() {
 
         <div className="flex min-w-0 items-center justify-center bg-[#fffdf9] px-4 py-6 sm:px-6 lg:px-10">
           <div className="w-full max-w-[520px] rounded-3xl border border-tadka-line bg-white p-6 shadow-tadka-lg sm:p-8">
-            <div className="w-full max-w-[520px] rounded-3xl border border-tadka-line bg-white p-6 shadow-tadka-lg sm:p-8-head">
+            <div className="w-full max-w-[520px] rounded-3xl border border-tadka-line bg-white p-6 shadow-tadka-lg sm:p-8">
               <div>
                 <span className="text-xs font-black uppercase tracking-[.14em] text-tadka-orange">{isSignup ? "Create account" : "Welcome back"}</span>
                 <h2>{isSignup ? "Join Tadka Today" : "Login to your account"}</h2>
-                <p className="w-full max-w-[520px] rounded-3xl border border-tadka-line bg-white p-6 shadow-tadka-lg sm:p-8-sub">{isSignup ? "Be part of a food-loving community." : "Continue your food journey with Tadka."}</p>
+                <p className="w-full max-w-[520px] rounded-3xl border border-tadka-line bg-white p-6 shadow-tadka-lg mt-2">{isSignup ? "Be part of a food-loving community." : "Continue your food journey with Tadka."}</p>
               </div>
               <div className="grid h-12 w-12 flex-none place-items-center rounded-2xl bg-orange-50 text-xl text-tadka-orange">🍴</div>
             </div>
@@ -112,7 +112,7 @@ export default function AuthPage() {
             {message && <p className={`mt-3 rounded-xl border border-green-200 bg-tadka-green-soft p-3 text-xs text-tadka-success ${message.startsWith("Unable") || message.includes("reach") ? "border-orange-200 bg-orange-50 text-tadka-danger" : ""}`}>{message}</p>}
 
             <div className="mb-2 mt-5 text-center text-xs text-tadka-muted">{isSignup ? "Already a member?" : "New to Tadka?"}</div>
-            <div className="flex items-center justify-between gap-3 text-xs" style={{justifyContent:"center"}}><button className="border-0 bg-transparent p-0 font-bold text-tadka-orange" type="button" onClick={toggleMode}>{isSignup ? "Login to your account →" : "Create a free account →"}</button></div>
+            <div className="flex items-center justify-center gap-3 text-xs"><button className="border-0 bg-transparent p-0 font-bold text-tadka-orange" type="button" onClick={toggleMode}>{isSignup ? "Login to your account →" : "Create a free account →"}</button></div>
             <p className="mt-3 text-center text-[10px] leading-relaxed text-tadka-subtle">By continuing, you agree to Tadka&apos;s Terms, Privacy Policy and ordering guidelines.</p>
             <div className="mt-3 text-center text-xs text-tadka-subtle"><Link href="/">← Back to Tadka</Link></div>
           </div>
