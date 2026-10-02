@@ -10,6 +10,8 @@ export default function AdminRestaurantsPage() {
   const [busy, setBusy] = useState('');
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState({ name: '', cuisine: '', description: '', deliveryFee: '0' });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -23,6 +25,16 @@ export default function AdminRestaurantsPage() {
       .catch((error) => { if (error.name !== 'AbortError') setMessage(error.message); });
     return () => controller.abort();
   }, []);
+
+  async function createRestaurant(event) {
+    event.preventDefault(); setBusy('create'); setMessage('');
+    try {
+      const response = await fetch(`${apiUrl}/v1/admin/restaurants`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, deliveryFee: Number(form.deliveryFee || 0) }) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(body?.error?.message || 'Unable to create restaurant.');
+      setRestaurants((current) => [body.data, ...current]); setForm({ name: '', cuisine: '', description: '', deliveryFee: '0' }); setShowCreate(false); setMessage('Restaurant created successfully.');
+    } catch (error) { setMessage(error.message); } finally { setBusy(''); }
+  }
 
   async function toggleRestaurant(restaurant) {
     setBusy(restaurant.id);
@@ -70,7 +82,7 @@ export default function AdminRestaurantsPage() {
               </div>
             </div>
           </div>
-          <div className="admin-live-pill"><i /> Live data</div>
+          <div className="admin-restaurants-head-actions"><div className="admin-live-pill"><i /> Live data</div><button className="admin-create-restaurant-btn" onClick={() => setShowCreate(true)}><span>+</span> Add restaurant</button></div>
         </header>
 
         <section className="admin-restaurant-stats">
@@ -133,6 +145,16 @@ export default function AdminRestaurantsPage() {
           )}
         </section>
       </div>
+    
+        {showCreate && <div className="admin-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCreate(false); }}>
+          <form className="admin-create-modal" onSubmit={createRestaurant}>
+            <div className="admin-create-modal-head"><div><span className="eyebrow">NEW PARTNER</span><h2>Add restaurant</h2><p>Create a restaurant first, then assign staff to it from User Management.</p></div><button type="button" onClick={() => setShowCreate(false)}>×</button></div>
+            <label>Restaurant name<input required value={form.name} onChange={e => setForm({...form,name:e.target.value})} placeholder="e.g. Tadka Kitchen" /></label>
+            <div className="admin-create-grid"><label>Cuisine<input value={form.cuisine} onChange={e => setForm({...form,cuisine:e.target.value})} placeholder="Indian, Chinese…" /></label><label>Delivery fee (₹)<input type="number" min="0" value={form.deliveryFee} onChange={e => setForm({...form,deliveryFee:e.target.value})} /></label></div>
+            <label>Description<textarea value={form.description} onChange={e => setForm({...form,description:e.target.value})} placeholder="Short restaurant description…" rows="3" /></label>
+            <div className="admin-create-actions"><button type="button" onClick={() => setShowCreate(false)}>Cancel</button><button className="primary" disabled={busy === 'create'}>{busy === 'create' ? 'Creating…' : 'Create restaurant'}</button></div>
+          </form>
+        </div>}
     </main>
   );
 }
