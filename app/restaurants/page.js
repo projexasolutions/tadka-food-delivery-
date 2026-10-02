@@ -56,26 +56,10 @@ function RestaurantContent() {
       }
     }
     void load();
-    return () => controller.abort();
-  }, [query, cuisine, filter]);
-
-  const visibleRestaurants = useMemo(() => {
-    const source = restaurants.length ? restaurants : fallbackRestaurants;
-    const term = (query || activeCategory).toLowerCase();
-    return source.filter((restaurant) => {
-      const text = `${restaurant.name || ''} ${restaurant.cuisine || ''} ${restaurant.description || ''}`.toLowerCase();
-      const matchesSearch = !query && activeCategory === 'All' ? true : text.includes(term);
-      const matchesRating = filter !== 'rating' || Number.parseFloat(restaurant.rating) >= 4;
-      return matchesSearch && matchesRating;
-    });
-  }, [restaurants, query, activeCategory, filter]);
-
-  const heading = query ? `Results for “${query}”` : cuisine ? `${cuisine} kitchens` : 'Find your next favourite.';
-
-  return (
-    <main className="min-h-screen bg-tadka-bg text-tadka-ink"><section className="mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 lg:px-8">
-      <section className="mx-auto w-full max-w-[1240px]">
-        <div className="flex flex-col gap-5 border-b border-tadka-line pb-6">
+    return (
+    <main className="min-h-screen bg-tadka-bg text-tadka-ink">
+      <section className="mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 lg:px-8">
+        <div className="border-b border-tadka-line pb-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="mb-1 text-xs font-semibold text-tadka-muted">{query ? 'SEARCH RESULTS' : 'DISCOVER FOOD'}</p>
@@ -91,14 +75,24 @@ function RestaurantContent() {
               </select>
             </label>
           </div>
-          <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Restaurant filters">
+
+          <div className="mt-4 flex flex-wrap items-center gap-2" role="tablist" aria-label="Restaurant filters">
             {[['all', 'All'], ['rating', '4.0+ rated'], ['offers', 'Offers']].map(([value, label]) => (
               <button
                 type="button"
                 key={value}
                 onClick={() => setFilter(value)}
                 className={filter === value
-                          <div className="flex gap-2 overflow-x-auto border-b border-tadka-line py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  ? 'rounded-full bg-tadka-green px-4 py-2 text-xs font-semibold text-white'
+                  : 'rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-ink hover:border-tadka-green/40 hover:bg-tadka-green-soft'}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto border-b border-tadka-line py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
             onClick={() => setActiveCategory('All')}
@@ -123,66 +117,113 @@ function RestaurantContent() {
           ))}
         </div>
 
-        <div className="mb-5 flex items-end justify-between gap-6">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-tadka-orange">TOP PICKS</span>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-tadka-ink">Restaurants near you</h2>
-            <p className="mt-1 text-sm text-tadka-muted">Compare ratings, delivery times and prices.</p>
-          </div>
+        <div className="mb-5 mt-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-tadka-orange">TOP PICKS</p>
+          <h2 className="mt-1 text-2xl font-bold tracking-tight">Restaurants near you</h2>
+          <p className="mt-1 text-sm text-tadka-muted">Compare ratings, delivery times and prices.</p>
         </div>
 
-        {error && <div className="mb-4 flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 text-xs text-orange-900"><span className="material-symbols-outlined">info</span>{error}</div>}
+        {error && (
+          <div className="mb-5 flex items-center gap-2 rounded-lg border border-orange-100 bg-orange-50 px-3 py-2.5 text-xs text-orange-900">
+            <span className="material-symbols-outlined text-[17px] text-tadka-orange">info</span>
+            {error}
+          </div>
+        )}
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2">{[1, 2, 3, 4].map((item) => <div className="h-72 animate-pulse rounded-tadka-lg border border-tadka-line bg-tadka-bg" key={item} />)}</div>
-        ) : (
-          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {visibleRestaurants.map((restaurant, index) => (
-                <Link className="block overflow-hidden rounded-tadka-lg border border-tadka-line bg-white text-tadka-ink shadow-tadka-sm transition hover:-translate-y-0.5 hover:shadow-tadka-md" href={`/menu?restaurant=${restaurant.id}`} key={restaurant.id || `${restaurant.name}-${index}`}>
-                  <div className="relative h-52 bg-cover bg-center" style={{ backgroundImage: `url(${restaurant.imageUrl || fallbackRestaurants[index % fallbackRestaurants.length].imageUrl})` }}>
-                    <span className="absolute left-3 top-3 rounded-lg bg-white px-2 py-1.5 text-[9px] font-black tracking-wider text-tadka-orange shadow-sm">{restaurant.badge || (index % 2 === 0 ? 'SPECIAL OFFER' : 'FREE DELIVERY')}</span>
-                    <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white text-tadka-green shadow-sm" aria-label={`Save ${restaurant.name}`}><span className="material-symbols-outlined">favorite_border</span></span>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((item) => (
+              <div key={item} className="overflow-hidden rounded-xl border border-tadka-line bg-white">
+                <div className="h-48 animate-pulse bg-tadka-line/50" />
+                <div className="space-y-3 p-4">
+                  <div className="h-4 w-3/5 animate-pulse rounded bg-tadka-line/60" />
+                  <div className="h-3 w-4/5 animate-pulse rounded bg-tadka-line/50" />
+                  <div className="h-3 w-2/5 animate-pulse rounded bg-tadka-line/50" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : visibleRestaurants.length ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleRestaurants.map((restaurant, index) => {
+              const fallback = fallbackRestaurants[index % fallbackRestaurants.length];
+              const image = restaurant.imageUrl || fallback.imageUrl;
+
+              return (
+                <Link
+                  key={restaurant.id || restaurant.name + '-' + index}
+                  href={'/menu?restaurant=' + restaurant.id}
+                  className="group overflow-hidden rounded-xl border border-tadka-line bg-white transition hover:-translate-y-0.5 hover:border-tadka-line-strong hover:shadow-tadka-md"
+                >
+                  <div className="relative h-48 overflow-hidden bg-tadka-bg">
+                    <img
+                      src={image}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 to-transparent" />
+                    {(restaurant.badge || index < 2) && (
+                      <span className="absolute left-3 top-3 rounded-md bg-white px-2 py-1 text-[10px] font-bold text-tadka-orange shadow-sm">
+                        {restaurant.badge || 'POPULAR'}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      aria-label={'Save ' + restaurant.name}
+                      onClick={(event) => event.preventDefault()}
+                      className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/95 text-tadka-green shadow-sm"
+                    >
+                      <span className="material-symbols-outlined text-[19px]">favorite_border</span>
+                    </button>
                   </div>
+
                   <div className="p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-bold tracking-tight">{restaurant.name}</h3>
-                      <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-tadka-muted"><span className="material-symbols-outlined">schedule</span>{restaurant.time || '25–35 min'}</span>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h2 className="truncate text-base font-bold text-tadka-ink">{restaurant.name}</h2>
+                        <p className="mt-1 truncate text-xs text-tadka-muted">
+                          {restaurant.cuisine || restaurant.description || 'Indian food & beverages'}
+                        </p>
+                      </div>
+                      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-tadka-green">
+                        <span className="material-symbols-outlined text-[15px]">star</span>
+                        {restaurant.rating || 'New'}
+                      </span>
                     </div>
-                    <p className="my-2.5 text-xs text-tadka-muted">{restaurant.cuisine || restaurant.description || 'Indian food & beverages'}</p>
-                    <div className="flex items-center justify-between text-xs text-tadka-muted">
-                      <span className="inline-flex items-center gap-1 text-tadka-green"><span className="material-symbols-outlined">star</span>{restaurant.rating || 'New'} <small>({restaurant.reviews || '—'})</small></span>
-                      <span>{restaurant.price || `₹${restaurant.deliveryFee || 0} delivery`}</span>
+
+                    <div className="mt-4 flex items-center justify-between border-t border-tadka-line pt-3 text-xs text-tadka-muted">
+                      <span className="inline-flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[15px]">schedule</span>
+                        {restaurant.time || '25–35 min'}
+                      </span>
+                      <span>{restaurant.price || '₹' + (restaurant.deliveryFee || 0) + ' delivery'}</span>
                     </div>
                   </div>
                 </Link>
-              ))}
-            </div>
-            <aside className="rounded-tadka-lg border border-tadka-line bg-tadka-green-soft p-6 lg:sticky lg:top-24">
-              <span className="text-[10px] font-black tracking-wider text-tadka-green">TODAY'S OFFERS</span>
-              <h3>Good food,<br /><em>better value.</em></h3>
-              <p>Discover offers and free-delivery deals from selected kitchens.</p>
-              <Link href="/restaurants?filter=offers" className="offer-button">View offers <span className="material-symbols-outlined">arrow_forward</span></Link>
-            </aside>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-tadka-line bg-white px-6 py-16 text-center">
+            <span className="material-symbols-outlined text-4xl text-tadka-subtle">search_off</span>
+            <h2 className="mt-3 text-lg font-bold">No matching restaurants</h2>
+            <p className="mt-1 text-sm text-tadka-muted">Try another cuisine or clear the filters.</p>
+            <Link href="/restaurants" className="mt-4 inline-flex rounded-lg bg-tadka-orange px-4 py-2.5 text-xs font-bold text-white">
+              Show all restaurants
+            </Link>
           </div>
         )}
 
-        {!loading && visibleRestaurants.length === 0 && (
-          <div className="flex flex-col items-center gap-2 rounded-tadka-lg border border-dashed border-tadka-line p-10 text-center"><span className="material-symbols-outlined">search_off</span><h3>No matching kitchens.</h3><p>Try another cuisine or clear the filters.</p><Link href="/restaurants">Show all restaurants</Link></div>
-        )}
-
-        <div className="mt-8 grid gap-3 border-t border-tadka-line py-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">delivery_dining</span></span><div><strong>Fast delivery</strong><small>Fresh food, on time</small></div></div>
-          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">lock</span></span><div><strong>Secure payments</strong><small>Protected transactions</small></div></div>
-          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">restaurant</span></span><div><strong>Trusted kitchens</strong><small>Curated for you</small></div></div>
-          <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">favorite</span></span><div><strong>Made for you</strong><small>Your favourites, nearby</small></div></div>
+        <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 border-t border-tadka-line pt-5 text-xs text-tadka-muted">
+          <span className="inline-flex items-center gap-2"><span className="material-symbols-outlined text-[16px] text-tadka-green">delivery_dining</span>Fast delivery</span>
+          <span className="inline-flex items-center gap-2"><span className="material-symbols-outlined text-[16px] text-tadka-green">verified_user</span>Trusted kitchens</span>
+          <span className="inline-flex items-center gap-2"><span className="material-symbols-outlined text-[16px] text-tadka-green">lock</span>Secure payments</span>
         </div>
       </section>
     </main>
-
-
-    </main>
   );
+}
 }
 
 export default function RestaurantsPage() {
