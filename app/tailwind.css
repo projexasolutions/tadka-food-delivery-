@@ -1,6 +1,5 @@
 @import "tailwindcss/theme.css";
 @import "tailwindcss/utilities.css";
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0&display=swap');
 
 @theme {
   --color-tadka-orange: #F15B22;
