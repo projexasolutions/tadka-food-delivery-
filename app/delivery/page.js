@@ -75,18 +75,22 @@ export default function DeliveryPage() {
           <Link href="/delivery/support"><span className="material-symbols-outlined">support_agent</span>Help & Support</Link>
         </nav>
         <div className="rider-safety-card">
-          <div className="rider-safety-icon"><span className="material-symbols-outlined">two_wheeler</span></div>
-          <b>Stay Safe,<br />Deliver Fresh! 🍲</b>
-          <span>Good food brings happiness.</span>
+          <div className="rider-safety-art" />
+          <b>Ride smart.<br />Deliver fresh. 🍲</b>
+          <span>Every order matters.</span>
         </div>
       </aside>
 
       <section className="rider-main">
-        <div className="rider-topline">
-          <div>
-            <span className="rider-kicker"><i /> RIDER CONSOLE</span>
-            <h1>Good Morning, Rider! 👋</h1>
-            <p>Here are your deliveries for today.</p>
+        <div className="rider-hero">
+          <div className="rider-hero-copy">
+            <span className="rider-kicker"><i /> RIDER CONSOLE • LIVE</span>
+            <h1>Ready to deliver? 👋</h1>
+            <p>Manage your route, accept orders and keep every delivery moving smoothly.</p>
+            <div className="rider-hero-actions">
+              <button className="rider-hero-refresh" onClick={load} disabled={loading}><span className="material-symbols-outlined">refresh</span>{loading ? 'Checking…' : 'Check for orders'}</button>
+              <span className="rider-hero-status"><i /> Online & ready</span>
+            </div>
           </div>
           <div className="rider-date">
             <span className="material-symbols-outlined">calendar_month</span>
@@ -120,7 +124,7 @@ export default function DeliveryPage() {
             {loading ? <div className="rider-empty compact"><span className="rider-spinner" /><b>Checking for new deliveries…</b></div> :
               visible.length === 0 ? (
                 <div className="rider-empty">
-                  <div className="rider-empty-art"><span className="material-symbols-outlined">two_wheeler</span></div>
+                  <img className="rider-empty-image" src="/rider-empty.svg" alt="" />
                   <span className="rider-empty-badge">ALL CLEAR</span>
                   <h3>No {filter} deliveries</h3>
                   <p>New delivery assignments will appear here automatically. Refresh to check for new orders.</p>
