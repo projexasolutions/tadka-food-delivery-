@@ -1,7 +1,7 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { categories, orders, restaurants, users } from '../../db/schema';
-import type { CreateCategoryInput, UpdateOrderStatusInput, UpdateRestaurantInput, UpdateUserRoleInput } from './admin.schema';
+import type { CreateCategoryInput, CreateRestaurantInput, UpdateOrderStatusInput, UpdateRestaurantInput, UpdateUserRoleInput } from './admin.schema';
 
 export class AdminError extends Error {}
 const allowedTransitions: Record<string, string[]> = { pending: ['confirmed', 'cancelled'], confirmed: ['preparing', 'cancelled'], preparing: ['ready', 'cancelled'], ready: ['picked_up', 'cancelled'], picked_up: ['delivered'], delivered: [], cancelled: [] };
@@ -22,6 +22,8 @@ export async function updateUserRole(adminUserId: string, userId: string, input:
   const [updated] = await db.update(users).set({ role: input.role, restaurantId: input.role === 'restaurant_staff' ? input.restaurantId : null }).where(eq(users.id, userId)).returning({ id: users.id, email: users.email, fullName: users.fullName, role: users.role, restaurantId: users.restaurantId });
   if (!updated) throw new AdminError('User not found.'); return updated;
 }
+
+export async function createRestaurant(input: CreateRestaurantInput) { const [restaurant] = await db.insert(restaurants).values({ name: input.name, cuisine: input.cuisine || null, description: input.description || null, deliveryFee: input.deliveryFee, isOpen: true }).returning({ id: restaurants.id, name: restaurants.name, cuisine: restaurants.cuisine, description: restaurants.description, deliveryFee: restaurants.deliveryFee, rating: restaurants.rating, isOpen: restaurants.isOpen, createdAt: restaurants.createdAt }); if (!restaurant) throw new AdminError('Restaurant could not be created.'); return restaurant; }
 
 export async function listRestaurants() { return db.select({ id: restaurants.id, name: restaurants.name, cuisine: restaurants.cuisine, rating: restaurants.rating, isOpen: restaurants.isOpen, createdAt: restaurants.createdAt }).from(restaurants).orderBy(desc(restaurants.createdAt)); }
 export async function updateRestaurant(restaurantId: string, input: UpdateRestaurantInput) { const [updated] = await db.update(restaurants).set({ isOpen: input.isOpen }).where(eq(restaurants.id, restaurantId)).returning({ id: restaurants.id, name: restaurants.name, isOpen: restaurants.isOpen }); if (!updated) throw new AdminError('Restaurant not found.'); return updated; }
