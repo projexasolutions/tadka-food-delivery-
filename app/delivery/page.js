@@ -76,17 +76,18 @@ export default function DeliveryPage() {
         </nav>
         <div className="rider-safety-card">
           <div className="rider-safety-art" />
-          <b>Ride smart.<br />Deliver fresh. 🍲</b>
-          <span>Every order matters.</span>
+          <span className="rider-safety-label">RIDER TIP</span>
+          <b>Ride smart.<br />Deliver fresh.</b>
+          <span>Check your route before leaving.</span>
         </div>
       </aside>
 
       <section className="rider-main">
         <div className="rider-hero">
           <div className="rider-hero-copy">
-            <span className="rider-kicker"><i /> RIDER CONSOLE • LIVE</span>
-            <h1>Ready to deliver? 👋</h1>
-            <p>Manage your route, accept orders and keep every delivery moving smoothly.</p>
+            <span className="rider-kicker"><i /> TODAY'S DELIVERY HUB</span>
+            <h1>Ready for your next ride? 👋</h1>
+            <p>Your delivery queue, earnings and active orders — everything you need in one place.</p>
             <div className="rider-hero-actions">
               <button className="rider-hero-refresh" onClick={load} disabled={loading}><span className="material-symbols-outlined">refresh</span>{loading ? 'Checking…' : 'Check for orders'}</button>
               <span className="rider-hero-status"><i /> Online & ready</span>
@@ -98,7 +99,7 @@ export default function DeliveryPage() {
           </div>
         </div>
 
-        <div className="rider-stat-grid">
+        <div className="rider-stat-grid rider-stat-grid-new">
           <div className="rider-stat-card orange"><span className="rider-stat-icon"><span className="material-symbols-outlined">inventory_2</span></span><div><b>{stats.assigned}</b><strong>Assigned</strong><small>New deliveries</small></div></div>
           <div className="rider-stat-card yellow"><span className="rider-stat-icon"><span className="material-symbols-outlined">two_wheeler</span></span><div><b>{stats.active}</b><strong>Active</strong><small>Currently on delivery</small></div></div>
           <div className="rider-stat-card green"><span className="rider-stat-icon"><span className="material-symbols-outlined">task_alt</span></span><div><b>{stats.completed}</b><strong>Completed</strong><small>Today's deliveries</small></div></div>
@@ -106,6 +107,11 @@ export default function DeliveryPage() {
         </div>
 
         {message && <div className="rider-alert"><span className="material-symbols-outlined">error</span><span>{message}</span><button onClick={() => setMessage('')}>×</button></div>}
+
+        <div className="rider-mini-strip">
+          <div><span className="material-symbols-outlined">route</span><section><small>TODAY'S ROUTE</small><b>Keep your deliveries moving</b></section></div>
+          <div><span className="material-symbols-outlined">bolt</span><section><small>QUICK ACTION</small><b>Refresh for new orders</b></section><button onClick={load} disabled={loading}>Refresh</button></div>
+        </div>
 
         <div className="rider-workspace">
           <section className="rider-queue">
