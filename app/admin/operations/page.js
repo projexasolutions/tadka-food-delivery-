@@ -42,20 +42,20 @@ export default function AdminOperations() {
   }
 
   return (
-    <main className="container">
-      <div className="page-head"><div><span className="eyebrow">ADMIN OPERATIONS</span><h1>Platform Control Center</h1><p>Monitor orders, payments and platform activity.</p></div></div>
-      {message && <p className="notice">{message}</p>}
-      {stats && <section className="stats-grid">
-        <div className="stat"><small>Users</small><strong>{stats.users}</strong></div>
-        <div className="stat"><small>Restaurants</small><strong>{stats.restaurants}</strong></div>
-        <div className="stat"><small>Orders</small><strong>{stats.orders}</strong></div>
-        <div className="stat"><small>Paid revenue</small><strong>₹{stats.paidRevenue.toLocaleString('en-IN')}</strong></div>
+    <main className="min-h-screen bg-tadka-bg px-4 py-8 text-tadka-ink sm:px-6">
+      <div className="mx-auto mb-7 w-full max-w-[1240px]"><div><span className="text-[10px] font-black tracking-[0.14em] text-tadka-orange">ADMIN OPERATIONS</span><h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Platform Control Center</h1><p>Monitor orders, payments and platform activity.</p></div></div>
+      {message && <p className="mx-auto mb-4 w-full max-w-[1240px] rounded-xl border border-orange-100 bg-orange-50 p-3 text-sm text-orange-900">{message}</p>}
+      {stats && <section className="mx-auto grid w-full max-w-[1240px] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><small>Users</small><strong>{stats.users}</strong></div>
+        <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><small>Restaurants</small><strong>{stats.restaurants}</strong></div>
+        <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><small>Orders</small><strong>{stats.orders}</strong></div>
+        <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><small>Paid revenue</small><strong>₹{stats.paidRevenue.toLocaleString('en-IN')}</strong></div>
       </section>}
-      <section className="panel">
-        <div className="panel-head"><div><span className="eyebrow">RECENT</span><h2>Recent orders</h2></div><span className="muted">Latest 25</span></div>
+      <section className="mx-auto mt-5 w-full max-w-[1240px] rounded-tadka-lg border border-tadka-line bg-white p-6 shadow-tadka-sm">
+        <div className="flex items-start justify-between gap-4"><div><span className="text-[10px] font-black tracking-[0.14em] text-tadka-orange">RECENT</span><h2 className="mt-1 text-xl font-bold tracking-tight">Recent orders</h2></div><span className="text-sm text-tadka-muted">Latest 25</span></div>
         {orders.length ? <div className="table operations-table">
           <div className="table-row table-heading"><span>Order</span><span>Restaurant</span><span>Status</span><span>Payment</span><span>Total</span></div>
-          {orders.map((order) => <div className="table-row" key={order.id}>
+          {orders.map((order) => <div className="grid grid-cols-5 gap-3 border-b border-tadka-line p-3 text-sm last:border-0" key={order.id}>
             <span>#{order.id.slice(0, 8)}</span><span>{order.restaurantName}</span>
             <select value={order.status} disabled={busy === order.id} onChange={(event) => updateStatus(order.id, event.target.value)} aria-label={`Status for order ${order.id}`}>
               {statusOptions.map((status) => <option key={status} value={status}>{status}</option>)}
