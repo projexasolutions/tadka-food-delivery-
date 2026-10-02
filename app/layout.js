@@ -1,4 +1,5 @@
 import '@fontsource/metropolis/400.css';
+import '@fontsource/material-symbols-outlined/500.css';
 import '@fontsource/metropolis/500.css';
 import '@fontsource/metropolis/600.css';
 import '@fontsource/metropolis/700.css';
