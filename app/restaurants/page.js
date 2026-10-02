@@ -73,44 +73,62 @@ function RestaurantContent() {
   const heading = query ? `Results for “${query}”` : cuisine ? `${cuisine} kitchens` : 'Find your next favourite.';
 
   return (
-    <main className="min-h-screen bg-white px-4 py-7 text-tadka-ink sm:px-6">
+    <main className="min-h-screen bg-tadka-bg text-tadka-ink"><section className="mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 lg:px-8">
       <section className="mx-auto w-full max-w-[1240px]">
-        <div className="grid min-h-[300px] overflow-hidden rounded-tadka-xl bg-tadka-green lg:grid-cols-[1fr_1.18fr]">
-          <div className="relative z-10 flex flex-col justify-center p-7 sm:p-10">
-            <span className="text-[11px] font-black tracking-[0.18em] text-green-200">DISCOVER TADKA</span>
-            <h1 className="my-3 max-w-[610px] text-4xl font-bold leading-none tracking-tight text-white sm:text-5xl lg:text-6xl">{heading}</h1>
-            <p className="mb-6 max-w-[560px] text-base leading-6 text-white/75">Delicious food from trusted local kitchens, delivered to your doorstep.</p>
-            <div className="flex flex-wrap gap-2.5" role="tablist" aria-label="Restaurant filters">
-              {[['all', 'All', 'apps'], ['rating', '4.0+ Rated', 'star'], ['offers', 'Offers', 'local_offer']].map(([value, label, icon]) => (
-                <button type="button" key={value} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-bold transition ${filter === value ? "border-green-200 bg-green-200 text-tadka-green" : "border-white/25 bg-white text-tadka-green"}`} onClick={() => setFilter(value)}>
-                  <span className="material-symbols-outlined">{icon}</span>{label}
-                </button>
-              ))}
+        <div className="flex flex-col gap-5 border-b border-tadka-line pb-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="mb-1 text-xs font-semibold text-tadka-muted">{query ? 'SEARCH RESULTS' : 'DISCOVER FOOD'}</p>
+              <h1 className="text-3xl font-bold tracking-tight text-tadka-ink sm:text-4xl">{heading}</h1>
+              <p className="mt-2 text-sm text-tadka-muted">Fresh food from local kitchens, delivered to your door.</p>
             </div>
+            <label className="flex h-10 w-fit items-center gap-2 rounded-lg border border-tadka-line bg-white px-3 text-xs text-tadka-muted">
+              Sort
+              <select className="bg-transparent font-semibold text-tadka-ink outline-none" defaultValue="relevance">
+                <option value="relevance">Relevance</option>
+                <option value="rating">Rating</option>
+                <option value="time">Delivery time</option>
+              </select>
+            </label>
           </div>
-          <div className="relative min-h-[300px]" aria-hidden="true">
-            <div className="hero-food-image" />
-          </div>
-        </div>
-
-        <div className="flex gap-3 overflow-x-auto py-5 pb-7" aria-label="Popular cuisines">
-          <button type="button" className={`flex h-[104px] w-[104px] shrink-0 flex-col items-center justify-center gap-2 rounded-tadka-lg border text-sm font-bold transition ${activeCategory === "All" ? "border-tadka-green bg-tadka-green-soft text-tadka-green" : "border-tadka-line bg-white text-tadka-ink"}`} onClick={() => setActiveCategory('All')}>
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-orange-50 text-tadka-orange"><span className="material-symbols-outlined">apps</span></span><span>All</span>
+          <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Restaurant filters">
+            {[['all', 'All'], ['rating', '4.0+ rated'], ['offers', 'Offers']].map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                onClick={() => setFilter(value)}
+                className={filter === value
+                          <div className="flex gap-2 overflow-x-auto border-b border-tadka-line py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <button
+            type="button"
+            onClick={() => setActiveCategory('All')}
+            className={activeCategory === 'All'
+              ? 'shrink-0 rounded-full bg-tadka-orange px-4 py-2 text-xs font-semibold text-white'
+              : 'shrink-0 rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-muted hover:text-tadka-ink'}
+          >
+            All cuisines
           </button>
           {categories.map(([icon, name]) => (
-            <button type="button" key={name} className={`flex h-[104px] w-[104px] shrink-0 flex-col items-center justify-center gap-2 rounded-tadka-lg border text-sm font-bold transition ${activeCategory === name ? "border-tadka-green bg-tadka-green-soft text-tadka-green" : "border-tadka-line bg-white text-tadka-ink"}`} onClick={() => setActiveCategory(name)}>
-              <span className="grid h-14 w-14 place-items-center rounded-full bg-orange-50 text-tadka-orange"><span className="material-symbols-outlined">{icon}</span></span><span>{name}</span>
+            <button
+              type="button"
+              key={name}
+              onClick={() => setActiveCategory(name)}
+              className={activeCategory === name
+                ? 'inline-flex shrink-0 items-center gap-1.5 rounded-full bg-tadka-orange px-4 py-2 text-xs font-semibold text-white'
+                : 'inline-flex shrink-0 items-center gap-1.5 rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-muted hover:text-tadka-ink'}
+            >
+              <span className="material-symbols-outlined text-[16px]">{icon}</span>
+              {name}
             </button>
           ))}
         </div>
 
         <div className="mb-5 flex items-end justify-between gap-6">
           <div>
-            <span className="text-[10px] font-black tracking-[0.12em] text-tadka-orange">TOP PICKS FOR YOU</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-tadka-orange">TOP PICKS</span>
             <h2 className="mt-1 text-2xl font-bold tracking-tight text-tadka-ink">Restaurants near you</h2>
-            <p className="text-sm text-tadka-muted">Explore top restaurants, cuisines and exclusive offers</p>
+            <p className="mt-1 text-sm text-tadka-muted">Compare ratings, delivery times and prices.</p>
           </div>
-          <label className="whitespace-nowrap rounded-xl border border-tadka-line bg-white px-3 py-2 text-xs text-tadka-muted">Sort by <select defaultValue="relevance"><option value="relevance">Relevance</option><option value="rating">Rating</option><option value="time">Delivery time</option></select></label>
         </div>
 
         {error && <div className="mb-4 flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 text-xs text-orange-900"><span className="material-symbols-outlined">info</span>{error}</div>}
@@ -160,77 +178,9 @@ function RestaurantContent() {
           <div><span className="grid h-9 w-9 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><span className="material-symbols-outlined">favorite</span></span><div><strong>Made for you</strong><small>Your favourites, nearby</small></div></div>
         </div>
       </section>
+    </main>
 
-      <style jsx global>{`
-        .tadka-discovery{min-height:calc(100vh - 82px);background:#fff;color:#132d2a;padding:28px 0 58px;font-family:inherit}
-        .tadka-discovery-wrap{width:min(1500px,calc(100% - 64px));margin:0 auto}
-        .discovery-hero{min-height:300px;border-radius:26px;overflow:hidden;position:relative;background:#17463c;display:grid;grid-template-columns:1fr 1.18fr;box-shadow:0 14px 36px rgba(25,62,53,.12)}
-        .hero-copy{padding:42px 46px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
-        .eyebrow{font-size:11px;font-weight:900;letter-spacing:2px;color:#a8dfb8}
-        .hero-copy h1{font-size:clamp(38px,4vw,62px);line-height:1;letter-spacing:-2.4px;color:#fff;margin:13px 0 13px;max-width:610px}
-        .hero-copy p{font-size:16px;line-height:1.5;color:rgba(255,255,255,.76);margin:0 0 24px;max-width:560px}
-        .hero-filters{display:flex;gap:10px;flex-wrap:wrap}
-        .hero-filter{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.25);background:#fff;color:#173c35;border-radius:999px;padding:10px 17px;font-weight:800;font-size:13px;cursor:pointer;transition:.2s ease}
-        .hero-filter .material-symbols-outlined{font-size:17px}
-        .hero-filter:hover{transform:translateY(-1px)}
-        .hero-filter.active{background:#bceac9;border-color:#bceac9}
-        .hero-food{position:relative;min-height:300px}
-        .hero-food-image{position:absolute;inset:0;background-image:linear-gradient(90deg,#17463c 0%,rgba(23,70,60,.22) 20%,rgba(23,70,60,0) 48%),url('https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1400&q=88');background-size:cover;background-position:center}
-        .category-strip{display:flex;gap:12px;overflow-x:auto;padding:20px 0 28px;scrollbar-width:none}
-        .category-strip::-webkit-scrollbar{display:none}
-        .category-card{flex:0 0 104px;height:104px;border:1px solid #ebe6de;background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#20312e;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(56,44,30,.035);transition:.2s ease}
-        .category-card:hover,.category-card.active{border-color:#b9dcca;background:#f2f9f4;transform:translateY(-2px)}
-        .category-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:50%;background:#fff5e9;color:#e85b29}
-        .category-icon .material-symbols-outlined{font-size:28px}
-        .section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin:0 0 18px}
-        .section-heading h2{font-size:30px;letter-spacing:-1px;margin:5px 0 4px;color:#102a27}
-        .section-heading p{margin:0;color:#74807d;font-size:14px}
-        .section-kicker{color:#f05a24;font-size:10px;font-weight:900;letter-spacing:1.7px}
-        .sort-control{border:1px solid #e7e0d7;border-radius:12px;padding:10px 12px;background:#fff;font-size:12px;color:#68716f;white-space:nowrap}
-        .sort-control select{border:0;background:transparent;font-weight:800;color:#173b35;margin-left:4px;outline:0;font-size:12px}
-        .soft-notice{display:flex;align-items:center;gap:8px;background:#fff8f1;border:1px solid #f2dcc9;color:#89583c;border-radius:12px;padding:10px 14px;margin:0 0 15px;font-size:12px}
-        .soft-notice .material-symbols-outlined{font-size:17px;color:#ef5b29}
-        .restaurant-layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:start}
-        .restaurant-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-        .restaurant-card{display:block;background:#fff;border:1px solid #e9e4dc;border-radius:18px;overflow:hidden;color:inherit;text-decoration:none;box-shadow:0 6px 20px rgba(43,37,29,.045);transition:transform .2s ease,box-shadow .2s ease}
-        .restaurant-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(43,37,29,.09)}
-        .restaurant-photo{height:205px;background-size:cover;background-position:center;position:relative}
-        .offer-badge{position:absolute;left:12px;top:12px;background:#fff;border-radius:8px;padding:7px 9px;color:#d84e21;font-size:9px;font-weight:900;letter-spacing:.8px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-        .heart-button{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;background:#fff;display:grid;place-items:center;color:#1a3b35;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-        .heart-button .material-symbols-outlined{font-size:19px}
-        .restaurant-card-body{padding:15px 16px 16px}
-        .restaurant-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-        .restaurant-title-row h3{font-size:19px;letter-spacing:-.4px;margin:0;color:#142b28}
-        .delivery-time{display:inline-flex;align-items:center;gap:3px;color:#687773;font-size:11px;white-space:nowrap}
-        .delivery-time .material-symbols-outlined{font-size:14px}
-        .restaurant-cuisine{margin:7px 0 12px;color:#6f7b78;font-size:13px}
-        .restaurant-meta{display:flex;justify-content:space-between;align-items:center;color:#64716e;font-size:12px}
-        .rating-pill{display:inline-flex;align-items:center;gap:3px;color:#176052;font-weight:900}
-        .rating-pill .material-symbols-outlined{font-size:15px}
-        .rating-pill small{font-weight:500;color:#8a9491}
-        .offer-panel{background:#f3f8f4;border:1px solid #dcece2;border-radius:18px;padding:23px;min-height:100%;position:sticky;top:100px}
-        .offer-mini{font-size:10px;font-weight:900;letter-spacing:1.6px;color:#176052}
-        .offer-panel h3{font-size:26px;line-height:1.08;letter-spacing:-.8px;color:#143b34;margin:12px 0}
-        .offer-panel h3 em{font-style:normal;color:#ef5a27}
-        .offer-panel p{font-size:13px;line-height:1.55;color:#71807a;margin:0 0 22px}
-        .offer-button{display:flex;align-items:center;justify-content:space-between;background:#155b4d;color:#fff;text-decoration:none;border-radius:10px;padding:12px 14px;font-size:12px;font-weight:900}
-        .offer-button .material-symbols-outlined{font-size:17px}
-        .empty-card{padding:45px 20px;text-align:center;border:1px dashed #ddd5ca;border-radius:16px;margin-top:18px;color:#64716e}
-        .empty-card>.material-symbols-outlined{font-size:34px;color:#9aaca5}
-        .empty-card h3{margin:8px 0 5px;color:#18332e}
-        .empty-card p{margin:0 0 12px;font-size:13px}
-        .empty-card a{color:#e85425;font-weight:800;text-decoration:none;font-size:13px}
-        .trust-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e9e5df;border:1px solid #e9e5df;border-radius:16px;overflow:hidden;margin-top:32px}
-        .trust-strip>div{background:#fff;padding:16px;display:flex;align-items:center;gap:10px}
-        .trust-icon{width:38px;height:38px;border-radius:50%;background:#eef7f1;color:#176052;display:grid;place-items:center;flex:0 0 auto}
-        .trust-icon .material-symbols-outlined{font-size:20px}
-        .trust-strip strong{display:block;font-size:12px;color:#19332e}
-        .trust-strip small{display:block;color:#7b8582;font-size:10px;margin-top:2px}
-        .skeleton{height:330px;background:linear-gradient(90deg,#f4f1ed 25%,#faf9f7 50%,#f4f1ed 75%);background-size:200% 100%;animation:tadka-shimmer 1.3s infinite}
-        @keyframes tadka-shimmer{to{background-position:-200% 0}}
-        @media(max-width:1050px){.tadka-discovery-wrap{width:min(100% - 32px,900px)}.restaurant-layout{grid-template-columns:1fr}.offer-panel{position:static}.restaurant-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.trust-strip{grid-template-columns:repeat(2,1fr)}}
-        @media(max-width:700px){.tadka-discovery{padding-top:16px}.tadka-discovery-wrap{width:calc(100% - 24px)}.discovery-hero{grid-template-columns:1fr;min-height:0}.hero-copy{padding:32px 25px}.hero-copy h1{font-size:42px}.hero-food{min-height:190px}.hero-food-image{background-position:center}.category-card{flex-basis:92px;height:96px}.restaurant-grid{grid-template-columns:1fr}.restaurant-photo{height:190px}.section-heading{align-items:flex-start;flex-direction:column}.sort-control{align-self:stretch}.trust-strip{grid-template-columns:1fr}.trust-strip>div{padding:13px 15px}}
-      `}</style>
+
     </main>
   );
 }
