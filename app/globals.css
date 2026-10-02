@@ -391,3 +391,16 @@ input,select,textarea{border-radius:8px;background:#fff;border-color:#dcd1c7}inp
 .rider-online,.rider-customer-link{font-size:9px}
 @media(max-width:900px){.rider-settings-wrap,.rider-navbar-inner{width:calc(100% - 32px)}.rider-support-grid{grid-template-columns:1fr}.rider-contact-card{min-height:auto}.rider-settings-head h1{font-size:32px}}
 @media(max-width:600px){.rider-settings{padding:22px 0 45px}.rider-settings-wrap,.rider-navbar-inner{width:calc(100% - 24px)}.rider-settings-head{align-items:flex-start}.rider-settings-head h1{font-size:29px}.rider-support-hero{padding:16px;align-items:flex-start}.rider-support-hero>div{align-items:flex-start}.rider-support-hero>a{width:100%;text-align:center}.rider-support-grid>.rider-settings-card{padding:18px}.rider-nav-links{gap:2px}.rider-nav-links a{padding:8px}.rider-brand-divider,.rider-brand>span:last-child{display:none}}
+
+/* Branded rider background artwork */
+.rider-settings{background:#f8f7f5 url('/rider-pattern.svg') repeat}
+.rider-support-hero{position:relative;overflow:hidden;min-height:150px;padding:24px 28px;background:#155b4e url('/rider-bg.svg') center right/cover no-repeat;isolation:isolate}
+.rider-support-hero:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(21,91,78,.98) 0%,rgba(21,91,78,.88) 45%,rgba(21,91,78,.25) 100%);z-index:-1}
+.rider-support-hero>div,.rider-support-hero>a{position:relative;z-index:1}
+.rider-support-hero>div{max-width:650px}
+.rider-support-hero b{font-size:18px}
+.rider-support-hero p{font-size:10px}
+.rider-contact-card{position:relative;overflow:hidden}
+.rider-contact-card:after{content:'🍲';position:absolute;right:-8px;bottom:-20px;font-size:86px;opacity:.045;transform:rotate(-12deg);pointer-events:none}
+.rider-contact-card:nth-child(2):after{content:'🚴';font-size:76px}
+.rider-faq-item button:hover{color:#ef5b25}
