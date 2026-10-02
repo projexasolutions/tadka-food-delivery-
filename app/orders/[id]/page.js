@@ -44,13 +44,13 @@ export default function OrderDetailsPage() {
     return Math.max(0, steps.findIndex(([status]) => status === order.status));
   }, [order]);
 
-  if (!order) return <main className="mx-auto w-full max-w-3xl px-4 py-12 text-center"><div className="rounded-2xl border border-tadka-line bg-white p-6 shadow-tadka-sm"><span className="text-[10px] font-black uppercase tracking-[.14em] text-tadka-orange">ORDER TRACKING</span><h1>{message}</h1><Link className="secondary" href="/orders">Back to orders</Link></div></main>;
+  if (!order) return <main className="mx-auto w-full max-w-3xl px-4 py-12 text-center"><div className="rounded-2xl border border-tadka-line bg-white p-6 shadow-tadka-sm"><span className="text-[10px] font-black uppercase tracking-[.14em] text-tadka-orange">ORDER TRACKING</span><h1>{message}</h1><Link className="inline-flex items-center justify-center rounded-xl border border-tadka-line bg-white px-4 py-2.5 text-sm font-bold text-tadka-ink hover:bg-tadka-bg" href="/orders">Back to orders</Link></div></main>;
 
   return (
     <main className="mx-auto w-full max-w-[1200px] px-4 py-9 pb-20">
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div><span className="text-[10px] font-black uppercase tracking-[.14em] text-tadka-orange">LIVE ORDER TRACKING</span><h1>Your order is on the way.</h1><p>#{order.id.slice(0, 8).toUpperCase()} · {order.restaurantName}</p></div>
-        <Link className="secondary" href="/orders">← All orders</Link>
+        <Link className="inline-flex items-center justify-center rounded-xl border border-tadka-line bg-white px-4 py-2.5 text-sm font-bold text-tadka-ink hover:bg-tadka-bg" href="/orders">← All orders</Link>
       </div>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -58,9 +58,9 @@ export default function OrderDetailsPage() {
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div><span className="text-[10px] font-black uppercase tracking-[.14em] text-tadka-orange">{order.restaurantName}</span><h2>Good food. Happier people.</h2></div><span className="inline-flex rounded-full bg-tadka-green-soft px-3 py-1.5 text-xs font-bold text-tadka-success">{steps[activeIndex]?.[1] || order.status}</span></div>
           <div className="my-6 grid gap-4">
             {steps.map(([status, title, copy], index) => (
-              <div className={`order-step ${index <= activeIndex ? 'done' : ''} ${index === activeIndex ? 'current' : ''}`} key={status}>
+              <div className="flex items-start gap-3 rounded-xl border border-tadka-line bg-tadka-bg p-3" key={status}>
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-tadka-green text-xs font-bold text-white">{index < activeIndex ? '✓' : index + 1}</span>
-                <div><b>{title}</b><p>{copy}</p></div>
+                <div><b className="text-sm">{title}</b><p className="mt-1 text-sm text-tadka-muted">{copy}</p></div>
               </div>
             ))}
           </div>
