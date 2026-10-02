@@ -170,13 +170,13 @@ export default function CustomerNav() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-tadka-line bg-white/95 backdrop-blur">
-      <div className="mx-auto flex min-h-[72px] w-full max-w-[1400px] items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[72px] w-full max-w-[1440px] items-center gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
         <Link className="shrink-0" href="/" aria-label="Tadka home"><img src="/tadka-logo.svg" alt="Tadka" className="h-11 w-auto" /></Link>
         <div className="relative shrink-0" ref={locationRef}>
-          <button className={`flex min-w-0 items-center gap-2 rounded-xl border px-3 py-2 text-left transition ${locationOpen ? 'border-tadka-green bg-tadka-green-soft' : 'border-tadka-line bg-white hover:border-tadka-line-strong'}`} type="button" onClick={() => setLocationOpen((open) => !open)} aria-expanded={locationOpen} aria-haspopup="dialog" title="Choose delivery location">
+          <button className={`flex h-[52px] min-w-[190px] items-center gap-2 rounded-xl border px-3 py-2 text-left transition ${locationOpen ? 'border-tadka-green bg-tadka-green-soft' : 'border-tadka-line bg-white hover:border-tadka-line-strong'}`} type="button" onClick={() => setLocationOpen((open) => !open)} aria-expanded={locationOpen} aria-haspopup="dialog" title="Choose delivery location">
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-orange-50 text-tadka-orange" aria-hidden="true"><span className="material-symbols-outlined">location_on</span></span>
-            <span className="flex min-w-0 flex-col"><small>DELIVER TO</small><b>{locationBusy ? 'Finding...' : location}</b></span>
-            <span className="text-tadka-muted" aria-hidden="true"><span className="material-symbols-outlined">expand_more</span></span>
+            <span className="flex min-w-0 flex-1 flex-col leading-tight"><small className="text-[9px] font-bold uppercase tracking-[0.08em] text-tadka-muted">Deliver to</small><b className="truncate text-sm font-bold text-tadka-ink">{locationBusy ? 'Finding...' : location}</b></span>
+            <span className="shrink-0 text-tadka-muted" aria-hidden="true"><span className="material-symbols-outlined text-[20px]">expand_more</span></span>
           </button>
 
           {locationOpen && (
@@ -232,9 +232,9 @@ export default function CustomerNav() {
             </div>
           )}
         </div>
-        <form className="flex min-w-0 flex-1 items-center rounded-xl border border-tadka-line bg-tadka-bg px-3 transition focus-within:border-tadka-green focus-within:bg-white" onSubmit={submitSearch} role="search"><span className="text-tadka-muted" aria-hidden="true"><span className="material-symbols-outlined">search</span></span><input className="h-10 w-full bg-transparent text-sm text-tadka-ink outline-none placeholder:text-tadka-subtle" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search food" placeholder="Search for dishes, restaurants or cuisines" /></form>
-        <nav className="hidden items-center gap-5 text-sm font-semibold text-tadka-muted lg:flex" aria-label="Primary navigation"><Link className="transition hover:text-tadka-green" href="/">Home</Link><Link className="transition hover:text-tadka-green" href="/restaurants">Explore</Link><Link href="/restaurants?offers=true">Offers</Link><Link href="/restaurants">Categories</Link><Link className="transition hover:text-tadka-green" href="/account">Account</Link></nav>
-        <Link className="relative inline-flex shrink-0 items-center gap-2 rounded-xl bg-tadka-green px-4 py-2.5 text-sm font-bold text-white transition hover:bg-tadka-orange" href="/cart" aria-label={`Bag with ${cartCount} items`}><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</Link>
+        <form className="flex h-[52px] min-w-0 flex-1 items-center rounded-xl border border-tadka-line bg-tadka-bg px-3 transition focus-within:border-tadka-green focus-within:bg-white" onSubmit={submitSearch} role="search"><span className="mr-1 shrink-0 text-tadka-muted" aria-hidden="true"><span className="material-symbols-outlined text-[20px]">search</span></span><input className="h-10 w-full bg-transparent text-sm text-tadka-ink outline-none placeholder:text-tadka-subtle" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search food" placeholder="Search for dishes, restaurants or cuisines" /></form>
+        <nav className="hidden shrink-0 items-center gap-4 text-sm font-semibold text-tadka-muted xl:flex" aria-label="Primary navigation"><Link className="transition hover:text-tadka-green" href="/">Home</Link><Link className="transition hover:text-tadka-green" href="/restaurants">Explore</Link><Link href="/restaurants?offers=true">Offers</Link><Link href="/restaurants">Categories</Link><Link className="transition hover:text-tadka-green" href="/account">Account</Link></nav>
+        <Link className="relative inline-flex h-[52px] shrink-0 items-center gap-2 rounded-xl bg-tadka-green px-5 text-sm font-bold text-white transition hover:bg-tadka-orange" href="/cart" aria-label={`Bag with ${cartCount} items`}><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</Link>
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-6 border-t border-tadka-line bg-white/95 py-2 backdrop-blur lg:hidden" aria-label="Mobile navigation"><Link className="transition hover:text-tadka-green" href="/"><span>Home</span></Link><Link className="transition hover:text-tadka-green" href="/restaurants"><span>Explore</span></Link><Link href="/restaurants?offers=true"><span>Offers</span></Link><Link className="transition hover:text-tadka-green" href="/orders"><span>Orders</span></Link><Link className="transition hover:text-tadka-green" href="/account"><span>Account</span></Link><Link className={isActive('/cart') ? 'active' : ''} href="/cart"><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</Link></nav>
     </header>
