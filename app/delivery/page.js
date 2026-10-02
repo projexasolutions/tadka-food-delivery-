@@ -62,9 +62,9 @@ export default function DeliveryPage() {
       : deliveries.filter((x) => x.status === 'delivered');
 
   return (
-    <main className="rider-dashboard">
-      <aside className="rider-sidebar">
-        <div className="rider-side-brand">
+    <main className="min-h-screen bg-tadka-bg text-tadka-ink">
+      <aside className="hidden w-64 shrink-0 border-r border-tadka-line bg-white p-4 lg:block">
+        <div className="flex items-center gap-3 border-b border-tadka-line pb-5">
           <img src="/tadka-logo.svg" alt="Tadka" />
           <span><b>RIDER CONSOLE</b><small>DELIVERY PARTNER</small></span>
         </div>
@@ -82,49 +82,49 @@ export default function DeliveryPage() {
         </div>
       </aside>
 
-      <section className="rider-main">
-        <div className="rider-hero">
+      <section className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6">
+        <div className="flex flex-col justify-between gap-5 rounded-2xl bg-tadka-green p-6 text-white shadow-tadka-md md:flex-row md:items-center">
           <div className="rider-hero-copy">
-            <span className="rider-kicker"><i /> TODAY'S DELIVERY HUB</span>
+            <span className="inline-flex items-center gap-2 text-[10px] font-black tracking-widest text-tadka-orange"><i /> TODAY'S DELIVERY HUB</span>
             <h1>Ready for your next ride? 👋</h1>
             <p>Your delivery queue, earnings and active orders — everything you need in one place.</p>
-            <div className="rider-hero-actions">
-              <button className="rider-hero-refresh" onClick={load} disabled={loading}><span className="material-symbols-outlined">refresh</span>{loading ? 'Checking…' : 'Check for orders'}</button>
-              <span className="rider-hero-status"><i /> Online & ready</span>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-tadka-green" onClick={load} disabled={loading}><span className="material-symbols-outlined">refresh</span>{loading ? 'Checking…' : 'Check for orders'}</button>
+              <span className="text-xs font-bold"><i /> Online & ready</span>
             </div>
           </div>
-          <div className="rider-date">
+          <div className="flex items-center gap-3 rounded-xl bg-white/10 p-3">
             <span className="material-symbols-outlined">calendar_month</span>
             <div><small>{new Date().toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}</small><b>{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</b></div>
           </div>
         </div>
 
-        <div className="rider-stat-grid rider-stat-grid-new">
-          <div className="rider-stat-card orange"><span className="rider-stat-icon"><span className="material-symbols-outlined">inventory_2</span></span><div><b>{stats.assigned}</b><strong>Assigned</strong><small>New deliveries</small></div></div>
-          <div className="rider-stat-card yellow"><span className="rider-stat-icon"><span className="material-symbols-outlined">two_wheeler</span></span><div><b>{stats.active}</b><strong>Active</strong><small>Currently on delivery</small></div></div>
-          <div className="rider-stat-card green"><span className="rider-stat-icon"><span className="material-symbols-outlined">task_alt</span></span><div><b>{stats.completed}</b><strong>Completed</strong><small>Today's deliveries</small></div></div>
-          <div className="rider-stat-card value"><span className="rider-stat-icon"><span className="material-symbols-outlined">payments</span></span><div><b>₹{stats.value.toLocaleString('en-IN')}</b><strong>Order Value</strong><small>Across loaded deliveries</small></div></div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border border-tadka-line bg-white p-4 shadow-tadka-sm"><span className="rider-stat-icon"><span className="material-symbols-outlined">inventory_2</span></span><div><b>{stats.assigned}</b><strong>Assigned</strong><small>New deliveries</small></div></div>
+          <div className="rounded-xl border border-tadka-line bg-white p-4 shadow-tadka-sm"><span className="rider-stat-icon"><span className="material-symbols-outlined">two_wheeler</span></span><div><b>{stats.active}</b><strong>Active</strong><small>Currently on delivery</small></div></div>
+          <div className="rounded-xl border border-tadka-line bg-white p-4 shadow-tadka-sm"><span className="rider-stat-icon"><span className="material-symbols-outlined">task_alt</span></span><div><b>{stats.completed}</b><strong>Completed</strong><small>Today's deliveries</small></div></div>
+          <div className="rounded-xl border border-tadka-line bg-white p-4 shadow-tadka-sm"><span className="rider-stat-icon"><span className="material-symbols-outlined">payments</span></span><div><b>₹{stats.value.toLocaleString('en-IN')}</b><strong>Order Value</strong><small>Across loaded deliveries</small></div></div>
         </div>
 
-        {message && <div className="rider-alert"><span className="material-symbols-outlined">error</span><span>{message}</span><button onClick={() => setMessage('')}>×</button></div>}
+        {message && <div className="my-4 flex items-center gap-3 rounded-xl border border-orange-100 bg-orange-50 p-3 text-sm text-orange-900"><span className="material-symbols-outlined">error</span><span>{message}</span><button onClick={() => setMessage('')}>×</button></div>}
 
-        <div className="rider-mini-strip">
+        <div className="my-4 grid gap-3 md:grid-cols-2">
           <div><span className="material-symbols-outlined">route</span><section><small>TODAY'S ROUTE</small><b>Keep your deliveries moving</b></section></div>
           <div><span className="material-symbols-outlined">bolt</span><section><small>QUICK ACTION</small><b>Refresh for new orders</b></section><button onClick={load} disabled={loading}>Refresh</button></div>
         </div>
 
-        <div className="rider-workspace">
-          <section className="rider-queue">
-            <div className="rider-queue-head">
+        <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
+          <section className="rounded-2xl border border-tadka-line bg-white p-5 shadow-tadka-sm">
+            <div className="flex items-center justify-between gap-4">
               <div><span className="eyebrow">TODAY'S QUEUE</span><h2>Deliveries <em>{deliveries.length}</em></h2></div>
-              <button className="rider-refresh" onClick={load} disabled={loading}><span className="material-symbols-outlined">refresh</span> Refresh</button>
+              <button className="rounded-xl border border-tadka-line px-3 py-2 text-sm font-bold hover:bg-tadka-bg" onClick={load} disabled={loading}><span className="material-symbols-outlined">refresh</span> Refresh</button>
             </div>
-            <div className="rider-tabs">
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
               {[
                 ['assigned', `Assigned (${stats.assigned})`],
                 ['active', `Active (${stats.active})`],
                 ['completed', `Completed (${stats.completed})`],
-              ].map(([key, label]) => <button key={key} className={filter === key ? 'active' : ''} onClick={() => setFilter(key)}>{label}</button>)}
+              ].map(([key, label]) => <button key={key} className={`shrink-0 rounded-xl border px-3 py-2 text-xs font-bold ${filter === key ? "border-tadka-green bg-tadka-green text-white" : "border-tadka-line bg-white text-tadka-muted"}`} onClick={() => setFilter(key)}>{label}</button>)}
             </div>
 
             {loading ? <div className="rider-empty compact"><span className="rider-spinner" /><b>Checking for new deliveries…</b></div> :
@@ -134,7 +134,7 @@ export default function DeliveryPage() {
                   <span className="rider-empty-badge">ALL CLEAR</span>
                   <h3>No {filter} deliveries</h3>
                   <p>New delivery assignments will appear here automatically. Refresh to check for new orders.</p>
-                  <button className="rider-primary" onClick={load}><span className="material-symbols-outlined">refresh</span> Check again</button>
+                  <button className="rounded-xl bg-tadka-orange px-4 py-2.5 text-sm font-bold text-white hover:bg-tadka-orange-dark disabled:opacity-50" onClick={load}><span className="material-symbols-outlined">refresh</span> Check again</button>
                 </div>
               ) : (
                 <div className="rider-order-list">
@@ -149,21 +149,21 @@ export default function DeliveryPage() {
                         <p><span className="material-symbols-outlined">location_on</span>{delivery.address}</p>
                         <p><span className="material-symbols-outlined">call</span>{delivery.phone}</p>
                       </div>
-                      <div className="rider-order-side"><strong>₹{delivery.total}</strong>{delivery.status !== 'delivered' ? <button className="rider-primary" onClick={() => advance(delivery)} disabled={busyId === delivery.id}><span className="material-symbols-outlined">{busyId === delivery.id ? 'progress_activity' : 'arrow_forward'}</span>{busyId === delivery.id ? 'Updating…' : nextLabel}</button> : <span className="rider-complete"><span className="material-symbols-outlined">check</span>Completed</span>}</div>
+                      <div className="rider-order-side"><strong>₹{delivery.total}</strong>{delivery.status !== 'delivered' ? <button className="rounded-xl bg-tadka-orange px-4 py-2.5 text-sm font-bold text-white hover:bg-tadka-orange-dark disabled:opacity-50" onClick={() => advance(delivery)} disabled={busyId === delivery.id}><span className="material-symbols-outlined">{busyId === delivery.id ? 'progress_activity' : 'arrow_forward'}</span>{busyId === delivery.id ? 'Updating…' : nextLabel}</button> : <span className="rider-complete"><span className="material-symbols-outlined">check</span>Completed</span>}</div>
                     </article>;
                   })}
                 </div>
               )}
           </section>
 
-          <aside className="rider-detail">
-            <div className="rider-detail-head"><div><span className="eyebrow">DELIVERY FLOW</span><h3>Quick guide</h3></div><span className="rider-live"><i /> Live</span></div>
-            <div className="rider-flow">
+          <aside className="rounded-2xl border border-tadka-line bg-white p-5 shadow-tadka-sm">
+            <div className="flex items-center justify-between"><div><span className="eyebrow">DELIVERY FLOW</span><h3>Quick guide</h3></div><span className="rider-live"><i /> Live</span></div>
+            <div className="mt-5 space-y-4">
               <div><span>1</span><section><b>Accept</b><small>Confirm the assigned order</small></section></div>
               <div><span>2</span><section><b>Pick up</b><small>Collect the order from restaurant</small></section></div>
               <div><span>3</span><section><b>Deliver</b><small>Complete the handoff to customer</small></section></div>
             </div>
-            <div className="rider-help"><span className="material-symbols-outlined">support_agent</span><div><b>Need help?</b><small>Contact TADKA support</small></div><Link href="/delivery/support">Open</Link></div>
+            <div className="mt-5 flex items-center gap-3 rounded-xl bg-tadka-green-soft p-3"><span className="material-symbols-outlined">support_agent</span><div><b>Need help?</b><small>Contact TADKA support</small></div><Link href="/delivery/support">Open</Link></div>
           </aside>
         </div>
       </section>
