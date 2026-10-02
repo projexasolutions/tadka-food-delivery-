@@ -69,34 +69,34 @@ export default function AdminRestaurantsPage() {
   const closedCount = restaurants.length - openCount;
 
   return (
-    <main className="admin-restaurants-page">
-      <div className="admin-restaurants-wrap">
-        <header className="admin-restaurants-head">
+    <main className="min-h-screen bg-tadka-bg px-4 py-8 text-tadka-ink sm:px-6">
+      <div className="mx-auto w-full max-w-[1240px]">
+        <header className="mb-7 flex items-end justify-between gap-5">
           <div>
-            <div className="admin-breadcrumb"><span>ADMIN</span><b>/</b><span>RESTAURANTS</span></div>
-            <div className="admin-restaurants-title-row">
-              <div className="admin-page-icon">R</div>
+            <div className="mb-3 flex gap-2 text-[10px] font-black tracking-wider text-tadka-muted"><span>ADMIN</span><b>/</b><span>RESTAURANTS</span></div>
+            <div className="flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-xl bg-tadka-orange font-black text-white">R</div>
               <div>
                 <h1>Restaurant Management</h1>
                 <p>Monitor partner restaurants and control their availability from one place.</p>
               </div>
             </div>
           </div>
-          <div className="admin-restaurants-head-actions"><div className="admin-live-pill"><i /> Live data</div><button className="admin-create-restaurant-btn" onClick={() => setShowCreate(true)}><span>+</span> Add restaurant</button></div>
+          <div className="flex items-center gap-3"><div className="rounded-full bg-tadka-green-soft px-3 py-1.5 text-xs font-bold text-tadka-green"><i /> Live data</div><button className="rounded-xl bg-tadka-orange px-4 py-2.5 text-sm font-bold text-white hover:bg-tadka-orange-dark" onClick={() => setShowCreate(true)}><span>+</span> Add restaurant</button></div>
         </header>
 
-        <section className="admin-restaurant-stats">
+        <section className="grid gap-3 sm:grid-cols-3">
           <div><span>Total restaurants</span><strong>{restaurants.length}</strong><small>Partner locations</small></div>
           <div><span>Currently open</span><strong>{openCount}</strong><small className="positive">Available to customers</small></div>
           <div><span>Currently closed</span><strong>{closedCount}</strong><small>Not accepting orders</small></div>
         </section>
 
-        <section className="admin-restaurant-toolbar">
-          <div className="admin-restaurant-search">
+        <section className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-1 items-center gap-2 rounded-xl border border-tadka-line bg-white px-3">
             <span>⌕</span>
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search restaurants or cuisine…" />
           </div>
-          <div className="admin-filter-group">
+          <div className="flex gap-2">
             {['all', 'open', 'closed'].map((item) => (
               <button key={item} className={filter === item ? 'active' : ''} onClick={() => setFilter(item)}>
                 {item === 'all' ? 'All' : item === 'open' ? 'Open' : 'Closed'}
@@ -105,21 +105,21 @@ export default function AdminRestaurantsPage() {
           </div>
         </section>
 
-        {message && <section className="admin-restaurant-alert">{message}</section>}
+        {message && <section className="mt-4 rounded-xl border border-orange-100 bg-orange-50 p-3 text-sm text-orange-900">{message}</section>}
 
-        <section className="admin-restaurant-list">
+        <section className="mt-5 rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm">
           <div className="admin-list-heading">
             <div><span className="eyebrow">PARTNER LOCATIONS</span><h2>Restaurants <em>{filtered.length}</em></h2></div>
             <span>{filtered.length} shown</span>
           </div>
 
           {filtered.map((restaurant) => (
-            <article className="admin-restaurant-card" key={restaurant.id}>
-              <div className="admin-restaurant-avatar">{restaurant.name?.trim()?.charAt(0)?.toUpperCase() || 'R'}</div>
-              <div className="admin-restaurant-info">
-                <div className="admin-restaurant-name-row">
+            <article className="flex flex-col gap-4 border-b border-tadka-line py-4 last:border-0 sm:flex-row sm:items-center" key={restaurant.id}>
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-tadka-green-soft font-bold text-tadka-green">{restaurant.name?.trim()?.charAt(0)?.toUpperCase() || 'R'}</div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3">
                   <h3>{restaurant.name}</h3>
-                  <span className={restaurant.isOpen ? 'admin-status-chip open' : 'admin-status-chip closed'}>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${restaurant.isOpen ? "bg-tadka-green-soft text-tadka-green" : "bg-orange-50 text-tadka-danger"}`}>
                     <i /> {restaurant.isOpen ? 'Open' : 'Closed'}
                   </span>
                 </div>
@@ -127,7 +127,7 @@ export default function AdminRestaurantsPage() {
               </div>
               <div className="admin-restaurant-action">
                 <button
-                  className={restaurant.isOpen ? 'admin-close-btn' : 'admin-open-btn'}
+                  className={restaurant.isOpen ? "rounded-xl border border-tadka-line px-3 py-2 text-xs font-bold text-tadka-danger hover:bg-orange-50" : "rounded-xl bg-tadka-green px-3 py-2 text-xs font-bold text-white hover:bg-tadka-orange"}
                   disabled={busy === restaurant.id}
                   onClick={() => toggleRestaurant(restaurant)}
                 >
@@ -138,7 +138,7 @@ export default function AdminRestaurantsPage() {
           ))}
 
           {!message && !filtered.length && (
-            <div className="admin-restaurant-empty">
+            <div className="p-10 text-center text-sm text-tadka-muted">
               <strong>No restaurants found</strong>
               <span>Try another search or filter.</span>
             </div>
@@ -146,8 +146,8 @@ export default function AdminRestaurantsPage() {
         </section>
       </div>
     
-        {showCreate && <div className="admin-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCreate(false); }}>
-          <form className="admin-create-modal" onSubmit={createRestaurant}>
+        {showCreate && <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCreate(false); }}>
+          <form className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-tadka-lg" onSubmit={createRestaurant}>
             <div className="admin-create-modal-head"><div><span className="eyebrow">NEW PARTNER</span><h2>Add restaurant</h2><p>Create a restaurant first, then assign staff to it from User Management.</p></div><button type="button" onClick={() => setShowCreate(false)}>×</button></div>
             <label>Restaurant name<input required value={form.name} onChange={e => setForm({...form,name:e.target.value})} placeholder="e.g. Tadka Kitchen" /></label>
             <div className="admin-create-grid"><label>Cuisine<input value={form.cuisine} onChange={e => setForm({...form,cuisine:e.target.value})} placeholder="Indian, Chinese…" /></label><label>Delivery fee (₹)<input type="number" min="0" value={form.deliveryFee} onChange={e => setForm({...form,deliveryFee:e.target.value})} /></label></div>
