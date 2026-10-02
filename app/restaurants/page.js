@@ -21,6 +21,7 @@ const categories = [
   ['local_bar', 'Beverages'], ['spa', 'Healthy'], ['more_horiz', 'More'],
 ];
 
+
 function RestaurantContent() {
   const params = useSearchParams();
   const query = (params.get('q') || '').trim();
@@ -34,6 +35,7 @@ function RestaurantContent() {
 
   useEffect(() => {
     const controller = new AbortController();
+
     async function load() {
       setLoading(true);
       setError('');
@@ -42,9 +44,17 @@ function RestaurantContent() {
         if (query) search.set('q', query);
         if (cuisine) search.set('cuisine', cuisine);
         if (filter !== 'all') search.set('filter', filter);
-        const response = await fetch(`${apiUrl}/v1/restaurants?${search.toString()}`, { signal: controller.signal, cache: 'no-store' });
+
+        const response = await fetch(apiUrl + '/v1/restaurants?' + search.toString(), {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
         const body = await response.json().catch(() => null);
-        if (!response.ok) throw new Error(body?.error?.message || 'Unable to load restaurants.');
+
+        if (!response.ok) {
+          throw new Error(body?.error?.message || 'Unable to load restaurants.');
+        }
+
         setRestaurants(Array.isArray(body?.data) ? body.data : []);
       } catch (fetchError) {
         if (fetchError.name !== 'AbortError') {
@@ -55,8 +65,30 @@ function RestaurantContent() {
         if (!controller.signal.aborted) setLoading(false);
       }
     }
+
     void load();
-    return (
+    return () => controller.abort();
+  }, [query, cuisine, filter]);
+
+  const visibleRestaurants = useMemo(() => {
+    const source = restaurants.length ? restaurants : fallbackRestaurants;
+    const term = (query || activeCategory).toLowerCase();
+
+    return source.filter((restaurant) => {
+      const text = (restaurant.name || '') + ' ' + (restaurant.cuisine || '') + ' ' + (restaurant.description || '');
+      const matchesSearch = !query && activeCategory === 'All' ? true : text.toLowerCase().includes(term);
+      const matchesRating = filter !== 'rating' || Number.parseFloat(restaurant.rating) >= 4;
+      return matchesSearch && matchesRating;
+    });
+  }, [restaurants, query, activeCategory, filter]);
+
+  const heading = query
+    ? 'Restaurants for “' + query + '”'
+    : cuisine
+      ? cuisine + ' restaurants'
+      : 'Restaurants near you';
+
+  return (
     <main className="min-h-screen bg-tadka-bg text-tadka-ink">
       <section className="mx-auto w-full max-w-[1400px] px-4 py-7 sm:px-6 lg:px-8">
         <div className="border-b border-tadka-line pb-6">
@@ -78,14 +110,10 @@ function RestaurantContent() {
 
           <div className="mt-4 flex flex-wrap items-center gap-2" role="tablist" aria-label="Restaurant filters">
             {[['all', 'All'], ['rating', '4.0+ rated'], ['offers', 'Offers']].map(([value, label]) => (
-              <button
-                type="button"
-                key={value}
-                onClick={() => setFilter(value)}
+              <button type="button" key={value} onClick={() => setFilter(value)}
                 className={filter === value
                   ? 'rounded-full bg-tadka-green px-4 py-2 text-xs font-semibold text-white'
-                  : 'rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-ink hover:border-tadka-green/40 hover:bg-tadka-green-soft'}
-              >
+                  : 'rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-ink hover:border-tadka-green/40 hover:bg-tadka-green-soft'}>
                 {label}
               </button>
             ))}
@@ -93,24 +121,17 @@ function RestaurantContent() {
         </div>
 
         <div className="flex gap-2 overflow-x-auto border-b border-tadka-line py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <button
-            type="button"
-            onClick={() => setActiveCategory('All')}
+          <button type="button" onClick={() => setActiveCategory('All')}
             className={activeCategory === 'All'
               ? 'shrink-0 rounded-full bg-tadka-orange px-4 py-2 text-xs font-semibold text-white'
-              : 'shrink-0 rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-muted hover:text-tadka-ink'}
-          >
+              : 'shrink-0 rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-muted hover:text-tadka-ink'}>
             All cuisines
           </button>
           {categories.map(([icon, name]) => (
-            <button
-              type="button"
-              key={name}
-              onClick={() => setActiveCategory(name)}
+            <button type="button" key={name} onClick={() => setActiveCategory(name)}
               className={activeCategory === name
                 ? 'inline-flex shrink-0 items-center gap-1.5 rounded-full bg-tadka-orange px-4 py-2 text-xs font-semibold text-white'
-                : 'inline-flex shrink-0 items-center gap-1.5 rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-muted hover:text-tadka-ink'}
-            >
+                : 'inline-flex shrink-0 items-center gap-1.5 rounded-full border border-tadka-line bg-white px-4 py-2 text-xs font-semibold text-tadka-muted hover:text-tadka-ink'}>
               <span className="material-symbols-outlined text-[16px]">{icon}</span>
               {name}
             </button>
@@ -125,8 +146,7 @@ function RestaurantContent() {
 
         {error && (
           <div className="mb-5 flex items-center gap-2 rounded-lg border border-orange-100 bg-orange-50 px-3 py-2.5 text-xs text-orange-900">
-            <span className="material-symbols-outlined text-[17px] text-tadka-orange">info</span>
-            {error}
+            <span className="material-symbols-outlined text-[17px] text-tadka-orange">info</span>{error}
           </div>
         )}
 
@@ -148,55 +168,34 @@ function RestaurantContent() {
             {visibleRestaurants.map((restaurant, index) => {
               const fallback = fallbackRestaurants[index % fallbackRestaurants.length];
               const image = restaurant.imageUrl || fallback.imageUrl;
-
               return (
-                <Link
-                  key={restaurant.id || restaurant.name + '-' + index}
+                <Link key={restaurant.id || restaurant.name + '-' + index}
                   href={'/menu?restaurant=' + restaurant.id}
-                  className="group overflow-hidden rounded-xl border border-tadka-line bg-white transition hover:-translate-y-0.5 hover:border-tadka-line-strong hover:shadow-tadka-md"
-                >
+                  className="group overflow-hidden rounded-xl border border-tadka-line bg-white transition hover:-translate-y-0.5 hover:border-tadka-line-strong hover:shadow-tadka-md">
                   <div className="relative h-48 overflow-hidden bg-tadka-bg">
-                    <img
-                      src={image}
-                      alt=""
-                      loading="lazy"
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 to-transparent" />
+                    <img src={image} alt="" loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
                     {(restaurant.badge || index < 2) && (
                       <span className="absolute left-3 top-3 rounded-md bg-white px-2 py-1 text-[10px] font-bold text-tadka-orange shadow-sm">
                         {restaurant.badge || 'POPULAR'}
                       </span>
                     )}
-                    <button
-                      type="button"
-                      aria-label={'Save ' + restaurant.name}
-                      onClick={(event) => event.preventDefault()}
-                      className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/95 text-tadka-green shadow-sm"
-                    >
+                    <button type="button" aria-label={'Save ' + restaurant.name} onClick={(event) => event.preventDefault()}
+                      className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/95 text-tadka-green shadow-sm">
                       <span className="material-symbols-outlined text-[19px]">favorite_border</span>
                     </button>
                   </div>
-
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <h2 className="truncate text-base font-bold text-tadka-ink">{restaurant.name}</h2>
-                        <p className="mt-1 truncate text-xs text-tadka-muted">
-                          {restaurant.cuisine || restaurant.description || 'Indian food & beverages'}
-                        </p>
+                        <p className="mt-1 truncate text-xs text-tadka-muted">{restaurant.cuisine || restaurant.description || 'Indian food & beverages'}</p>
                       </div>
                       <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-tadka-green">
-                        <span className="material-symbols-outlined text-[15px]">star</span>
-                        {restaurant.rating || 'New'}
+                        <span className="material-symbols-outlined text-[15px]">star</span>{restaurant.rating || 'New'}
                       </span>
                     </div>
-
                     <div className="mt-4 flex items-center justify-between border-t border-tadka-line pt-3 text-xs text-tadka-muted">
-                      <span className="inline-flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[15px]">schedule</span>
-                        {restaurant.time || '25–35 min'}
-                      </span>
+                      <span className="inline-flex items-center gap-1"><span className="material-symbols-outlined text-[15px]">schedule</span>{restaurant.time || '25–35 min'}</span>
                       <span>{restaurant.price || '₹' + (restaurant.deliveryFee || 0) + ' delivery'}</span>
                     </div>
                   </div>
@@ -209,9 +208,7 @@ function RestaurantContent() {
             <span className="material-symbols-outlined text-4xl text-tadka-subtle">search_off</span>
             <h2 className="mt-3 text-lg font-bold">No matching restaurants</h2>
             <p className="mt-1 text-sm text-tadka-muted">Try another cuisine or clear the filters.</p>
-            <Link href="/restaurants" className="mt-4 inline-flex rounded-lg bg-tadka-orange px-4 py-2.5 text-xs font-bold text-white">
-              Show all restaurants
-            </Link>
+            <Link href="/restaurants" className="mt-4 inline-flex rounded-lg bg-tadka-orange px-4 py-2.5 text-xs font-bold text-white">Show all restaurants</Link>
           </div>
         )}
 
@@ -226,5 +223,22 @@ function RestaurantContent() {
 }
 
 export default function RestaurantsPage() {
-  return <Suspense fallback={<main className="min-h-screen bg-white px-4 py-7 text-tadka-ink sm:px-6"><div className="mx-auto w-full max-w-[1240px]"><div className="grid gap-4 sm:grid-cols-2"><div className="h-72 animate-pulse rounded-tadka-lg border border-tadka-line bg-tadka-bg" /><div className="h-72 animate-pulse rounded-tadka-lg border border-tadka-line bg-tadka-bg" /></div></div></main>}><RestaurantContent /></Suspense>;
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-tadka-bg px-4 py-7 text-tadka-ink sm:px-6">
+          <div className="mx-auto w-full max-w-[1400px]">
+            <div className="h-10 w-56 animate-pulse rounded bg-tadka-line/60" />
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="h-72 animate-pulse rounded-xl border border-tadka-line bg-white" />
+              ))}
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <RestaurantContent />
+    </Suspense>
+  );
 }
