@@ -60,11 +60,11 @@ export default function Categories() {
       {msg && <div className="mt-4 rounded-xl border border-orange-100 bg-orange-50 p-3 text-sm text-orange-900">{msg}<button onClick={() => setMsg('')}>×</button></div>}
       <div className="mt-5 divide-y divide-tadka-line overflow-hidden rounded-xl border border-tadka-line">
         {loading ? <div className="p-8 text-center text-tadka-muted">Loading categories…</div> : cats.map((c) => <div className="flex items-center gap-3 p-4" key={c.id}>
-          <span className="material-symbols-outlined">category</span><span className="min-w-0 flex-1"><b>{c.name}</b><small>{itemCount[c.id] || 0} dish{itemCount[c.id] === 1 ? '' : 'es'}</small></span><span className="rounded-full bg-tadka-bg px-2 py-1 text-[10px] font-bold text-tadka-muted">Restaurant</span>
+          <span className="material-symbols-outlined">category</span><span className="min-w-0 flex-1"><b className="block">{c.name}</b><small className="mt-1 block text-xs text-tadka-muted">{itemCount[c.id] || 0} dish{itemCount[c.id] === 1 ? '' : 'es'}</small></span><span className="rounded-full bg-tadka-bg px-2 py-1 text-[10px] font-bold text-tadka-muted">Restaurant</span>
           <button className="grid h-10 w-10 place-items-center rounded-xl border border-tadka-line bg-white hover:bg-tadka-bg" onClick={() => setEditing({ ...c })} aria-label={`Edit ${c.name}`}><span className="material-symbols-outlined">edit</span></button>
-          <button className="icon-action danger-icon" onClick={() => remove(c.id)} aria-label={`Delete ${c.name}`}><span className="material-symbols-outlined">delete</span></button>
+          <button className="grid h-10 w-10 place-items-center rounded-xl border border-red-200 bg-white text-tadka-danger hover:bg-red-50" onClick={() => remove(c.id)} aria-label={`Delete ${c.name}`}><span className="material-symbols-outlined">delete</span></button>
         </div>)}
-        {!loading && !cats.length && <div className="partner-empty compact"><span className="material-symbols-outlined">category</span><b>No categories yet</b><p>Add your first menu section above.</p></div>}
+        {!loading && !cats.length && <div className="grid place-items-center p-8 text-center text-tadka-muted"><span className="material-symbols-outlined">category</span><b>No categories yet</b><p>Add your first menu section above.</p></div>}
       </div>
     </section>
 
