@@ -4,9 +4,7 @@ import '@fontsource/metropolis/600.css';
 import '@fontsource/metropolis/700.css';
 import SiteNav from '@/components/SiteNav';
 import './globals.css';
-import './customer-ui.css';
 import './tadka-icons.css';
-import './tadka-ui-system.css';
 import './tailwind.css';
 
 export const metadata = { title:'Tadka — Food Delivery', description:'Order from local kitchens with Tadka.' };
