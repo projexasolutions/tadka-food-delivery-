@@ -120,48 +120,48 @@ function MenuContent() {
   const heroImage = restaurant?.imageUrl || items.find((item) => item.imageUrl)?.imageUrl || fallbackImage;
 
   return <main className="min-h-screen bg-tadka-bg px-4 py-7 text-tadka-ink sm:px-6">
-    <section className="restaurant-hero">
-      <div className="restaurant-hero-inner">
-        <div className="hero-content">
-          <div className="restaurant-breadcrumb">{restaurant?.cuisine || 'Indian'} <span>•</span> Freshly prepared <span>•</span> Order online</div>
+    <section className="border-b border-tadka-line bg-[#f4e8da] px-0 py-5">
+      <div className="mx-auto grid max-w-[1280px] grid-cols-1 overflow-hidden rounded-2xl border border-tadka-line bg-white shadow-tadka-sm lg:grid-cols-[minmax(0,1fr)_430px]">
+        <div className="flex flex-col justify-center p-7 sm:p-9">
+          <div className="text-xs font-bold text-tadka-muted">{restaurant?.cuisine || 'Indian'} <span>•</span> Freshly prepared <span>•</span> Order online</div>
           <h1>{restaurant?.name || 'Restaurant menu'}</h1>
           <p>{restaurant?.description || 'Fresh Indian favourites prepared to order.'}</p>
-          <div className="hero-meta">
-            <span className="rating-dot">★ {restaurant?.rating || 'New'}</span>
+          <div className="mt-4 flex flex-wrap gap-3 text-xs text-tadka-muted">
+            <span className="font-bold text-tadka-green">★ {restaurant?.rating || 'New'}</span>
             <span><Icon name="clock" size={16}/>25–35 min</span>
             <span><Icon name="truck" size={16}/>₹{restaurant?.deliveryFee || 0} delivery</span>
           </div>
-          <div className="trust-pills"><span><Icon name="leaf" size={15}/>Quality ingredients</span><span><Icon name="leaf" size={15}/>Freshly prepared</span></div>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs text-tadka-muted"><span><Icon name="leaf" size={15}/>Quality ingredients</span><span><Icon name="leaf" size={15}/>Freshly prepared</span></div>
         </div>
-        <div className="hero-photo"><img src={heroImage} alt="Restaurant food"/></div>
+        <div className="min-h-[220px] overflow-hidden lg:min-h-[300px]"><img src={heroImage} alt="Restaurant food"/></div>
       </div>
     </section>
 
-    <section className="menu-layout">
-      <div className="menu-main" id="menu">
-        <div className="category-row" role="tablist" aria-label="Menu categories">
-          <button className={activeCategory === 'all' ? 'active' : ''} onClick={() => setActiveCategory('all')}>Recommended</button>
-          {categories.map((category) => <button key={category.id} className={activeCategory === category.id ? 'active' : ''} onClick={() => setActiveCategory(category.id)}>{category.name}</button>)}
+    <section className="mx-auto grid max-w-[1280px] gap-6 px-0 py-6 lg:grid-cols-[minmax(0,1fr)_330px]">
+      <div className="min-w-0" id="menu">
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Menu categories">
+          <button className={`shrink-0 rounded-xl border px-4 py-2.5 text-sm font-bold ${activeCategory === 'all' ? 'border-tadka-green bg-tadka-green text-white' : 'border-tadka-line bg-white text-tadka-muted hover:bg-tadka-bg'}`} onClick={() => setActiveCategory('all')}>Recommended</button>
+          {categories.map((category) => <button key={category.id} className={`shrink-0 rounded-xl border px-4 py-2.5 text-sm font-bold ${activeCategory === category.id ? 'border-tadka-green bg-tadka-green text-white' : 'border-tadka-line bg-white text-tadka-muted hover:bg-tadka-bg'}`} onClick={() => setActiveCategory(category.id)}>{category.name}</button>)}
         </div>
-        <div className="section-heading">
+        <div className="mb-4 flex items-end justify-between gap-4">
           <div><h2>{activeCategory === 'all' ? 'Recommended for you' : categories.find((c) => c.id === activeCategory)?.name || 'Menu'}</h2><p>Popular dishes from this kitchen</p></div>
           <span>{visible.length} dishes</span>
         </div>
         {message && <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50 p-3 text-sm text-orange-900">{message}</div>}
-        {loading ? <div className="loading-card">Loading menu...</div> : visible.length === 0 ? <div className="empty-card"><h3>No dishes here yet.</h3><p>Try another category.</p></div> : <div className="menu-list">
+        {loading ? <div className="rounded-2xl border border-tadka-line bg-white p-8 text-center text-sm text-tadka-muted">Loading menu...</div> : visible.length === 0 ? <div className="rounded-2xl border border-dashed border-tadka-line bg-white p-10 text-center text-tadka-muted"><h3>No dishes here yet.</h3><p>Try another category.</p></div> : <div className="grid gap-3">
           {visible.map((item, index) => {
             const cartItem = findCartItem(item.id);
             const quantity = Number(cartItem?.quantity || 0);
-            return <article className="menu-item-card" key={item.id}>
-              <div className="menu-item-copy">
-                {index < 2 && <span className="pick-label">CHEF'S PICK</span>}
+            return <article className="grid min-h-[112px] grid-cols-1 gap-4 rounded-2xl border border-tadka-line bg-white p-3 shadow-tadka-sm sm:grid-cols-[minmax(0,1fr)_195px]" key={item.id}>
+              <div className="min-w-0">
+                {index < 2 && <span className="mb-2 inline-flex rounded-full bg-tadka-green-soft px-2 py-1 text-[9px] font-black tracking-wide text-tadka-green">CHEF'S PICK</span>}
                 <h3>{item.name}</h3>
                 <p>{item.description || 'Freshly prepared and delivered with care.'}</p>
                 <strong>₹{Number(item.price).toFixed(0)}</strong>
               </div>
-              <div className="menu-item-action">
+              <div className="flex items-center justify-between gap-3 sm:justify-end">
                 <img src={item.imageUrl || fallbackImage} alt=""/>
-                {quantity > 0 && cartItem ? <div className="menu-quantity-control" aria-label={`Quantity for ${item.name}`}>
+                {quantity > 0 && cartItem ? <div className="flex items-center gap-2 rounded-xl border border-tadka-line bg-white p-1" aria-label={`Quantity for ${item.name}`}>
                   <button disabled={updatingCartId === cartItem.id} onClick={() => updateCartItem(cartItem.id, Math.max(0, quantity - 1))}>−</button>
                   <span>{quantity}</span>
                   <button disabled={updatingCartId === cartItem.id} onClick={() => updateCartItem(cartItem.id, Math.min(50, quantity + 1))}>+</button>
@@ -173,19 +173,19 @@ function MenuContent() {
       </div>
 
       <aside className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm lg:sticky lg:top-24 lg:self-start">
-        <div className="cart-panel-header"><span>YOUR ORDER</span><span>{cartCount ? `${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : 'Your bag'}</span></div>
-        {cartLoading ? <div className="cart-empty"><p>Loading your bag...</p></div> : cart?.items?.length ? <>
+        <div className="flex items-center justify-between border-b border-tadka-line pb-3 text-xs font-black tracking-widest text-tadka-muted"><span>YOUR ORDER</span><span>{cartCount ? `${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : 'Your bag'}</span></div>
+        {cartLoading ? <div className="p-6 text-center text-sm text-tadka-muted"><p>Loading your bag...</p></div> : cart?.items?.length ? <>
           <div className="my-4 flex max-h-[360px] flex-col gap-3 overflow-auto">{cart.items.map((item) => <div className="flex items-center gap-3 border-b border-tadka-line pb-3" key={item.id}>
             <img src={item.imageUrl || fallbackImage} alt=""/>
-            <div className="cart-item-info"><strong>{item.name}</strong><b>₹{Number(item.price * item.quantity).toFixed(0)}</b></div>
-            <div className="quantity-control"><button disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, Math.max(0, item.quantity - 1))}>−</button><span>{item.quantity}</span><button disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, Math.min(50, item.quantity + 1))}>+</button></div>
-            <button className="remove-button" aria-label={`Remove ${item.name}`} disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, 0)}><Icon name="trash" size={16}/></button>
+            <div className="min-w-0 flex-1"><strong>{item.name}</strong><b>₹{Number(item.price * item.quantity).toFixed(0)}</b></div>
+            <div className="flex items-center gap-2"><button disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, Math.max(0, item.quantity - 1))}>−</button><span>{item.quantity}</span><button disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, Math.min(50, item.quantity + 1))}>+</button></div>
+            <button className="grid h-8 w-8 place-items-center rounded-lg text-tadka-muted hover:bg-tadka-bg" aria-label={`Remove ${item.name}`} disabled={updatingCartId === item.id} onClick={() => updateCartItem(item.id, 0)}><Icon name="trash" size={16}/></button>
           </div>)}</div>
-          <div className="border-t border-tadka-line pt-4"><div><span>Item total</span><b>₹{Number(cart.subtotal || 0).toFixed(0)}</b></div><div><span>Delivery fee</span><b>₹{Number(cart.deliveryFee || 0).toFixed(0)}</b></div><div className="cart-total"><span>Total</span><b>₹{Number(cart.total || 0).toFixed(0)}</b></div></div>
-          <Link href="/cart" className="checkout-button">Proceed to Checkout <span>→</span></Link>
-          <div className="cart-promise"><span><Icon name="leaf" size={22}/></span><div><strong>Good food. A happier you.</strong><p>Freshly prepared. Carefully delivered.</p></div></div>
-        </> : <div className="cart-empty"><div className="empty-bag"><Icon name="bag" size={24}/></div><h3>Your bag is empty</h3><p>Add your favourites from this kitchen. Your bag stays connected to checkout.</p><a href="#menu" className="browse-link">Explore menu</a></div>}
-        <div className="cart-help"><div><strong>Need anything else?</strong><p>Add more items from the menu.</p></div><a href="#menu">Explore Menu</a></div>
+          <div className="border-t border-tadka-line pt-4"><div><span>Item total</span><b>₹{Number(cart.subtotal || 0).toFixed(0)}</b></div><div><span>Delivery fee</span><b>₹{Number(cart.deliveryFee || 0).toFixed(0)}</b></div><div className="mt-2 flex items-center justify-between border-t border-tadka-line pt-3 text-base font-black"><span>Total</span><b>₹{Number(cart.total || 0).toFixed(0)}</b></div></div>
+          <Link href="/cart" className="mt-4 flex w-full items-center justify-between rounded-xl bg-tadka-orange px-4 py-3 text-sm font-bold text-white hover:bg-tadka-orange-dark">Proceed to Checkout <span>→</span></Link>
+          <div className="mt-4 flex items-center gap-3 rounded-xl bg-tadka-green-soft p-3"><span><Icon name="leaf" size={22}/></span><div><strong>Good food. A happier you.</strong><p>Freshly prepared. Carefully delivered.</p></div></div>
+        </> : <div className="p-6 text-center text-sm text-tadka-muted"><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-tadka-green-soft text-tadka-green"><Icon name="bag" size={24}/></div><h3>Your bag is empty</h3><p>Add your favourites from this kitchen. Your bag stays connected to checkout.</p><a href="#menu" className="font-bold text-tadka-orange">Explore menu</a></div>}
+        <div className="mt-4 border-t border-tadka-line pt-4 text-xs text-tadka-muted"><div><strong>Need anything else?</strong><p>Add more items from the menu.</p></div><a href="#menu">Explore Menu</a></div>
       </aside>
     </section>
 
