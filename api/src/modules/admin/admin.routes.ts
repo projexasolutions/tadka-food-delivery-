@@ -1,8 +1,8 @@
 import type { Express } from 'express';
 import { requireAuth } from '../auth/auth.middleware';
 import { requireRole } from '../auth/auth.roles';
-import { categoryIdParamsSchema, createCategorySchema, orderIdParamsSchema, restaurantIdParamsSchema, updateOrderStatusSchema, updateRestaurantSchema, updateUserRoleSchema, userIdParamsSchema } from './admin.schema';
-import { AdminError, createCategory, deleteCategory, getDashboard, listCategories, listRecentOrders, listRestaurants, listUsers, updateOrderStatus, updateRestaurant, updateUserRole } from './admin.service';
+import { categoryIdParamsSchema, createCategorySchema, createRestaurantSchema, orderIdParamsSchema, restaurantIdParamsSchema, updateOrderStatusSchema, updateRestaurantSchema, updateUserRoleSchema, userIdParamsSchema } from './admin.schema';
+import { AdminError, createCategory, createRestaurant, deleteCategory, getDashboard, listCategories, listRecentOrders, listRestaurants, listUsers, updateOrderStatus, updateRestaurant, updateUserRole } from './admin.service';
 
 const adminOnly = [requireAuth, requireRole('admin')];
 const validationError = (message: string) => ({ error: { code: 'VALIDATION_ERROR', message } });
@@ -29,6 +29,17 @@ export function registerAdminRoutes(app: Express) {
 
   app.get('/v1/admin/restaurants', ...adminOnly, async (_req, res, next) => {
     try { return res.json({ data: await listRestaurants() }); } catch (error) { return next(error); }
+  });
+
+  app.post('/v1/admin/restaurants', ...adminOnly, async (req, res, next) => {
+    try {
+      const body = createRestaurantSchema.safeParse(req.body);
+      if (!body.success) return res.status(400).json(validationError('Invalid restaurant details.'));
+      return res.status(201).json({ data: await createRestaurant(body.data) });
+    } catch (error) {
+      if (error instanceof AdminError) return res.status(409).json({ error: { code: 'RESTAURANT_CREATE_FAILED', message: error.message } });
+      return next(error);
+    }
   });
 
   app.patch('/v1/admin/restaurants/:restaurantId', ...adminOnly, async (req, res, next) => {
