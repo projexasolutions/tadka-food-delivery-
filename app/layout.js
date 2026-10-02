@@ -1,12 +1,7 @@
 import SiteNav from '@/components/SiteNav';
 import './globals.css';
-import './tadka-theme.css';
-import './tadka-modern.css';
+import './customer-ui.css';
 import './tadka-icons.css';
-import './tadka-v3.css';
-import './tadka-v3-extra.css';
-import './tadka-reference.css';
-import './tadka-final-ui.css';
 import './restaurant/access-state.css';
 import './admin/tadka-admin-users.css';
 import './auth/tadka-auth.css';
@@ -14,7 +9,6 @@ import './restaurant-polish.css';
 import './restaurant/partner-ui.css';
 import './restaurant-scroll-fix.css';
 import './restaurant/menu-ui-fix.css';
-import './tadka-menu-polish.css';
 import './tadka-ui-system.css';
 
 export const metadata = { title:'Tadka — Food Delivery', description:'Order from local kitchens with Tadka.' };
