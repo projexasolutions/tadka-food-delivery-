@@ -164,6 +164,10 @@ export default function SiteNav() {
     return <AdminNav pathname={pathname} />;
   }
 
+  if (pathname.startsWith('/delivery')) {
+    return <RiderNav pathname={pathname} />;
+  }
+
   const searchValue = locationSearch.trim().toLowerCase();
   const filteredAddresses = addresses.filter((item) => !searchValue || [item.label, item.address, item.landmark, item.city, item.pincode].filter(Boolean).join(' ').toLowerCase().includes(searchValue));
 
@@ -276,6 +280,29 @@ function AdminNav({ pathname }) {
         <div className="admin-nav-actions">
           <span className="admin-online"><i /> Admin</span>
           <Link href="/" className="admin-customer-link">Customer view ↗</Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+
+function RiderNav({ pathname }) {
+  return (
+    <header className="rider-navbar">
+      <div className="rider-navbar-inner">
+        <Link href="/delivery" className="rider-brand" aria-label="Tadka rider console">
+          <img src="/tadka-logo.svg" alt="Tadka" />
+          <span className="rider-brand-divider" />
+          <span><b>RIDER</b><small>DELIVERY CONSOLE</small></span>
+        </Link>
+        <nav className="rider-nav-links" aria-label="Rider navigation">
+          <Link href="/delivery" className={pathname === '/delivery' ? 'active' : ''}><span className="material-symbols-outlined">dashboard</span>Deliveries</Link>
+          <Link href="/account"><span className="material-symbols-outlined">person</span>Account</Link>
+        </nav>
+        <div className="rider-nav-right">
+          <span className="rider-online"><i /> Online</span>
+          <Link href="/" className="rider-customer-link">Customer view ↗</Link>
         </div>
       </div>
     </header>
