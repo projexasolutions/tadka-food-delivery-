@@ -53,25 +53,25 @@ export default function AdminCategories() {
   }
 
   return (
-    <main className="container">
-      <div className="page-head"><div><span className="eyebrow">ADMIN</span><h1>Categories</h1><p>Keep each restaurant's food catalog organized.</p></div></div>
-      {message && <p className="notice">{message}</p>}
-      <section className="panel">
-        <form onSubmit={add} className="form-grid">
+    <main className="min-h-screen bg-tadka-bg px-4 py-8 text-tadka-ink sm:px-6">
+      <div className="mx-auto mb-7 w-full max-w-[1240px]"><div><span className="text-[10px] font-black tracking-[0.14em] text-tadka-orange">ADMIN</span><h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Categories</h1><p>Keep each restaurant's food catalog organized.</p></div></div>
+      {message && <p className="mx-auto mb-4 w-full max-w-[1240px] rounded-xl border border-orange-100 bg-orange-50 p-3 text-sm text-orange-900">{message}</p>}
+      <section className="mx-auto mt-5 w-full max-w-[1240px] rounded-tadka-lg border border-tadka-line bg-white p-6 shadow-tadka-sm">
+        <form onSubmit={add} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
           <select required value={restaurantId} onChange={(event) => setRestaurantId(event.target.value)} aria-label="Restaurant">
             <option value="" disabled>Select restaurant</option>
             {restaurants.map((restaurant) => <option key={restaurant.id} value={restaurant.id}>{restaurant.name}</option>)}
           </select>
           <input required minLength={2} maxLength={80} placeholder="Category name" value={name} onChange={(event) => setName(event.target.value)} />
-          <button className="btn primary" disabled={busy === 'add' || !restaurantId}>{busy === 'add' ? 'Adding…' : 'Add category'}</button>
+          <button className="rounded-xl bg-tadka-green px-4 py-2.5 text-sm font-bold text-white hover:bg-tadka-orange disabled:opacity-50" disabled={busy === 'add' || !restaurantId}>{busy === 'add' ? 'Adding…' : 'Add category'}</button>
         </form>
       </section>
-      <section className="cards">
-        {items.map((item) => <article className="card" key={item.id}>
+      <section className="mx-auto mt-5 grid w-full max-w-[1240px] gap-3">
+        {items.map((item) => <article className="flex items-center justify-between gap-4 rounded-xl border border-tadka-line bg-white p-4 shadow-tadka-sm" key={item.id}>
           <div><strong>{item.name}</strong><p>{item.restaurantName || 'Unassigned restaurant'}</p></div>
-          <button className="btn danger" disabled={busy === item.id} onClick={() => remove(item.id)}>{busy === item.id ? 'Deleting…' : 'Delete'}</button>
+          <button className="rounded-xl border border-tadka-line px-3 py-2 text-xs font-bold text-tadka-danger hover:bg-orange-50 disabled:opacity-50" disabled={busy === item.id} onClick={() => remove(item.id)}>{busy === item.id ? 'Deleting…' : 'Delete'}</button>
         </article>)}
-        {!message && !items.length && <section className="panel"><p>No categories found.</p></section>}
+        {!message && !items.length && <section className="mx-auto mt-5 w-full max-w-[1240px] rounded-tadka-lg border border-tadka-line bg-white p-6 shadow-tadka-sm"><p>No categories found.</p></section>}
       </section>
     </main>
   );
