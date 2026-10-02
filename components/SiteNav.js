@@ -174,7 +174,7 @@ export default function SiteNav() {
   return (
     <header className="site-nav">
       <div className="site-nav-inner">
-        <Link className="site-brand" href="/" aria-label="Tadka home"><img src="/tadka-logo.svg" alt="Tadka" className="site-logo" style={{ width: 145, height: "auto", display: "block" }} /></Link>
+        <Link className="site-brand" href="/" aria-label="Tadka home"><img src="/tadka-logo.svg" alt="Tadka" className="site-logo" /></Link>
         <div className="location-wrap" ref={locationRef}>
           <button className={`location-chip ${locationOpen ? 'open' : ''}`} type="button" onClick={() => setLocationOpen((open) => !open)} aria-expanded={locationOpen} aria-haspopup="dialog" title="Choose delivery location">
             <span className="location-pin" aria-hidden="true"><span className="material-symbols-outlined">location_on</span></span>
