@@ -298,7 +298,7 @@ function RiderNav({ pathname }) {
         </Link>
         <nav className="rider-nav-links" aria-label="Rider navigation">
           <Link href="/delivery" className={pathname === '/delivery' ? 'active' : ''}><span className="material-symbols-outlined">dashboard</span>Deliveries</Link>
-          <Link href="/account"><span className="material-symbols-outlined">person</span>Account</Link>
+          <Link href="/delivery/account" className={pathname.startsWith('/delivery/account') ? 'active' : ''}><span className="material-symbols-outlined">settings</span>Account Settings</Link>
         </nav>
         <div className="rider-nav-right">
           <span className="rider-online"><i /> Online</span>
