@@ -19,6 +19,7 @@ import './restaurant/spacing-fix.css';
 import './restaurant-scroll-fix.css';
 import './restaurant/menu-ui-fix.css';
 import './tadka-menu-polish.css';
+import './tadka-ui-system.css';
 
 export const metadata = { title:'Tadka — Food Delivery', description:'Order from local kitchens with Tadka.' };
 export default function RootLayout({ children }) { return <html lang="en"><body><SiteNav />{children}</body></html>; }
