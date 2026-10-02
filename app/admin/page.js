@@ -24,45 +24,45 @@ export default function AdminPage() {
   }, []);
 
   return (
-    <main className="admin-shell">
-      <div className="admin-top">
+    <main className="min-h-screen bg-tadka-bg px-4 py-8 text-tadka-ink sm:px-6">
+      <div className="mx-auto mb-7 flex w-full max-w-[1240px] items-end justify-between gap-5">
         <div>
-          <span className="eyebrow">PLATFORM ADMIN</span>
-          <h1>Operations overview</h1>
-          <p className="muted">A clear view of what is happening across Tadka.</p>
+          <span className="text-[10px] font-black tracking-[0.14em] text-tadka-orange">PLATFORM ADMIN</span>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Operations overview</h1>
+          <p className="mt-2 text-sm text-tadka-muted">A clear view of what is happening across Tadka.</p>
         </div>
-        <div className="admin-top-actions">
-          <span className="admin-date">Live platform data</span>
-          <Link href="/" className="btn secondary">Customer view</Link>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-xs text-tadka-muted sm:block">Live platform data</span>
+          <Link href="/" className="rounded-xl border border-tadka-line bg-white px-4 py-2.5 text-sm font-bold text-tadka-green hover:bg-tadka-bg">Customer view</Link>
         </div>
       </div>
 
-      {message && <div className="admin-alert">{message}</div>}
+      {message && <div className="mx-auto mb-4 w-full max-w-[1240px] rounded-xl border border-orange-100 bg-orange-50 p-3 text-sm text-orange-900">{message}</div>}
 
       {stats && (
         <>
-          <section className="admin-kpis">
-            <div className="admin-kpi"><span>USERS</span><b>{stats.users}</b><small>Registered accounts</small></div>
-            <div className="admin-kpi"><span>RESTAURANTS</span><b>{stats.restaurants}</b><small>Partner locations</small></div>
-            <div className="admin-kpi"><span>ORDERS</span><b>{stats.orders}</b><small>Total orders</small></div>
-            <div className="admin-kpi"><span>PAID REVENUE</span><b>₹{stats.paidRevenue.toLocaleString('en-IN')}</b><small>Captured payments</small></div>
+          <section className="mx-auto grid w-full max-w-[1240px] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><span>USERS</span><b>{stats.users}</b><small>Registered accounts</small></div>
+            <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><span>RESTAURANTS</span><b>{stats.restaurants}</b><small>Partner locations</small></div>
+            <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><span>ORDERS</span><b>{stats.orders}</b><small>Total orders</small></div>
+            <div className="rounded-tadka-lg border border-tadka-line bg-white p-5 shadow-tadka-sm"><span>PAID REVENUE</span><b>₹{stats.paidRevenue.toLocaleString('en-IN')}</b><small>Captured payments</small></div>
           </section>
 
-          <section className="admin-grid">
-            <div className="admin-card admin-main-card">
-              <div className="admin-card-head">
-                <div><span className="eyebrow">CONTROL CENTER</span><h2>Platform operations</h2></div>
-                <span className="admin-status">Healthy</span>
+          <section className="mx-auto mt-5 grid w-full max-w-[1240px] gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="rounded-tadka-lg border border-tadka-line bg-white p-6 shadow-tadka-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div><span className="text-[10px] font-black tracking-[0.14em] text-tadka-orange">CONTROL CENTER</span><h2>Platform operations</h2></div>
+                <span className="rounded-full bg-tadka-green-soft px-3 py-1 text-xs font-bold text-tadka-green">Healthy</span>
               </div>
-              <div className="admin-links">
+              <div className="mt-5 grid gap-2 sm:grid-cols-2">
                 <Link href="/admin/users"><b>Users</b><small>Accounts and roles</small></Link>
                 <Link href="/admin/restaurants"><b>Restaurants</b><small>Partners and availability</small></Link>
                 <Link href="/admin/operations"><b>Operations</b><small>Orders and payments</small></Link>
                 <Link href="/admin/categories"><b>Categories</b><small>Restaurant catalog structure</small></Link>
               </div>
             </div>
-            <div className="admin-card admin-side-card">
-              <span className="eyebrow">QUICK VIEW</span>
+            <div className="rounded-tadka-lg border border-tadka-line bg-white p-6 shadow-tadka-sm">
+              <span className="text-[10px] font-black tracking-[0.14em] text-tadka-orange">QUICK VIEW</span>
               <h2>Platform health</h2>
               <p className="muted">Admin actions are authenticated by the server session and authorized by the database role.</p>
             </div>
