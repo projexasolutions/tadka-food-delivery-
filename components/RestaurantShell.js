@@ -71,9 +71,9 @@ export default function RestaurantShell({ children, title, subtitle }) {
   return (
     <div className="flex h-screen min-h-0 w-full overflow-hidden bg-tadka-bg">
       <RestaurantSidebar restaurant={restaurantView} navItems={NAV_ITEMS} />
-      <main className="partner-main">
+      <main className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <RestaurantTopbar restaurant={restaurant} notifications={notifications} />
-        <div className="partner-content">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-gutter-stable p-4 sm:p-6 lg:p-8">
           <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><span className="text-[10px] font-black uppercase tracking-[.14em] text-tadka-orange">{title || 'RESTAURANT PARTNER'}</span><h1>{subtitle || 'Your restaurant command center'}</h1></div>{error && <span className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-bold text-tadka-danger">{error}</span>}</div>
           {children}
         </div>
