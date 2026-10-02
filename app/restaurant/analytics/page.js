@@ -76,14 +76,14 @@ export default function Analytics() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <section className="partner-panel analytics-chart-panel">
-          <div className="panel-head"><div><h2>Orders — last 7 days</h2><p>Real order volume from your restaurant account.</p></div><button className="rounded-xl border border-tadka-line bg-white px-4 py-2.5 text-sm font-bold text-tadka-ink hover:bg-tadka-bg" onClick={load}>Refresh</button></div>
+        <section className="rounded-2xl border border-tadka-line bg-white p-6 shadow-tadka-sm">
+          <div className="flex items-start justify-between gap-4"><div><h2>Orders — last 7 days</h2><p>Real order volume from your restaurant account.</p></div><button className="rounded-xl border border-tadka-line bg-white px-4 py-2.5 text-sm font-bold text-tadka-ink hover:bg-tadka-bg" onClick={load}>Refresh</button></div>
           <div className="mt-6 flex h-64 items-end justify-between gap-3" aria-label="Orders over the last seven days">
             {last7Days.map((day) => <div className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2" key={day.key}><span className="text-[10px] font-bold text-tadka-muted">{day.orders}</span><div className="flex h-full w-full max-w-10 items-end rounded-lg bg-tadka-bg"><i className="block w-full rounded-lg bg-tadka-orange" style={{ height: `${Math.max(day.orders ? 10 : 3, (day.orders / peakOrders) * 100)}%` }} /></div><small>{day.label}</small></div>)}
           </div>
         </section>
 
-        <section className="partner-panel">
+        <section className="rounded-2xl border border-tadka-line bg-white p-6 shadow-tadka-sm">
           <div className="panel-head"><div><h2>Revenue snapshot</h2><p>Delivered orders only.</p></div></div>
           <div className="mt-5 space-y-3"><div><span>Completed revenue</span><strong>₹{revenue.toFixed(0)}</strong></div><div><span>Average delivered order</span><strong>₹{avg.toFixed(0)}</strong></div><div><span>Completion rate</span><strong>{completionRate}%</strong></div></div>
         </section>
@@ -92,18 +92,18 @@ export default function Analytics() {
       <div className="grid gap-4 xl:grid-cols-2">
         <section className="partner-panel analytics-chart-panel">
           <div className="panel-head"><div><h2>Delivered revenue — last 7 days</h2><p>Revenue is recognized only when an order is delivered.</p></div></div>
-          <div className="analytics-bars revenue-bars" aria-label="Revenue over the last seven days">
+          <div className="mt-6 flex h-64 items-end justify-between gap-3" aria-label="Revenue over the last seven days">
             {last7Days.map((day) => <div className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2" key={day.key}><span className="text-[10px] font-bold text-tadka-muted">₹{day.revenue.toFixed(0)}</span><div className="flex h-full w-full max-w-10 items-end rounded-lg bg-tadka-bg"><i className="block w-full rounded-lg bg-tadka-orange" style={{ height: `${Math.max(day.revenue ? 10 : 3, (day.revenue / peakRevenue) * 100)}%` }} /></div><small>{day.label}</small></div>)}
           </div>
         </section>
 
         <section className="partner-panel">
           <div className="panel-head"><div><h2>Order throughput</h2><p>Current distribution by order status.</p></div></div>
-          <div className="divide-y divide-tadka-line overflow-hidden rounded-xl border border-tadka-line">{byStatus.map(([status, count]) => <div className="flex items-center gap-3 p-4" key={status}><span className="h-2.5 w-2.5 rounded-full bg-tadka-orange" /><b>{pretty(status)}</b><span className="ml-auto rounded-full bg-tadka-bg px-2 py-1 text-xs font-bold text-tadka-muted">{count}</span></div>)}{!byStatus.length && <div className="partner-empty compact"><span className="material-symbols-outlined">bar_chart</span><b>No order data yet</b><p>Your analytics will populate as orders arrive.</p></div>}</div>
+          <div className="divide-y divide-tadka-line overflow-hidden rounded-xl border border-tadka-line">{byStatus.map(([status, count]) => <div className="flex items-center gap-3 p-4" key={status}><span className="h-2.5 w-2.5 rounded-full bg-tadka-orange" /><b>{pretty(status)}</b><span className="ml-auto rounded-full bg-tadka-bg px-2 py-1 text-xs font-bold text-tadka-muted">{count}</span></div>)}{!byStatus.length && <div className="grid place-items-center p-8 text-center text-tadka-muted"><span className="material-symbols-outlined">bar_chart</span><b>No order data yet</b><p>Your analytics will populate as orders arrive.</p></div>}</div>
         </section>
       </div>
     </>}
   </RestaurantShell>;
 }
 
-function Metric({ title, value, icon, sub }) { return <div className="rounded-xl border border-tadka-line bg-white p-5 shadow-tadka-sm"><span className="metric-icon material-symbols-outlined">{icon}</span><small>{title}</small><strong>{value}</strong><span>{sub}</span></div>; }
+function Metric({ title, value, icon, sub }) { return <div className="rounded-xl border border-tadka-line bg-white p-5 shadow-tadka-sm"><span className="mb-3 inline-block text-tadka-orange material-symbols-outlined">{icon}</span><small>{title}</small><strong>{value}</strong><span>{sub}</span></div>; }
