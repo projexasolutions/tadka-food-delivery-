@@ -1,0 +1,158 @@
+/* TADKA UI system
+ * Consolidated product layer for customer, admin, restaurant and rider surfaces.
+ * Keep page-specific CSS focused on layout/behavior; shared visual decisions live here.
+ */
+:root{
+  --td-brand:#f15b22;
+  --td-brand-strong:#d94716;
+  --td-green:#174f43;
+  --td-green-soft:#e9f3ed;
+  --td-ink:#17231f;
+  --td-muted:#68736e;
+  --td-subtle:#8b948f;
+  --td-bg:#f7f7f4;
+  --td-surface:#fff;
+  --td-line:#e7e4de;
+  --td-line-strong:#d9d5cd;
+  --td-danger:#c94b32;
+  --td-success:#19734f;
+  --td-radius-sm:10px;
+  --td-radius-md:14px;
+  --td-radius-lg:18px;
+  --td-radius-xl:24px;
+  --td-shadow:0 1px 2px rgba(23,35,31,.04),0 8px 24px rgba(23,35,31,.05);
+  --td-shadow-lg:0 18px 50px rgba(23,35,31,.10);
+}
+
+html{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:var(--td-bg);color:var(--td-ink);-webkit-font-smoothing:antialiased}
+button,a,input,textarea,select{font-family:inherit}
+button{transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease}
+a{transition:color .16s ease,background-color .16s ease,border-color .16s ease}
+
+/* Customer navigation: restrained product chrome, not marketing chrome. */
+.site-nav{height:72px!important;background:rgba(255,255,255,.94)!important;border-bottom:1px solid var(--td-line)!important;box-shadow:0 1px 2px rgba(23,35,31,.03)!important;backdrop-filter:blur(18px)!important}
+.site-nav-inner{width:min(1240px,calc(100% - 40px))!important;min-height:72px!important;height:72px!important;gap:16px!important}
+.site-brand{min-width:132px!important;color:var(--td-ink)!important}
+.site-logo{width:118px!important;height:auto!important}
+.location-chip{height:42px!important;min-width:155px!important;border:1px solid var(--td-line)!important;border-radius:var(--td-radius-md)!important;background:#fff!important}
+.location-chip:hover{border-color:var(--td-line-strong)!important;background:#fafaf8!important}
+.nav-search{height:42px!important;max-width:440px!important;background:#f6f6f3!important;border:1px solid transparent!important;border-radius:12px!important;box-shadow:none!important}
+.nav-search:focus-within{background:#fff!important;border-color:#cdd8d2!important;box-shadow:0 0 0 3px rgba(23,79,67,.06)!important}
+.nav-search input{font-size:13px!important}
+.site-links{gap:2px!important}
+.site-links a{padding:9px 11px!important;border-radius:9px!important;color:#4d5853!important;font-size:12px!important;font-weight:700!important}
+.site-links a:hover{background:#f3f5f2!important;color:var(--td-green)!important}
+.site-links a.active{background:var(--td-green-soft)!important;color:var(--td-green)!important}
+.nav-cart{height:42px!important;border-radius:11px!important;background:var(--td-brand)!important;box-shadow:none!important;padding:0 13px!important}
+.nav-cart:hover{background:var(--td-brand-strong)!important;transform:none!important}
+.nav-cart b{background:#fff!important;color:var(--td-brand)!important}
+.mobile-bottom-nav{box-shadow:0 -4px 20px rgba(23,35,31,.05)!important}
+
+/* Shared page rhythm. */
+.page,.section{width:min(1240px,calc(100% - 40px))}
+.page{padding-top:32px!important}
+.eyebrow{font-size:10px!important;letter-spacing:.12em!important;font-weight:800!important;color:#68736e!important}
+.card,.panel{border:1px solid var(--td-line)!important;border-radius:var(--td-radius-lg)!important;box-shadow:var(--td-shadow)!important}
+.btn,.button,.primary{border-radius:10px!important;box-shadow:none!important}
+input,select,textarea{border-color:var(--td-line-strong)!important;border-radius:10px!important}
+input:focus,select:focus,textarea:focus{border-color:#8da99f!important;box-shadow:0 0 0 3px rgba(23,79,67,.07)!important}
+
+/* Customer home: reduce decoration and strengthen hierarchy. */
+.ref-home{background:#fff!important}
+.ref-wrap{width:min(1240px,calc(100% - 40px))!important}
+.ref-hero{border-bottom:1px solid var(--td-line)!important}
+.ref-greeting{font-size:10px!important;letter-spacing:.13em!important}
+.ref-hero h1{font-weight:850!important;letter-spacing:-.045em!important}
+.ref-hero p{font-size:15px!important;line-height:1.6!important}
+.ref-search{border-radius:12px!important;box-shadow:var(--td-shadow)!important}
+.ref-search button{border-radius:9px!important}
+.ref-section{padding:28px 0!important}
+.ref-head{margin-bottom:14px!important}
+.ref-head h2{font-size:25px!important;font-weight:800!important}
+.ref-cat{border-radius:14px!important;box-shadow:none!important}
+.ref-cat.active{box-shadow:0 3px 12px rgba(23,79,67,.06)!important}
+.ref-offer{border-radius:18px!important;box-shadow:var(--td-shadow)!important}
+.ref-restaurants{gap:16px!important}
+.ref-restaurant{border-radius:15px!important;box-shadow:var(--td-shadow)!important}
+.ref-restaurant:hover{transform:translateY(-1px)!important;box-shadow:0 12px 28px rgba(23,35,31,.09)!important}
+.ref-restaurant-img{height:195px!important}
+.ref-feature-card{border-radius:18px!important}
+.ref-benefits article{border-radius:14px!important}
+
+/* Admin: compact operations product rather than landing-page cards. */
+.admin-shell{width:min(1240px,calc(100% - 40px))!important;margin:0 auto!important;padding:34px 0 64px!important}
+.admin-top{padding-bottom:24px!important;border-bottom:1px solid var(--td-line)!important}
+.admin-top h1{font-size:34px!important;letter-spacing:-.035em!important}
+.admin-top-actions{gap:10px!important}
+.admin-date{border:1px solid var(--td-line)!important;border-radius:9px!important;background:#fff!important;padding:9px 11px!important;font-size:11px!important}
+.admin-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin:18px 0!important}
+.admin-kpi{min-height:116px!important;border:1px solid var(--td-line)!important;border-radius:14px!important;background:#fff!important;box-shadow:none!important;padding:17px!important}
+.admin-kpi span{font-size:9px!important;letter-spacing:.1em!important;color:#7a8580!important}
+.admin-kpi b{font-size:29px!important;letter-spacing:-.04em!important}
+.admin-grid{gap:12px!important}
+.admin-card{border:1px solid var(--td-line)!important;border-radius:15px!important;box-shadow:none!important;background:#fff!important}
+.admin-card-head{border-bottom:1px solid var(--td-line)!important;padding-bottom:15px!important}
+.admin-card-head h2,.admin-side-card h2{font-size:19px!important}
+.admin-status{border:1px solid #cfe4d8!important;background:#f2f8f4!important;color:var(--td-success)!important;border-radius:999px!important;font-size:10px!important}
+.admin-links{gap:0!important}
+.admin-links a{border-bottom:1px solid #efede8!important;border-radius:0!important;padding:15px 4px!important}
+.admin-links a:last-child{border-bottom:0!important}
+.admin-links a:hover{background:#fafaf8!important;padding-left:8px!important}
+.admin-alert{border-radius:10px!important}
+
+/* Admin navigation. */
+.admin-navbar{height:64px!important;background:#14201d!important;border-bottom:1px solid #29332f!important}
+.admin-navbar-inner{width:min(1240px,calc(100% - 40px))!important;height:64px!important}
+.admin-brand-mark{width:34px!important;height:34px!important;border-radius:9px!important;background:var(--td-brand)!important}
+.admin-brand span:last-child b{font-size:12px!important;letter-spacing:.03em!important}
+.admin-brand span:last-child small{font-size:8px!important;letter-spacing:.12em!important;color:#91a09a!important}
+.admin-nav-links{gap:2px!important}
+.admin-nav-links a{border-radius:8px!important;padding:8px 11px!important;font-size:11px!important;color:#aeb9b4!important}
+.admin-nav-links a:hover{background:#22312c!important;color:#fff!important}
+.admin-nav-links a.active{background:#29453c!important;color:#fff!important}
+.admin-online{font-size:10px!important;color:#d8e1dd!important}
+.admin-customer-link{border:1px solid #40504a!important;border-radius:8px!important;font-size:10px!important}
+
+/* Rider: workflow first, decoration second. */
+.rider-dashboard{background:#f5f6f3!important}
+.rider-sidebar{border-right:1px solid var(--td-line)!important;background:#fff!important}
+.rider-main{background:#f5f6f3!important}
+.rider-hero{border:1px solid var(--td-line)!important;border-radius:18px!important;box-shadow:none!important}
+.rider-stat-card{border:1px solid var(--td-line)!important;border-radius:14px!important;box-shadow:none!important}
+.rider-workspace{gap:14px!important}
+.rider-queue,.rider-detail{border:1px solid var(--td-line)!important;border-radius:15px!important;box-shadow:none!important}
+.rider-order{border:1px solid var(--td-line)!important;border-radius:12px!important;box-shadow:none!important}
+.rider-order:hover{box-shadow:0 6px 18px rgba(23,35,31,.06)!important;transform:none!important}
+.rider-primary{border-radius:9px!important;box-shadow:none!important}
+.rider-tabs button{border-radius:8px!important}
+.rider-empty{min-height:300px!important}
+.rider-mini-strip{border:1px solid var(--td-line)!important;border-radius:12px!important;box-shadow:none!important}
+
+/* Restaurant partner: dense operational workspace. */
+.partner-app{background:#f5f6f3!important}
+.partner-sidebar{background:#fff!important;border-right:1px solid var(--td-line)!important}
+.partner-main{background:#f5f6f3!important}
+.partner-topbar{background:#fff!important;border-bottom:1px solid var(--td-line)!important}
+.partner-content{padding-top:28px!important}
+.partner-page-title h1{font-weight:800!important}
+.partner-hero,.partner-panel,.metric,.insight{border-color:var(--td-line)!important;box-shadow:none!important}
+.partner-hero,.partner-panel{border-radius:15px!important}
+.metric{border-radius:13px!important}
+.partner-nav a{border-radius:9px!important}
+.partner-nav a.active{box-shadow:none!important}
+.partner-btn{border-radius:9px!important;box-shadow:none!important}
+
+/* Reduce accidental visual noise from old layers. */
+.rider-kicker,.rush-badge,.rider-live,.admin-status,.verified,.partner-access-pill{letter-spacing:.08em}
+@media(max-width:900px){
+  .site-nav,.site-nav-inner{height:64px!important;min-height:64px!important}
+  .site-nav-inner{width:calc(100% - 24px)!important}
+  .admin-shell,.ref-wrap,.page,.section{width:calc(100% - 24px)!important}
+  .admin-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:600px){
+  .admin-shell{padding-top:24px!important}
+  .admin-kpis{grid-template-columns:1fr 1fr!important}
+  .admin-top h1{font-size:28px!important}
+}
