@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+<defs>
+ <linearGradient id="bg" x1="0" x2="1"><stop stop-color="#173d35"/><stop offset="1" stop-color="#287461"/></linearGradient>
+ <linearGradient id="road" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f8b26a"/><stop offset="1" stop-color="#ef5b25"/></linearGradient>
+</defs>
+<rect width="1200" height="520" rx="36" fill="url(#bg)"/>
+<circle cx="1020" cy="70" r="150" fill="#fff" opacity=".06"/>
+<circle cx="1080" cy="390" r="220" fill="#fff" opacity=".05"/>
+<path d="M620 430 C760 330 790 260 900 250 C1010 240 1050 310 1160 270" fill="none" stroke="url(#road)" stroke-width="14" stroke-linecap="round" opacity=".85"/>
+<path d="M650 430 C790 335 815 278 905 270" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="10 13" opacity=".55"/>
+<g transform="translate(790 150)">
+ <circle cx="35" cy="175" r="34" fill="#f4f4f1"/><circle cx="175" cy="175" r="34" fill="#f4f4f1"/>
+ <path d="M35 175h70l36-67h34l30 67M105 175l-28-78h50l38 78M142 108l25-34h31" fill="none" stroke="#f4f4f1" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+ <circle cx="132" cy="54" r="42" fill="#ef5b25"/><path d="M107 45c12-27 52-27 63 0v26h-63z" fill="#f4f4f1"/>
+ <rect x="147" y="103" width="83" height="67" rx="12" fill="#ef5b25"/><path d="M160 119h56v40h-56z" fill="#fff" opacity=".9"/>
+ <path d="M180 128h24" stroke="#ef5b25" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g transform="translate(80 95)" fill="#fff">
+ <text x="0" y="0" font-family="Arial,sans-serif" font-size="18" font-weight="800" letter-spacing="4" opacity=".7">TADKA • RIDER CONSOLE</text>
+ <text x="0" y="75" font-family="Arial,sans-serif" font-size="58" font-weight="900">Deliver fresh.</text>
+ <text x="0" y="138" font-family="Arial,sans-serif" font-size="58" font-weight="900">Move fast.</text>
+ <text x="0" y="183" font-family="Arial,sans-serif" font-size="19" opacity=".72">Your route, your orders, your day.</text>
+</g>
+<g transform="translate(80 330)">
+ <rect width="235" height="58" rx="18" fill="#fff" opacity=".12"/>
+ <circle cx="30" cy="29" r="8" fill="#35d08b"/><text x="52" y="36" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#fff">Rider status: ONLINE</text>
+</g>
+</svg>
