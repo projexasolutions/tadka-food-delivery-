@@ -6,8 +6,6 @@ import SiteNav from '@/components/SiteNav';
 import './globals.css';
 import './customer-ui.css';
 import './tadka-icons.css';
-import './restaurant/partner-ui.css';
-import './restaurant/menu-ui-fix.css';
 import './tadka-ui-system.css';
 import './tailwind.css';
 
